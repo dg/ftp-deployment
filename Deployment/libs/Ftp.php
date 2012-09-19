@@ -203,12 +203,15 @@ class Ftp
 
 
 	/**
-	 * Recursive deletes folder.
+	 * Recursive deletes path.
 	 * @param  string
 	 * @return void
 	 */
 	public function deleteRecursive($path, $onlyContent = FALSE)
 	{
+		if (!$onlyContent && $this->tryDelete($path)) {
+			return;
+		}
 		foreach ((array) $this->nlist($path) as $file) {
 			if ($file !== '.' && $file !== '..') {
 				$this->deleteRecursive(strpos($file, '/') === FALSE ? "$path/$file" : $file);
