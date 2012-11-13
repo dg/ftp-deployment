@@ -9,4 +9,4 @@ Usage
 
 Create file `deployment.ini` according to the instructions in `deployment.sample.ini` and run:
 
-	php deployment.phpc deployment.ini
+	php deployment.php deployment.ini
