@@ -98,10 +98,11 @@ class Preprocessor
 	public function expandApacheImports($content, $origFile)
 	{
 		$dir = dirname($origFile);
-		return preg_replace_callback('~<!--#include\s+file="(.+)"\s+-->~U', function($m) use ($dir) {
+		$preprocessor = $this;
+		return preg_replace_callback('~<!--#include\s+file="(.+)"\s+-->~U', function($m) use ($dir, $preprocessor) {
 			$file = $dir . '/' . $m[1];
 			if (is_file($file)) {
-				return $this->expandApacheImports(file_get_contents($file), dirname($file));
+				return $preprocessor->expandApacheImports(file_get_contents($file), dirname($file));
 			}
 			return $m[0];
 		}, $content);
