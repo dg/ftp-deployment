@@ -67,7 +67,8 @@ class Preprocessor
 	public function expandCssImports($content, $origFile)
 	{
 		$dir = dirname($origFile);
-		return preg_replace_callback('#@import\s+(?:url)?[(\'"]+(.+)[)\'"]+;#U', function($m) use ($dir) {
+		$preprocessor = $this;
+		return preg_replace_callback('#@import\s+(?:url)?[(\'"]+(.+)[)\'"]+;#U', function($m) use ($dir, $preprocessor) {
 			$file = $dir . '/' . $m[1];
 			if (!is_file($file)) {
 				return $m[0];
@@ -75,7 +76,7 @@ class Preprocessor
 
 			$s = file_get_contents($file);
 			$newDir = dirname($file);
-			$s = $this->expandCssImports($s, $file);
+			$s = $preprocessor->expandCssImports($s, $file);
 			if ($newDir !== $dir) {
 				$tmp = $dir . '/';
 				if (substr($newDir, 0, strlen($tmp)) === $tmp) {
@@ -97,10 +98,11 @@ class Preprocessor
 	public function expandApacheImports($content, $origFile)
 	{
 		$dir = dirname($origFile);
-		return preg_replace_callback('~<!--#include\s+file="(.+)"\s+-->~U', function($m) use ($dir) {
+		$preprocessor = $this;
+		return preg_replace_callback('~<!--#include\s+file="(.+)"\s+-->~U', function($m) use ($dir, $preprocessor) {
 			$file = $dir . '/' . $m[1];
 			if (is_file($file)) {
-				return $this->expandApacheImports(file_get_contents($file), dirname($file));
+				return $preprocessor->expandApacheImports(file_get_contents($file), dirname($file));
 			}
 			return $m[0];
 		}, $content);
