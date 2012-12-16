@@ -213,7 +213,7 @@ class Ftp
 			return;
 		}
 		foreach ((array) $this->nlist($path) as $file) {
-			if (!preg_match('#(^|/)\\.+$#', $file)) {
+			if ($file != NULL && !preg_match('#(^|/)\\.+$#', $file)) { // intentionally ==
 				$this->deleteRecursive(strpos($file, '/') === FALSE ? "$path/$file" : $file);
 			}
 		}
