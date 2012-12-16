@@ -67,6 +67,7 @@ foreach ($config as $section => $cfg) {
 		'purge' => '',
 		'before' => '',
 		'after' => '',
+		'preprocess' => TRUE,
 	);
 
 	if (empty($cfg['remote'])) {
@@ -75,12 +76,14 @@ foreach ($config as $section => $cfg) {
 
 	$deployment = new Deployment($cfg['remote'], $cfg['local'], $logger);
 
-	$preprocessor = new Preprocessor($logger);
-	$deployment->addFilter('js', array($preprocessor, 'expandApacheImports'));
-	$deployment->addFilter('js', array($preprocessor, 'compress'));
-	$deployment->addFilter('css', array($preprocessor, 'expandApacheImports'));
-	$deployment->addFilter('css', array($preprocessor, 'expandCssImports'));
-	$deployment->addFilter('css', array($preprocessor, 'compress'));
+	if ($cfg['preprocess']) {
+		$preprocessor = new Preprocessor($logger);
+		$deployment->addFilter('js', array($preprocessor, 'expandApacheImports'));
+		$deployment->addFilter('js', array($preprocessor, 'compress'));
+		$deployment->addFilter('css', array($preprocessor, 'expandApacheImports'));
+		$deployment->addFilter('css', array($preprocessor, 'expandCssImports'));
+		$deployment->addFilter('css', array($preprocessor, 'compress'));
+	}
 
 	$deployment->ignoreMasks = array_merge(
 		array('*.bak', '.svn' , '.git*'),
