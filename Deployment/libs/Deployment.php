@@ -289,7 +289,10 @@ class Deployment
 	{
 		$list = array();
 		$iterator = dir(".$dir");
+		$counter = 0;
 		while (FALSE !== ($entry = $iterator->read())) {
+			echo str_pad(str_repeat('.', $counter++ % 40), 40), "\x0D";
+
 			$path = ".$dir/$entry";
 			if ($entry == '.' || $entry == '..' || isset($disallow[$entry])) {
 				continue;

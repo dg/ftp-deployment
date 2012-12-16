@@ -45,13 +45,15 @@ class Preprocessor
 			return $content;
 		}
 		$dir = dirname(__DIR__) . '/vendor';;
+		$this->logger->log("Compressing $origFile");
 		if (substr($origFile, -3) === '.js') {
-			list($ok, $output) = $this->execute("$this->javaBinary -jar \"{$dir}/Google-Closure-Compiler/compiler.jar\" --warning_level QUIET", $content);
+			$cmd = "$this->javaBinary -jar \"{$dir}/Google-Closure-Compiler/compiler.jar\" --warning_level QUIET";
 		} else {
-			list($ok, $output) = $this->execute("$this->javaBinary -jar \"{$dir}/YUI-Compressor/yuicompressor-2.4.7.jar\" --type css", $content);
+			$cmd = "$this->javaBinary -jar \"{$dir}/YUI-Compressor/yuicompressor-2.4.7.jar\" --type css";
 		}
+		list($ok, $output) = $this->execute($cmd, $content);
 		if (!$ok) {
-			$this->logger->log("Compressing error: $origFile");
+			$this->logger->log("Error while executing $cmd");
 			$this->logger->log($output);
 			return $content;
 		}
