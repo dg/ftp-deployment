@@ -253,6 +253,7 @@ class Deployment
 
 		foreach ($toRename as $num => $file) {
 			$this->writeProgress($num + 1, count($toRename), "Renaming $file");
+			$this->ftp->tryDelete($file);
 			$this->ftp->rename($file . self::TEMPORARY_SUFFIX, $file); // TODO: zachovat permissions
 		}
 	}
