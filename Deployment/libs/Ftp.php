@@ -45,6 +45,9 @@ class Ftp
 
 	/** @var array */
 	private $state;
+	
+	/** @var bool */
+	private $needsIndirectRename = FALSE;
 
 
 
@@ -67,6 +70,7 @@ class Ftp
 			if (isset($parts['path'])) {
 				$this->chdir($parts['path']);
 			}
+			$this->checkRenameSupport();
 		}
 	}
 
@@ -108,6 +112,10 @@ class Ftp
 				$this->state[$name] = $args;
 			}
 
+			if (TRUE === $this->needsIndirectRename && $func === 'ftp_rename' && $this->fileExists($args[1])) {
+				$this->delete($args[1]);
+			}
+			
 			array_unshift($args, $this->resource);
 			$res = call_user_func_array($func, $args);
 
@@ -222,6 +230,27 @@ class Ftp
 		}
 	}
 
+	
+	
+	/**
+	 * Checks server's support for rename when destination file exists
+	 * @return boolean
+	 */
+	private function checkRenameSupport() {
+		$tmp = tmpfile();
+		$this->fput('.checkRenameSrc', $tmp, Ftp::BINARY);
+		$this->fput('.checkRenameDest', $tmp, Ftp::BINARY);
+		try {
+			$this->rename('.checkRenameSrc', '.checkRenameDest');
+			$this->needsIndirectRename = FALSE;
+		}
+		catch (FtpException $e) {
+			$this->delete('.checkRenameSrc');
+			$this->needsIndirectRename = TRUE;
+		}
+		$this->delete('.checkRenameDest');
+		fclose($tmp);
+	}
 }
 
 
