@@ -368,7 +368,7 @@ class Deployment
 	 * @param  array   patterns
 	 * @return bool
 	 */
-	private static function matchMask($path, array $patterns)
+	public static function matchMask($path, array $patterns)
 	{
 		$res = FALSE;
 		foreach ($patterns as $pattern) {
