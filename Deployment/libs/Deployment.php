@@ -44,6 +44,9 @@ class Deployment
 	public $runAfter;
 
 	/** @var string */
+	public $tempDir = '';
+
+	/** @var string */
 	private $remote;
 
 	/** @var string */
@@ -164,7 +167,7 @@ class Deployment
 	 */
 	private function loadDeploymentFile()
 	{
-		$tempFile = tempnam('', 'deploy');
+		$tempFile = tempnam($this->tempDir, 'deploy');
 		try {
 			$this->ftp->get($tempFile, $this->deploymentFile, Ftp::BINARY);
 		} catch (FtpException $e) {
@@ -344,7 +347,7 @@ class Deployment
 			return $file;
 		}
 
-		$tempFile = tempnam('', 'deploy');
+		$tempFile = tempnam($this->tempDir, 'deploy');
 		file_put_contents($tempFile, $content);
 		return $tempFile;
 	}
