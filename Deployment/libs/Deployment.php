@@ -114,19 +114,25 @@ class Deployment
 			return;
 		}
 
-		$this->logger->log("\nBefore-jobs:");
-		foreach ((array) $this->runBefore as $url) {
-			$this->logger->log("$url: " . trim(file_get_contents($url)));
+		if ($this->runBefore) {
+			$this->logger->log("\nBefore-jobs:");
+			foreach ((array) $this->runBefore as $url) {
+				$this->logger->log("$url: " . trim(file_get_contents($url)));
+			}
 		}
 
 		$this->writeDeploymentFile($localFiles);
 		$toUpload[] = "/$this->deploymentFile"; // must be the last one
 
-		$this->logger->log("\nUploading:");
-		$this->uploadFiles($toUpload);
+		if ($toUpload) {
+			$this->logger->log("\nUploading:");
+			$this->uploadFiles($toUpload);
+		}
 
-		$this->logger->log("\nDeleting:");
-		$this->deleteFiles($toDelete);
+		if ($toDelete) {
+			$this->logger->log("\nDeleting:");
+			$this->deleteFiles($toDelete);
+		}
 
 		foreach ((array) $this->toPurge as $path) {
 			$this->logger->log("Cleaning $path");
@@ -139,9 +145,11 @@ class Deployment
 
 		unlink($this->deploymentFile);
 
-		$this->logger->log("\nAfter-jobs:");
-		foreach ((array) $this->runAfter as $url) {
-			$this->logger->log("$url: " . trim(file_get_contents($url)));
+		if ($this->runAfter) {
+			$this->logger->log("\nAfter-jobs:");
+			foreach ((array) $this->runAfter as $url) {
+				$this->logger->log("$url: " . trim(file_get_contents($url)));
+			}
 		}
 	}
 
