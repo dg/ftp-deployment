@@ -273,6 +273,7 @@ class Deployment
 	 */
 	private function deleteFiles(array $files)
 	{
+		rsort($files);
 		$root = $this->ftp->pwd();
 		foreach ($files as $num => $file) {
 			$remoteFile = $root . $file;
