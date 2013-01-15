@@ -136,11 +136,7 @@ class Deployment
 
 		foreach ((array) $this->toPurge as $path) {
 			$this->logger->log("Cleaning $path");
-			try {
-				$this->ftp->deleteRecursive($path, TRUE);
-			} catch (FtpException $e) {
-				$this->logger->log("Error {$e->getMessage()}");
-			}
+			$this->purge($path, TRUE);
 		}
 
 		unlink($this->deploymentFile);
@@ -286,6 +282,34 @@ class Deployment
 			} else {
 				$this->ftp->delete($remoteFile);
 			}
+		}
+	}
+
+
+
+	/**
+	 * Recursive deletes path.
+	 * @param  string
+	 * @return void
+	 */
+	private function purge($path, $onlyContent = FALSE)
+	{
+		static $counter;
+		echo str_pad(str_repeat('.', $counter++ % 40), 40), "\x0D";
+
+		if (!$onlyContent && $this->ftp->tryDelete($path)) {
+			return;
+		}
+		foreach ((array) $this->ftp->nlist($path) as $file) {
+			if ($file != NULL && !preg_match('#(^|/)\\.+$#', $file)) { // intentionally ==
+				$file = strpos($file, '/') === FALSE ? "$path/$file" : $file;
+				if ($file !== $path) {
+					$this->purge($file);
+				}
+			}
+		}
+		if (!$onlyContent) {
+			$this->ftp->tryRmdir($path);
 		}
 	}
 

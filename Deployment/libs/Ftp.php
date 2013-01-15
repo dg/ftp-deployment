@@ -200,28 +200,6 @@ class Ftp
 		}
 	}
 
-
-
-	/**
-	 * Recursive deletes path.
-	 * @param  string
-	 * @return void
-	 */
-	public function deleteRecursive($path, $onlyContent = FALSE)
-	{
-		if (!$onlyContent && $this->tryDelete($path)) {
-			return;
-		}
-		foreach ((array) $this->nlist($path) as $file) {
-			if ($file != NULL && !preg_match('#(^|/)\\.+$#', $file)) { // intentionally ==
-				$this->deleteRecursive(strpos($file, '/') === FALSE ? "$path/$file" : $file);
-			}
-		}
-		if (!$onlyContent) {
-			$this->rmdir($path);
-		}
-	}
-
 }
 
 
