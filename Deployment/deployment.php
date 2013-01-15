@@ -52,6 +52,11 @@ set_exception_handler(function($e) use ($logger) {
 });
 
 
+function toArray($val)
+{
+	return is_array($val) ? array_diff($val, array(NULL)) : preg_split('#\s+#', $val, -1, PREG_SPLIT_NO_EMPTY);
+}
+
 
 // start deploy
 $logger->log("Started at " . date('[Y/m/d H:i]'));
@@ -87,14 +92,14 @@ foreach ($config as $section => $cfg) {
 
 	$deployment->ignoreMasks = array_merge(
 		array('*.bak', '.svn' , '.git*'),
-		is_array($cfg['ignore']) ? $cfg['ignore'] : preg_split('#\s+#', $cfg['ignore'], -1, PREG_SPLIT_NO_EMPTY)
+		toArray($cfg['ignore'])
 	);
 	$deployment->deploymentFile = empty($cfg['deploymentfile']) ? $deployment->deploymentFile : $cfg['deploymentfile'];
 	$deployment->testMode = !empty($cfg['test']) || isset($options['t']) || isset($options['test']);
 	$deployment->allowDelete = $cfg['allowdelete'];
-	$deployment->toPurge = is_array($cfg['purge']) ? $cfg['purge'] : preg_split('#\s+#', $cfg['purge'], -1, PREG_SPLIT_NO_EMPTY);
-	$deployment->runBefore = is_array($cfg['before']) ? $cfg['before'] : preg_split('#\s+#', $cfg['before'], -1, PREG_SPLIT_NO_EMPTY);
-	$deployment->runAfter = is_array($cfg['after']) ? $cfg['after'] : preg_split('#\s+#', $cfg['after'], -1, PREG_SPLIT_NO_EMPTY);
+	$deployment->toPurge = toArray($cfg['purge']);
+	$deployment->runBefore = toArray($cfg['before']);
+	$deployment->runAfter = toArray($cfg['after']);
 
 	if ($deployment->testMode) {
 		$logger->log('Test mode');
