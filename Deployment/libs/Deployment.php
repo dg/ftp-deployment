@@ -330,7 +330,7 @@ class Deployment
 			echo str_pad(str_repeat('.', $counter++ % 40), 40), "\x0D";
 
 			$path = ".$dir/$entry";
-			if ($entry == '.' || $entry == '..' || isset($disallow[$entry])) {
+			if ($entry == '.' || $entry == '..') {
 				continue;
 
 			} elseif (!is_readable($path)) {
