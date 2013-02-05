@@ -62,7 +62,7 @@ class Ftp
 				throw new InvalidArgumentException('Invalid URL.');
 			}
 			$this->connect($parts['host'], empty($parts['port']) ? NULL : (int) $parts['port']);
-			$this->login($parts['user'], $parts['pass']);
+			$this->login(urldecode($parts['user']), urldecode($parts['pass']));
 			$this->pasv(TRUE);
 			if (isset($parts['path'])) {
 				$this->chdir($parts['path']);
