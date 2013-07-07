@@ -71,7 +71,6 @@ class Ftp
 	}
 
 
-
 	/**
 	 * @param  string  method name
 	 * @param  array   arguments
@@ -133,7 +132,6 @@ class Ftp
 	}
 
 
-
 	/**
 	 * Reconnects to FTP server.
 	 * @return void
@@ -147,7 +145,6 @@ class Ftp
 	}
 
 
-
 	/**
 	 * Checks if file or directory exists.
 	 * @param  string
@@ -157,7 +154,6 @@ class Ftp
 	{
 		return is_array($this->nlist($file));
 	}
-
 
 
 	/**
@@ -175,7 +171,6 @@ class Ftp
 		$this->chdir($current);
 		return empty($e);
 	}
-
 
 
 	/**

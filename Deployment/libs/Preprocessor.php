@@ -32,7 +32,6 @@ class Preprocessor
 	}
 
 
-
 	/**
 	 * Compress JS or CSS file.
 	 * @param  string  source code
@@ -59,7 +58,6 @@ class Preprocessor
 		}
 		return $output;
 	}
-
 
 
 	/**
@@ -92,7 +90,6 @@ class Preprocessor
 	}
 
 
-
 	/**
 	 * Expands Apache includes <!--#include file="..." -->
 	 * @return string
@@ -109,7 +106,6 @@ class Preprocessor
 			return $m[0];
 		}, $content);
 	}
-
 
 
 	/**
