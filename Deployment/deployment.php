@@ -1,10 +1,5 @@
 <?php
 
-echo '
-FTP deployment
---------------
-';
-
 if (version_compare(PHP_VERSION, '5.3.0', '<')) {
 	throw new Exception('Deployment requires PHP 5.3.0 or newer.');
 }
@@ -13,27 +8,36 @@ require __DIR__ . '/libs/Ftp.php';
 require __DIR__ . '/libs/Logger.php';
 require __DIR__ . '/libs/Deployment.php';
 require __DIR__ . '/libs/Preprocessor.php';
+require __DIR__ . '/libs/CommandLine.php';
 
 
 
-// load config file
-if (!isset($_SERVER['argv'][1])) {
-	die("Usage: {$_SERVER['argv'][0]} <config_file> [-t | --test]");
+$cmd = new CommandLine("
+FTP deployment
+--------------
+Usage:
+	deployment.php <config_file> [-t | --test]
+
+Options:
+	-t | --test      Run in test-mode.
+
+", array(
+	'config' => array(CommandLine::REALPATH => TRUE),
+));
+
+if ($cmd->isEmpty()) {
+	$cmd->help();
+	exit;
 }
 
-$configFile = realpath($_SERVER['argv'][1]);
-if (!$configFile) {
-	die("Missing config file {$_SERVER['argv'][1]}");
-}
+$options = $cmd->parse();
 
-$options = getopt('t', array('test'));
-$config = parse_ini_file($configFile, TRUE);
-
+$config = parse_ini_file($options['config'], TRUE);
 if (isset($config['remote']) && is_string($config['remote'])) {
 	$config = array('' => $config);
 }
 
-$logger = new Logger(preg_replace('#\.\w+$#', '.log', $configFile));
+$logger = new Logger(preg_replace('#\.\w+$#', '.log', $options['config']));
 
 
 
@@ -60,13 +64,13 @@ function toArray($val)
 
 // start deploy
 $logger->log("Started at " . date('[Y/m/d H:i]'));
-$logger->log("Config file is $configFile");
+$logger->log("Config file is $options[config]");
 
 foreach ($config as $section => $cfg) {
 	$logger->log("\nDeploying $section");
 
 	$cfg = array_change_key_case($cfg, CASE_LOWER) + array(
-		'local' => dirname($configFile),
+		'local' => dirname($options['config']),
 		'ignore' => '',
 		'allowdelete' => TRUE,
 		'purge' => '',
@@ -95,7 +99,7 @@ foreach ($config as $section => $cfg) {
 		toArray($cfg['ignore'])
 	);
 	$deployment->deploymentFile = empty($cfg['deploymentfile']) ? $deployment->deploymentFile : $cfg['deploymentfile'];
-	$deployment->testMode = !empty($cfg['test']) || isset($options['t']) || isset($options['test']);
+	$deployment->testMode = !empty($cfg['test']) || $options['--test'];
 	$deployment->allowDelete = $cfg['allowdelete'];
 	$deployment->toPurge = toArray($cfg['purge']);
 	$deployment->runBefore = toArray($cfg['before']);
