@@ -78,7 +78,6 @@ class Deployment
 	}
 
 
-
 	/**
 	 * Synchronize remote and local.
 	 * @return void
@@ -150,7 +149,6 @@ class Deployment
 	}
 
 
-
 	/**
 	 * Appends preprocessor for files.
 	 * @param  string  file extension
@@ -162,7 +160,6 @@ class Deployment
 		$this->filters[$extension][] = $filter;
 		return $this;
 	}
-
 
 
 	/**
@@ -188,7 +185,6 @@ class Deployment
 	}
 
 
-
 	/**
 	 * Prepares .htdeployment for upload.
 	 * @return void
@@ -201,7 +197,6 @@ class Deployment
 		}
 		file_put_contents($this->deploymentFile, gzdeflate($s, 9));
 	}
-
 
 
 	/**
@@ -266,7 +261,6 @@ class Deployment
 	}
 
 
-
 	/**
 	 * Deletes files.
 	 * @return void
@@ -285,7 +279,6 @@ class Deployment
 			}
 		}
 	}
-
 
 
 	/**
@@ -313,7 +306,6 @@ class Deployment
 			$this->ftp->tryRmdir($path);
 		}
 	}
-
 
 
 	/**
@@ -353,7 +345,6 @@ class Deployment
 	}
 
 
-
 	/**
 	 * Calls preprocessors on file.
 	 * @param  string  file name
@@ -386,7 +377,6 @@ class Deployment
 	}
 
 
-
 	/**
 	 * Matches filename against patterns.
 	 * @param  string  file name
@@ -417,7 +407,6 @@ class Deployment
 		}
 		return $res;
 	}
-
 
 
 	private function writeProgress($count, $total, $file, $percent = NULL)
