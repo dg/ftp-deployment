@@ -273,9 +273,12 @@ class Deployment
 			$remoteFile = $root . $file;
 			$this->writeProgress($num + 1, count($files), "Deleting $file");
 			if (substr($file, -1) === '/') { // is directory?
-				$this->ftp->rmdir($remoteFile);
+				$res = $this->ftp->tryRmdir($remoteFile);
 			} else {
-				$this->ftp->delete($remoteFile);
+				$res = $this->ftp->tryDelete($remoteFile);
+			}
+			if (!$res) {
+				$this->logger->log("Unable to delete $remoteFile");
 			}
 		}
 	}
