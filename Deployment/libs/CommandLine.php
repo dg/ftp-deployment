@@ -50,14 +50,15 @@ class CommandLine
 				throw new \InvalidArgumentException("Unable to parse '$line[1]'.");
 			}
 
-			$name = isset($m[1][1]) ? $m[1][1] : $m[1][0];
-			$this->options[$name] = (isset($this->options[$name]) ? $this->options[$name] : array()) + array(
-				self::ARGUMENT => $m[2][0] ? trim($m[2][0], '<>[]') : NULL,
-				self::OPTIONAL => isset($line[2]) ? TRUE : ($m[2][0] ? $m[2][0][0] === '[' : NULL),
-				self::REPEATABLE => (bool) $m[3][0],
+			$name = end($m[1]);
+			$opts = isset($this->options[$name]) ? $this->options[$name] : array();
+			$this->options[$name] = $opts + array(
+				self::ARGUMENT => (bool) end($m[2]),
+				self::OPTIONAL => isset($line[2]) || (substr(end($m[2]), 0, 1) === '[') || isset($opts[self::VALUE]),
+				self::REPEATABLE => (bool) end($m[3]),
 				self::VALUE => isset($line[2]) ? $line[2] : NULL,
 			);
-			if (isset($m[1][1])) {
+			if ($name !== $m[1][0]) {
 				$this->aliases[$m[1][0]] = $name;
 			}
 		}
@@ -93,29 +94,30 @@ class CommandLine
 					$params[$name][] = $arg;
 				}
 				continue;
+			}
 
-			} elseif (isset($this->aliases[$arg])) {
-				$name = $this->aliases[$arg];
+			list($name, $arg) = strpos($arg, '=') ? explode('=', $arg, 2) : array($arg, TRUE);
 
-			} elseif (isset($this->options[$arg])) {
-				$name = $arg;
+			if (isset($this->aliases[$name])) {
+				$name = $this->aliases[$name];
 
-			} else {
-				throw new \Exception("Unknown option $arg.");
+			} elseif (!isset($this->options[$name])) {
+				throw new \Exception("Unknown option $name.");
 			}
 
 			$opt = $this->options[$name];
 
-			if (isset($args[$i]) && $args[$i][0] !== '-' && !empty($opt[self::ARGUMENT])) {
-				$arg = $args[$i++];
-				$this->checkArg($opt, $arg);
+			if ($arg !== TRUE && empty($opt[self::ARGUMENT])) {
+				throw new \Exception("Option $name has not argument.");
 
-			} elseif (empty($opt[self::OPTIONAL]) && !empty($opt[self::ARGUMENT])) {
-				throw new \Exception("Option $arg requires argument.");
-
-			} else {
-				$arg = TRUE;
+			} elseif ($arg === TRUE && !empty($opt[self::ARGUMENT])) {
+				if (isset($args[$i]) && $args[$i][0] !== '-') {
+					$arg = $args[$i++];
+				} elseif (empty($opt[self::OPTIONAL])) {
+					throw new \Exception("Option $name requires argument.");
+				}
 			}
+			$this->checkArg($opt, $arg);
 
 			if (empty($opt[self::REPEATABLE])) {
 				$params[$name] = $arg;
@@ -162,7 +164,7 @@ class CommandLine
 
 	public function isEmpty()
 	{
-		return !isset($_SERVER['argc']) || $_SERVER['argc'] < 2;
+		return !isset($_SERVER['argv']) || count($_SERVER['argv']) < 2;
 	}
 
 }
