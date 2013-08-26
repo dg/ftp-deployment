@@ -97,7 +97,7 @@ foreach ($config as $section => $cfg) {
 	}
 
 	$deployment->ignoreMasks = array_merge(
-		array('*.bak', '.svn' , '.git*'),
+		array('*.bak', '.svn' , '.git*', 'Thumbs.db', '.DS_Store'),
 		toArray($cfg['ignore'])
 	);
 	$deployment->deploymentFile = empty($cfg['deploymentfile']) ? $deployment->deploymentFile : $cfg['deploymentfile'];
