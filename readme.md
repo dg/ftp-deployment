@@ -61,6 +61,8 @@ purge[] = temp/cache
 preprocess = yes
 ```
 
+Configuration can be also stored in PHP file.
+
 In test mode (with `-t` option) uploading or deleting files is skipped, so you can use it
 to verify your settings.
 
