@@ -34,7 +34,11 @@ if ($cmd->isEmpty()) {
 
 $options = $cmd->parse();
 
-$config = parse_ini_file($options['config'], TRUE);
+if (pathinfo($options['config'], PATHINFO_EXTENSION) == 'php') {
+    $config = include $options['config'];
+} else {
+    $config = parse_ini_file($options['config'], TRUE);
+}
 if (isset($config['remote']) && is_string($config['remote'])) {
 	$config = array('' => $config);
 }
