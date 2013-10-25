@@ -34,7 +34,11 @@ if ($cmd->isEmpty()) {
 
 $options = $cmd->parse();
 
-$config = parse_ini_file($options['config'], TRUE);
+if (strtolower(pathinfo($options['config'],PATHINFO_EXTENSION)) == 'php') {
+    $config = include $options['config'];
+} else {
+    $config = parse_ini_file($options['config'], TRUE);
+}
 if (isset($config['remote']) && is_string($config['remote'])) {
 	$config = array('' => $config);
 }
@@ -60,14 +64,25 @@ set_exception_handler(function($e) use ($logger) {
 
 function toArray($val)
 {
-	return is_array($val) ? array_diff($val, array(NULL)) : preg_split('#\s+#', $val, -1, PREG_SPLIT_NO_EMPTY);
+	if (!is_array($val)) {
+		$val = preg_split('#\s+#', $val, -1, PREG_SPLIT_NO_EMPTY);
+	}
+	$result = array();
+	foreach( $val as $item ) {
+		if (is_string($item)) {
+			$item = trim( $item );
+		}
+		if (!empty($item)) {
+			$result[] = $item;
+		}
+	}
+	return $result;
 }
 
 
 // start deploy
 $logger->log("Started at " . date('[Y/m/d H:i]'));
-$logger->log("Config file is $options[config]");
-
+$logger->log("Config file is " . $options['config']);
 foreach ($config as $section => $cfg) {
 	$logger->log("\nDeploying $section");
 

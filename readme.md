@@ -58,6 +58,41 @@ purge[] = temp/cache
 preprocess = yes
 ```
 
+Or you can use php-config:
+```php
+<?php
+
+return array (
+	'test site' =>
+	array (
+		'remote' => 'ftp://user:secretpassword@ftp.example.com/directory',
+		'local' => '/www/sample',
+		'test' => true,
+		'ignore' => '
+			.git*
+			project.pp[jx]
+			/deployment.*
+			/log
+			temp/*
+			!temp/.htaccess
+		',
+		'allowdelete' => true,
+		'before' =>
+			array (
+				function(Ftp $ftp, Logger $logger, Deployment $deployment){
+					$logger->log("Hello!");
+				},
+			),
+		'after' => array (),
+		'purge' =>
+			array (
+				'temp/cache',
+			),
+		'preprocess' => true,
+	),
+);
+```
+
 In test mode (with `-t` option) uploading or deleting files is skipped, so you can use it
 to verify your settings.
 
@@ -74,6 +109,7 @@ project.pp[jx] - ignore files or folders 'project.ppj' and 'project.ppx'
 
 Before uploading is started and after is finished you can call own scripts on
 server (see `before` and `after`), which may for example switch server to maintenance mode.
+If you use php-config - you can run lambda function with deployment environment.
 
 Syncing a large number of files attempts to run in (something like) transaction: all files are
 uploaded with extension `.deploytmp` and then are quickly renamed.
