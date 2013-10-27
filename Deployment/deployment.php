@@ -1,5 +1,4 @@
 <?php
-
 // Version 1.1
 
 if (version_compare(PHP_VERSION, '5.3.0', '<')) {
@@ -69,6 +68,7 @@ function toArray($val)
 
 
 // start deploy
+$time = time();
 $logger->log("Started at " . date('[Y/m/d H:i]'));
 $logger->log("Config file is $options[config]");
 
@@ -123,4 +123,5 @@ foreach ($config as $section => $cfg) {
 	$deployment->deploy();
 }
 
-$logger->log("\nFinished at " . date('[Y/m/d H:i]'));
+$time = time() - $time;
+$logger->log("\nFinished at " . date('[Y/m/d H:i]') . " (in $time seconds)");
