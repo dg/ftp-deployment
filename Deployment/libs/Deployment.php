@@ -32,6 +32,9 @@ class Deployment
 	public $testMode = FALSE;
 
 	/** @var bool */
+	public $passiveMode = TRUE;
+
+	/** @var bool */
 	public $allowDelete = FALSE;
 
 	/** @var array */
@@ -85,7 +88,8 @@ class Deployment
 	public function deploy()
 	{
 		$this->logger->log("Connecting to server");
-		$this->ftp = new Ftp($this->remote);
+		$this->logger->log("Passive FTP mode " . ($this->passiveMode ? "enabled" : "disabled"));
+		$this->ftp = new Ftp($this->remote, $this->passiveMode);
 
 		$remoteFiles = $this->loadDeploymentFile();
 		if (is_array($remoteFiles)) {
