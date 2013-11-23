@@ -223,7 +223,7 @@ class Deployment
 		$toRename = array();
 		foreach ($files as $num => $file) {
 			$remoteFile = $root . $file;
-			$remoteDir = dirname($remoteFile);
+			$remoteDir = substr($remoteFile, -1) === '/' ? $remoteFile : dirname($remoteFile);
 			if ($remoteDir !== $prevDir) {
 				$prevDir = $remoteDir;
 				if (trim($remoteDir, '\\/') !== '' && !$this->ftp->isDir($remoteDir)) {
