@@ -232,6 +232,7 @@ class Deployment
 			}
 
 			if (substr($remoteFile, -1) === '/') { // is dir?
+				$this->writeProgress($num + 1, count($files), $file);
 				continue;
 			}
 
@@ -265,6 +266,7 @@ class Deployment
 			$this->writeProgress($num + 1, count($files), $file);
 		}
 
+		$this->logger->log("\nRenaming:");
 		foreach ($toRename as $num => $file) {
 			$this->writeProgress($num + 1, count($toRename), "Renaming $file");
 			$this->ftp->tryDelete($file);
