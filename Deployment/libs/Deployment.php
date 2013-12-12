@@ -99,7 +99,7 @@ class Deployment
 			$remoteFiles = array();
 		}
 
-		$this->logger->log("Scanning files in $this->local");		
+		$this->logger->log("Scanning files in $this->local");
 		chdir($this->local);
 		$localFiles = $this->collectFiles('');
 		unset($localFiles["/$this->deploymentFile"]);
@@ -258,7 +258,7 @@ class Deployment
 					if (--$retry) {
 						goto upload;
 					}
-					throw new Exception("Cannot upload file $file, number of retries exceeded.");
+					throw new Exception("Cannot upload file $file, number of retries exceeded. Error: {$e->getMessage()}");
 				}
 				$blocks++;
 			} while ($ret === Ftp::MOREDATA);
