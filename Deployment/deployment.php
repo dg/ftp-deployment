@@ -73,6 +73,7 @@ foreach ($config as $section => $cfg) {
 
 	$cfg = array_change_key_case($cfg, CASE_LOWER) + array(
 		'local' => dirname($options['config']),
+		'passivemode' => TRUE,
 		'ignore' => '',
 		'allowdelete' => TRUE,
 		'purge' => '',
@@ -101,6 +102,7 @@ foreach ($config as $section => $cfg) {
 		toArray($cfg['ignore'])
 	);
 	$deployment->deploymentFile = empty($cfg['deploymentfile']) ? $deployment->deploymentFile : $cfg['deploymentfile'];
+	$deployment->passiveMode = (bool) $cfg['passivemode'];
 	$deployment->testMode = !empty($cfg['test']) || $options['--test'];
 	$deployment->allowDelete = $cfg['allowdelete'];
 	$deployment->toPurge = toArray($cfg['purge']);
