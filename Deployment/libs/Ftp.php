@@ -59,10 +59,11 @@ class Ftp
 		}
 		if ($url) {
 			$parts = parse_url($url);
-			if (!isset($parts['scheme']) || $parts['scheme'] !== 'ftp') {
+			if (!isset($parts['scheme']) || !($parts['scheme'] !== 'ftp' || $parts['scheme'] !== 'sftp')) {
 				throw new InvalidArgumentException('Invalid URL.');
 			}
-			$this->connect($parts['host'], empty($parts['port']) ? NULL : (int) $parts['port']);
+			$func = $parts['scheme'] === 'ftp' ? 'connect' : 'ssl_connect';
+			$this->$func($parts['host'], empty($parts['port']) ? NULL : (int) $parts['port']);
 			$this->login(urldecode($parts['user']), urldecode($parts['pass']));
 			$this->pasv((bool) $passiveMode);
 			if (isset($parts['path'])) {
