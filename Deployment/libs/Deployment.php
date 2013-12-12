@@ -76,7 +76,7 @@ class Deployment
 			throw new InvalidArgumentException;
 		}
 		$this->remote = $remote;
-		$this->local = realpath($local);
+		$this->local = $local;
 		$this->logger = $logger;
 	}
 
@@ -99,7 +99,7 @@ class Deployment
 			$remoteFiles = array();
 		}
 
-		$this->logger->log("Scanning files in $this->local");
+		$this->logger->log("Scanning files in $this->local");		
 		chdir($this->local);
 		$localFiles = $this->collectFiles('');
 		unset($localFiles["/$this->deploymentFile"]);
