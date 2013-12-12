@@ -1,5 +1,5 @@
 <?php
-
+$timeStart = time();
 // Version 1.1
 
 if (version_compare(PHP_VERSION, '5.3.0', '<')) {
@@ -123,4 +123,18 @@ foreach ($config as $section => $cfg) {
 	$deployment->deploy();
 }
 
-$logger->log("\nFinished at " . date('[Y/m/d H:i]'));
+$timeEnd = time();
+$logger->log("\nFinished at " . date('[Y/m/d H:i]') . " (Time elapsed ".getHumanTime( $timeEnd - $timeStart ).")");
+
+function getHumanTime($seconds)
+{
+	$hours = floor($seconds / 60 / 60);
+	if ($hours > 0) {
+		$seconds -= $hours * 60 * 60;
+	}
+	$minutes = floor($seconds / 60);
+	if ($minutes > 0) {
+		$seconds -= $minutes * 60;
+	}
+	return sprintf("%02d:%02d:%02d", $hours, $minutes, $seconds);
+}
