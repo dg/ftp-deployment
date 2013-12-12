@@ -50,8 +50,9 @@ class Ftp
 
 	/**
 	 * @param  string  URL ftp://...
+	 * @param  bool
 	 */
-	public function __construct($url = NULL)
+	public function __construct($url = NULL, $passiveMode = TRUE)
 	{
 		if (!extension_loaded('ftp')) {
 			throw new Exception('PHP extension FTP is not loaded.');
@@ -63,7 +64,7 @@ class Ftp
 			}
 			$this->connect($parts['host'], empty($parts['port']) ? NULL : (int) $parts['port']);
 			$this->login(urldecode($parts['user']), urldecode($parts['pass']));
-			$this->pasv(TRUE);
+			$this->pasv((bool) $passiveMode);
 			if (isset($parts['path'])) {
 				$this->chdir($parts['path']);
 			}

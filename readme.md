@@ -27,6 +27,9 @@ And what file `deployment.ini` contains? Required is only item `remote`, all oth
 ; remote FTP server
 remote = ftp://user:secretpassword@ftp.example.com/directory
 
+; FTP passive mode
+passivemode = yes
+
 ; local path (optional)
 local = .
 
