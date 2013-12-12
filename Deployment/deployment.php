@@ -1,5 +1,5 @@
 <?php
-// Version 1.1
+// Version 1.2
 
 if (version_compare(PHP_VERSION, '5.3.0', '<')) {
 	throw new Exception('Deployment requires PHP 5.3.0 or newer.');
