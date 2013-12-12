@@ -34,15 +34,12 @@ if ($cmd->isEmpty()) {
 $options = $cmd->parse();
 
 if (pathinfo($options['config'], PATHINFO_EXTENSION) == 'php') {
-    $config = include $options['config'];
+	$config = include $options['config'];
 } else {
     $config = parse_ini_file($options['config'], TRUE);
 }
-if (isset($config['remote']) && is_string($config['remote'])) {
-	$config = array('' => $config);
-}
 
-$logger = new Logger(preg_replace('#\.\w+$#', '.log', $options['config']));
+$logger = new Logger(empty($config['log']) ? preg_replace('#\.\w+$#', '.log', $options['config']) : $config['log']);
 
 
 
@@ -71,6 +68,10 @@ function toArray($val)
 $time = time();
 $logger->log("Started at " . date('[Y/m/d H:i]'));
 $logger->log("Config file is $options[config]");
+
+if (isset($config['remote']) && is_string($config['remote'])) {
+	$config = array('' => $config);
+}
 
 foreach ($config as $section => $cfg) {
 	$logger->log("\nDeploying $section");

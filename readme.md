@@ -59,6 +59,9 @@ purge[] = temp/cache
 
 ; preprocess JS and CSS files? (defaults to yes)
 preprocess = yes
+
+; log file (defaults to config file with extension .log)
+log = ...
 ```
 
 Configuration can be also stored in PHP file.
