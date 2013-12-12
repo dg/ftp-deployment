@@ -15,7 +15,9 @@ return array(
 		',
 		'allowdelete' => TRUE,
 		'before' => array(
-			'http://example.com/deployment.php?before',
+			function (Ftp $ftp, Logger $logger, Deployment $deployment) {
+				$logger->log('Hello!');
+			},
 		),
 		'after' => array(
 			'http://example.com/deployment.php?after'
