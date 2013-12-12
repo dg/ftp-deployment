@@ -119,8 +119,12 @@ class Deployment
 
 		if ($this->runBefore) {
 			$this->logger->log("\nBefore-jobs:");
-			foreach ((array) $this->runBefore as $url) {
-				$this->logger->log("$url: " . trim(file_get_contents($url)));
+			foreach ((array) $this->runBefore as $job) {
+				if (is_string($job)) {
+					$this->logger->log("$job: " . trim(file_get_contents($job)));
+				} elseif(is_callable($job)) {
+					$job($this->ftp, $this->logger, $this);
+				}
 			}
 		}
 
@@ -146,8 +150,12 @@ class Deployment
 
 		if ($this->runAfter) {
 			$this->logger->log("\nAfter-jobs:");
-			foreach ((array) $this->runAfter as $url) {
-				$this->logger->log("$url: " . trim(file_get_contents($url)));
+			foreach ((array) $this->runAfter as $job) {
+				if (is_string($job)) {
+					$this->logger->log("$job: " . trim(file_get_contents($job)));
+				} elseif(is_callable($job)) {
+					$job($this->ftp, $this->logger, $this);
+				}
 			}
 		}
 	}
