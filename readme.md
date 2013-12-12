@@ -79,6 +79,7 @@ project.pp[jx] - ignore files or folders 'project.ppj' and 'project.ppx'
 
 Before uploading is started and after is finished you can call own scripts on
 server (see `before` and `after`), which may for example switch server to maintenance mode.
+If you use php-config - you can run lambda function with deployment environment.
 
 Syncing a large number of files attempts to run in (something like) transaction: all files are
 uploaded with extension `.deploytmp` and then are quickly renamed.

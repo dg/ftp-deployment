@@ -64,7 +64,7 @@ set_exception_handler(function($e) use ($logger) {
 
 function toArray($val)
 {
-	return is_array($val) ? array_diff($val, array(NULL)) : preg_split('#\s+#', $val, -1, PREG_SPLIT_NO_EMPTY);
+	return is_array($val) ? array_filter($val) : preg_split('#\s+#', $val, -1, PREG_SPLIT_NO_EMPTY);
 }
 
 
