@@ -10,5 +10,6 @@
 			"name": "David Grudl",
 			"homepage": "http://davidgrudl.com"
 		}
-	]
+	],
+	"bin": ["Deployment/deployment"]
 }
