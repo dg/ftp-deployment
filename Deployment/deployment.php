@@ -36,7 +36,7 @@ $options = $cmd->parse();
 if (pathinfo($options['config'], PATHINFO_EXTENSION) == 'php') {
 	$config = include $options['config'];
 } else {
-    $config = parse_ini_file($options['config'], TRUE);
+	$config = parse_ini_file($options['config'], TRUE);
 }
 
 $logger = new Logger(empty($config['log']) ? preg_replace('#\.\w+$#', '.log', $options['config']) : $config['log']);
