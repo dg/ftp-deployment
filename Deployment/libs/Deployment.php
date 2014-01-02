@@ -116,12 +116,12 @@ class Deployment
 		$toUpload = array_keys(array_diff_assoc($localFiles, $remoteFiles));
 
 		if (!$toUpload && !$toDelete) {
-			$this->logger->log('Already synchronized.');
+			$this->logger->log('Already synchronized.', 'light-green');
 			return;
 
 		} elseif ($this->testMode) {
-			$this->logger->log("\nUploading:\n" . implode("\n", $toUpload));
-			$this->logger->log("\nDeleting:\n" . implode("\n", $toDelete));
+			$this->logger->log("\nUploading:\n" . implode("\n", $toUpload), 'green');
+			$this->logger->log("\nDeleting:\n" . implode("\n", $toDelete), 'red');
 			return;
 		}
 
@@ -240,7 +240,7 @@ class Deployment
 			}
 
 			if (substr($remoteFile, -1) === '/') { // is dir?
-				$this->writeProgress($num + 1, count($files), $file);
+				$this->writeProgress($num + 1, count($files), $file, NULL, 'green');
 				continue;
 			}
 
@@ -255,7 +255,7 @@ class Deployment
 			upload:
 			$blocks = 0;
 			do {
-				$this->writeProgress($num + 1, count($files), $file, min(round($blocks * self::BLOCK_SIZE / max($size, 1)), 100));
+				$this->writeProgress($num + 1, count($files), $file, min(round($blocks * self::BLOCK_SIZE / max($size, 1)), 100), 'green');
 				try {
 					$ret = $blocks === 0
 						? $this->ftp->nbPut($remoteFile . self::TEMPORARY_SUFFIX, $localFile, Ftp::BINARY)
@@ -271,12 +271,12 @@ class Deployment
 				$blocks++;
 			} while ($ret === Ftp::MOREDATA);
 
-			$this->writeProgress($num + 1, count($files), $file);
+			$this->writeProgress($num + 1, count($files), $file, NULL, 'green');
 		}
 
 		$this->logger->log("\nRenaming:");
 		foreach ($toRename as $num => $file) {
-			$this->writeProgress($num + 1, count($toRename), "Renaming $file");
+			$this->writeProgress($num + 1, count($toRename), "Renaming $file", NULL, 'brown');
 			$this->ftp->tryDelete($file);
 			$this->ftp->rename($file . self::TEMPORARY_SUFFIX, $file); // TODO: zachovat permissions
 		}
@@ -293,14 +293,14 @@ class Deployment
 		$root = $this->ftp->pwd();
 		foreach ($files as $num => $file) {
 			$remoteFile = $root . $file;
-			$this->writeProgress($num + 1, count($files), "Deleting $file");
+			$this->writeProgress($num + 1, count($files), "Deleting $file", NULL, 'red');
 			if (substr($file, -1) === '/') { // is directory?
 				$res = $this->ftp->tryRmdir($remoteFile);
 			} else {
 				$res = $this->ftp->tryDelete($remoteFile);
 			}
 			if (!$res) {
-				$this->logger->log("Unable to delete $remoteFile");
+				$this->logger->log("Unable to delete $remoteFile", 'light-red');
 			}
 		}
 	}
@@ -354,7 +354,7 @@ class Deployment
 				continue;
 
 			} elseif ($this->matchMask($path, $this->ignoreMasks)) {
-				$this->logger->log("Ignoring $path");
+				$this->logger->log("Ignoring $path", 'dark-grey');
 				continue;
 
 			} elseif (is_dir($path)) {
@@ -435,12 +435,12 @@ class Deployment
 	}
 
 
-	private function writeProgress($count, $total, $file, $percent = NULL)
+	private function writeProgress($count, $total, $file, $percent = NULL, $color = NULL)
 	{
 		$len = strlen((string) $total);
 		$s = sprintf("(% {$len}d of %-{$len}d) %s", $count, $total, $file);
 		if ($percent === NULL) {
-			$this->logger->log($s);
+			$this->logger->log($s, $color);
 		} else {
 			echo $s . " [$percent%]\x0D";
 		}

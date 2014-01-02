@@ -86,12 +86,15 @@ foreach ($config as $section => $cfg) {
 		'after' => '',
 		'preprocess' => TRUE,
 		'tempdir' => sys_get_temp_dir() . '/deployment',
+		'colors' => (PHP_SAPI === 'cli' && ((function_exists('posix_isatty') && posix_isatty(STDOUT))
+			|| getenv('ConEmuANSI') === 'ON' || getenv('ANSICON') !== FALSE)),
 	);
 
 	if (empty($cfg['remote'])) {
 		throw new Exception("Missing 'remote' in config.");
 	}
 
+	$logger->useColors = (bool) $cfg['colors'];
 	$deployment = new Deployment($cfg['remote'], $cfg['local'], $logger);
 
 	if ($cfg['preprocess']) {
@@ -128,4 +131,4 @@ foreach ($config as $section => $cfg) {
 }
 
 $time = time() - $time;
-$logger->log("\nFinished at " . date('[Y/m/d H:i]') . " (in $time seconds)");
+$logger->log("\nFinished at " . date('[Y/m/d H:i]') . " (in $time seconds)", 'light-green');

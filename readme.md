@@ -65,6 +65,9 @@ log = ...
 
 ; directory for temporary files (defaults to system's temporary directory)
 tempdir = /temp/deployment
+
+; enable colored highlights? (defaults to autodetect)
+colors = yes
 ```
 
 Configuration can be also stored in PHP file.
