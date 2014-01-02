@@ -79,6 +79,7 @@ foreach ($config as $section => $cfg) {
 	$cfg = array_change_key_case($cfg, CASE_LOWER) + array(
 		'local' => dirname($options['config']),
 		'passivemode' => TRUE,
+		'colored' => TRUE,
 		'ignore' => '',
 		'allowdelete' => TRUE,
 		'purge' => '',
@@ -108,6 +109,7 @@ foreach ($config as $section => $cfg) {
 	);
 	$deployment->deploymentFile = empty($cfg['deploymentfile']) ? $deployment->deploymentFile : $cfg['deploymentfile'];
 	$deployment->passiveMode = (bool) $cfg['passivemode'];
+	$deployment->colored = (bool) $cfg['colored'];
 	$deployment->testMode = !empty($cfg['test']) || $options['--test'];
 	$deployment->allowDelete = $cfg['allowdelete'];
 	$deployment->toPurge = toArray($cfg['purge']);
@@ -125,4 +127,4 @@ foreach ($config as $section => $cfg) {
 }
 
 $time = time() - $time;
-$logger->log("\nFinished at " . date('[Y/m/d H:i]') . " (in $time seconds)");
+$logger->log("\nFinished at " . date('[Y/m/d H:i]') . " (in $time seconds)", $deployment->colored ? $deployment::COLOR_OK : FALSE);

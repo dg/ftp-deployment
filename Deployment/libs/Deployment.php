@@ -21,6 +21,12 @@ class Deployment
 	const RETRIES = 10;
 	const BLOCK_SIZE = 400000;
 	const TEMPORARY_SUFFIX = '.deploytmp';
+	
+	const COLOR_IGNORE = 'dark_grey';
+	const COLOR_UPLOAD = 'green';
+	const COLOR_DELETE = 'red';
+	const COLOR_OK = 'green';
+	const COLOR_ALERT = 'red';
 
 	/** @var string */
 	public $deploymentFile = '.htdeployment';
@@ -48,6 +54,9 @@ class Deployment
 
 	/** @var string */
 	public $tempDir = '';
+
+	/** @var bool */
+	public $colored = TRUE;
 
 	/** @var string */
 	private $remote;
@@ -108,12 +117,12 @@ class Deployment
 		$toUpload = array_keys(array_diff_assoc($localFiles, $remoteFiles));
 
 		if (!$toUpload && !$toDelete) {
-			$this->logger->log('Already synchronized.');
+			$this->logger->log('Already synchronized.', $this->colored ? self::COLOR_OK : FALSE);
 			return;
 
 		} elseif ($this->testMode) {
-			$this->logger->log("\nUploading:\n" . implode("\n", $toUpload));
-			$this->logger->log("\nDeleting:\n" . implode("\n", $toDelete));
+			$this->logger->log("\nUploading:\n" . implode("\n", $toUpload), $this->colored ? self::COLOR_UPLOAD : FALSE);
+			$this->logger->log("\nDeleting:\n" . implode("\n", $toDelete), $this->colored ? self::COLOR_DELETE : FALSE);
 			return;
 		}
 
@@ -232,7 +241,7 @@ class Deployment
 			}
 
 			if (substr($remoteFile, -1) === '/') { // is dir?
-				$this->writeProgress($num + 1, count($files), $file);
+				$this->writeProgress($num + 1, count($files), $file, NULL, self::COLOR_UPLOAD);
 				continue;
 			}
 
@@ -247,7 +256,7 @@ class Deployment
 			upload:
 			$blocks = 0;
 			do {
-				$this->writeProgress($num + 1, count($files), $file, min(round($blocks * self::BLOCK_SIZE / max($size, 1)), 100));
+				$this->writeProgress($num + 1, count($files), $file, min(round($blocks * self::BLOCK_SIZE / max($size, 1)), 100), self::COLOR_UPLOAD);
 				try {
 					$ret = $blocks === 0
 						? $this->ftp->nbPut($remoteFile . self::TEMPORARY_SUFFIX, $localFile, Ftp::BINARY)
@@ -263,12 +272,12 @@ class Deployment
 				$blocks++;
 			} while ($ret === Ftp::MOREDATA);
 
-			$this->writeProgress($num + 1, count($files), $file);
+			$this->writeProgress($num + 1, count($files), $file, NULL, self::COLOR_UPLOAD);
 		}
 
 		$this->logger->log("\nRenaming:");
 		foreach ($toRename as $num => $file) {
-			$this->writeProgress($num + 1, count($toRename), "Renaming $file");
+			$this->writeProgress($num + 1, count($toRename), "Renaming $file", NULL, self::COLOR_ALERT);
 			$this->ftp->tryDelete($file);
 			$this->ftp->rename($file . self::TEMPORARY_SUFFIX, $file); // TODO: zachovat permissions
 		}
@@ -285,14 +294,14 @@ class Deployment
 		$root = $this->ftp->pwd();
 		foreach ($files as $num => $file) {
 			$remoteFile = $root . $file;
-			$this->writeProgress($num + 1, count($files), "Deleting $file");
+			$this->writeProgress($num + 1, count($files), "Deleting $file", NULL, self::COLOR_DELETE);
 			if (substr($file, -1) === '/') { // is directory?
 				$res = $this->ftp->tryRmdir($remoteFile);
 			} else {
 				$res = $this->ftp->tryDelete($remoteFile);
 			}
 			if (!$res) {
-				$this->logger->log("Unable to delete $remoteFile");
+				$this->logger->log("Unable to delete $remoteFile", $this->colored ? self::COLOR_ALERT : FALSE);
 			}
 		}
 	}
@@ -346,7 +355,7 @@ class Deployment
 				continue;
 
 			} elseif ($this->matchMask($path, $this->ignoreMasks)) {
-				$this->logger->log("Ignoring $path");
+				$this->logger->log("Ignoring $path", $this->colored ? self::COLOR_IGNORE : FALSE);
 				continue;
 
 			} elseif (is_dir($path)) {
@@ -426,12 +435,12 @@ class Deployment
 	}
 
 
-	private function writeProgress($count, $total, $file, $percent = NULL)
+	private function writeProgress($count, $total, $file, $percent = NULL, $color = '')
 	{
 		$len = strlen((string) $total);
 		$s = sprintf("(% {$len}d of %-{$len}d) %s", $count, $total, $file);
 		if ($percent === NULL) {
-			$this->logger->log($s);
+			$this->logger->log($s, $this->colored ? $color : FALSE);
 		} else {
 			echo $s . " [$percent%]\x0D";
 		}
