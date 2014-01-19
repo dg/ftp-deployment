@@ -1,0 +1,9 @@
+#!/usr/bin/env php
+<?php
+/**
+ *
+ *   Wrapperscript for easy-commandline usage
+ *
+ */
+
+include_once realpath(__DIR__)."/../Deployment/deployment.php";
