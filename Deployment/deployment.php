@@ -10,6 +10,7 @@ require __DIR__ . '/libs/Logger.php';
 require __DIR__ . '/libs/Deployment.php';
 require __DIR__ . '/libs/Preprocessor.php';
 require __DIR__ . '/libs/CommandLine.php';
+require __DIR__ . '/libs/Configurator.php';
 
 
 
@@ -32,14 +33,27 @@ if ($cmd->isEmpty()) {
 }
 
 $options = $cmd->parse();
-
-if (pathinfo($options['config'], PATHINFO_EXTENSION) == 'php') {
-	$config = include $options['config'];
-} else {
-	$config = parse_ini_file($options['config'], TRUE);
+// Configurator
+$configurator = new Configurator;
+$configurator->defaultConfig = array(
+	'local' => dirname($options['config']),
+	'passivemode' => TRUE,
+	'ignore' => '',
+	'allowdelete' => TRUE,
+	'purge' => '',
+	'before' => '',
+	'after' => '',
+	'preprocess' => TRUE,
+);
+try {
+	$configurator->addFile($options['config']);
+} catch (RuntimeException $e) {
+	echo "Error: {$e->getMessage()}\nin {$e->getFile()} on {$e->getLine()}\n";
+	exit(2);
 }
+$config = $configurator->getConfig();
 
-$logger = new Logger(empty($config['log']) ? preg_replace('#\.\w+$#', '.log', $options['config']) : $config['log']);
+$logger = new Logger(empty($configurator->getLogFile()) ? preg_replace('#\.\w+$#', '.log', $options['config']) : $configurator->getLogFile());
 
 
 
@@ -69,23 +83,8 @@ $time = time();
 $logger->log("Started at " . date('[Y/m/d H:i]'));
 $logger->log("Config file is $options[config]");
 
-if (isset($config['remote']) && is_string($config['remote'])) {
-	$config = array('' => $config);
-}
-
 foreach ($config as $section => $cfg) {
 	$logger->log("\nDeploying $section");
-
-	$cfg = array_change_key_case($cfg, CASE_LOWER) + array(
-		'local' => dirname($options['config']),
-		'passivemode' => TRUE,
-		'ignore' => '',
-		'allowdelete' => TRUE,
-		'purge' => '',
-		'before' => '',
-		'after' => '',
-		'preprocess' => TRUE,
-	);
 
 	if (empty($cfg['remote'])) {
 		throw new Exception("Missing 'remote' in config.");
