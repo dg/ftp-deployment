@@ -45,7 +45,7 @@ class CommandLine
 
 		preg_match_all('#^[ \t]+(--?\w.*?)(?:  .*\(default: (.*)\)|  |\r|$)#m', $help, $lines, PREG_SET_ORDER);
 		foreach ($lines as $line) {
-			preg_match_all('#(--?\w+)(?:[= ](<.*?>|\[.*?]|\w+)(\.{0,3}))?[ ,|]*#A', $line[1], $m);
+			preg_match_all('#(--?\w[\w-]*)(?:[= ](<.*?>|\[.*?]|\w+)(\.{0,3}))?[ ,|]*#A', $line[1], $m);
 			if (!count($m[0]) || count($m[0]) > 2 || implode('', $m[0]) !== $line[1]) {
 				throw new \InvalidArgumentException("Unable to parse '$line[1]'.");
 			}
