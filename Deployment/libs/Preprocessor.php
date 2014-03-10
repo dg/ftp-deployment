@@ -23,7 +23,7 @@ class Preprocessor
 
 	/** @var bool  compress only file when contains /**! */
 	public $requireCompressMark = TRUE;
-	
+
 	/** @var Logger */
 	private $logger;
 
@@ -46,12 +46,14 @@ class Preprocessor
 		if ($this->requireCompressMark && !preg_match('#/\*+!#', $content)) { // must contain /**!
 			return $content;
 		}
-		$dir = dirname(__DIR__) . '/vendor';;
 		$this->logger->log("Compressing $origFile");
+
+		$dir = dirname(__DIR__) . '/vendor';;
+		$cmd = escapeshellarg($this->javaBinary) . ' -jar ';
 		if (substr($origFile, -3) === '.js') {
-			$cmd = "$this->javaBinary -jar \"{$dir}/Google-Closure-Compiler/compiler.jar\" --warning_level QUIET";
+			$cmd .= escapeshellarg($dir . '/Google-Closure-Compiler/compiler.jar') . ' --warning_level QUIET';
 		} else {
-			$cmd = "$this->javaBinary -jar \"{$dir}/YUI-Compressor/yuicompressor-2.4.7.jar\" --type css";
+			$cmd .= escapeshellarg($dir . '/YUI-Compressor/yuicompressor-2.4.7.jar') . ' --type css';
 		}
 		list($ok, $output) = $this->execute($cmd, $content);
 		if (!$ok) {
@@ -117,7 +119,12 @@ class Preprocessor
 	 */
 	private function execute($command, $input)
 	{
-		$process = proc_open($command, array(array('pipe', 'r'), array('pipe', 'w'), array('pipe', 'w')), $pipes);
+		$process = proc_open(
+			$command,
+			array(array('pipe', 'r'), array('pipe', 'w'), array('pipe', 'w')),
+			$pipes,
+			NULL, NULL, array('bypass_shell' => TRUE)
+		);
 		if (!is_resource($process)) {
 			throw new Exception("Unable start process $command.");
 		}
@@ -128,7 +135,11 @@ class Preprocessor
 		if (!$output) {
 			$output = stream_get_contents($pipes[2]);
 		}
-		return array(proc_close($process) === 0, $output);
+
+		return array(
+			proc_close($process) === 0,
+			$output
+		);
 	}
 
 }
