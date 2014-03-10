@@ -1,5 +1,4 @@
 <?php
-// Version 1.2
 
 if (version_compare(PHP_VERSION, '5.3.0', '<')) {
 	throw new Exception('Deployment requires PHP 5.3.0 or newer.');
@@ -14,8 +13,8 @@ require __DIR__ . '/libs/CommandLine.php';
 
 
 $cmd = new CommandLine("
-FTP deployment
---------------
+FTP deployment v1.3
+-------------------
 Usage:
 	deployment.php <config_file> [-t | --test]
 
