@@ -57,8 +57,8 @@ after[] = http://example.com/deployment.php?after
 ; directories to purge after file upload
 purge[] = temp/cache
 
-; preprocess JS and CSS files? (defaults to yes)
-preprocess = yes
+; files to preprocess (defaults to *.js *.css)
+preprocess = no
 
 ; log file (defaults to config file with extension .log)
 log = ...
