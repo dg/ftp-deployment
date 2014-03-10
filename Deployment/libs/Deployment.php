@@ -385,12 +385,12 @@ class Deployment
 			$content = call_user_func($filter, $content, $file);
 		}
 		if ($content === $orig) {
-			return $file;
+			return $cache[$file] = $file;
 		}
 
 		$tempFile = tempnam($this->tempDir, 'deploy');
 		file_put_contents($tempFile, $content);
-		return $tempFile;
+		return $cache[$file] = $tempFile;
 	}
 
 
