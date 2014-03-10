@@ -21,6 +21,9 @@ class Preprocessor
 	/** @var string  path to java binary */
 	public $javaBinary = 'java';
 
+	/** @var bool  compress only file when contains /**! */
+	public $requireCompressMark = TRUE;
+	
 	/** @var Logger */
 	private $logger;
 
@@ -40,7 +43,7 @@ class Preprocessor
 	 */
 	public function compress($content, $origFile)
 	{
-		if (!preg_match('#/\*+!#', $content)) { // must contain /**!
+		if ($this->requireCompressMark && !preg_match('#/\*+!#', $content)) { // must contain /**!
 			return $content;
 		}
 		$dir = dirname(__DIR__) . '/vendor';;
