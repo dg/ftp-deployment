@@ -91,6 +91,11 @@ class Deployment
 		$this->logger->log("Passive FTP mode " . ($this->passiveMode ? "enabled" : "disabled"));
 		$this->ftp = new Ftp($this->remote, $this->passiveMode);
 
+		if (!is_dir($this->tempDir)) {
+			$this->logger->log("Creating temporary directory $this->tempDir");
+			mkdir($this->tempDir);
+		}
+
 		$remoteFiles = $this->loadDeploymentFile();
 		if (is_array($remoteFiles)) {
 			$this->logger->log("Loaded remote $this->deploymentFile file");
