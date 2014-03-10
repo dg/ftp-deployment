@@ -62,6 +62,9 @@ preprocess = yes
 
 ; log file (defaults to config file with extension .log)
 log = ...
+
+; directory for temporary files (defaults to system's temporary directory)
+tempdir = /temp/deployment
 ```
 
 Configuration can be also stored in PHP file.
