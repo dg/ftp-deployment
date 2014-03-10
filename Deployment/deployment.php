@@ -97,10 +97,10 @@ foreach ($config as $section => $cfg) {
 	if ($cfg['preprocess']) {
 		$preprocessor = new Preprocessor($logger);
 		$deployment->addFilter('js', array($preprocessor, 'expandApacheImports'));
-		$deployment->addFilter('js', array($preprocessor, 'compress'));
+		$deployment->addFilter('js', array($preprocessor, 'compress'), TRUE);
 		$deployment->addFilter('css', array($preprocessor, 'expandApacheImports'));
 		$deployment->addFilter('css', array($preprocessor, 'expandCssImports'));
-		$deployment->addFilter('css', array($preprocessor, 'compress'));
+		$deployment->addFilter('css', array($preprocessor, 'compress'), TRUE);
 	}
 
 	$deployment->ignoreMasks = array_merge(

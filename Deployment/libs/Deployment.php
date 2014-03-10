@@ -172,9 +172,9 @@ class Deployment
 	 * @param  callable
 	 * @return void
 	 */
-	public function addFilter($extension, $filter)
+	public function addFilter($extension, $filter, $cached = FALSE)
 	{
-		$this->filters[$extension][] = $filter;
+		$this->filters[$extension][] = array('filter' => $filter, 'cached' => $cached);
 		return $this;
 	}
 
@@ -374,28 +374,29 @@ class Deployment
 	 */
 	private function preprocess($file)
 	{
-		static $cache;
-		$file = realpath($file);
-		if (isset($cache[$file])) {
-			return $cache[$file];
-		}
-
-		$ext = pathinfo($file, PATHINFO_EXTENSION);
+		$path = realpath($file);
+		$ext = pathinfo($path, PATHINFO_EXTENSION);
 		if (!isset($this->filters[$ext])) {
-			return $file;
+			return $path;
 		}
 
-		$content = $orig = file_get_contents($file);
-		foreach ($this->filters[$ext] as $filter) {
-			$content = call_user_func($filter, $content, $file);
-		}
-		if ($content === $orig) {
-			return $cache[$file] = $file;
+		$content = file_get_contents($path);
+		foreach ($this->filters[$ext] as $info) {
+			if ($info['cached'] && is_file($tempFile = $this->tempDir . '/' . md5($content))) {
+				$content = file_get_contents($tempFile);
+			} else {
+				$content = call_user_func($info['filter'], $content, $path);
+				if ($info['cached']) {
+					file_put_contents($tempFile, $content);
+				}
+			}
 		}
 
-		$tempFile = tempnam($this->tempDir, 'deploy');
-		file_put_contents($tempFile, $content);
-		return $cache[$file] = $tempFile;
+		if (empty($info['cached'])) {
+			$tempFile = tempnam($this->tempDir, 'deploy');
+			file_put_contents($tempFile, $content);
+		}
+		return $tempFile;
 	}
 
 
@@ -413,7 +414,7 @@ class Deployment
 			if ($neg = substr($pattern, 0, 1) === '!') {
 				$pattern = substr($pattern, 1);
 			}
-			if (substr($pattern, -1) === '/') { // leading slash means directory
+			if (substr($pattern, -1) === '/') { // trailing slash means directory
 				if (!is_dir($path)) {
 					continue;
 				}
