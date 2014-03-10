@@ -85,7 +85,7 @@ foreach ($config as $section => $cfg) {
 		'before' => '',
 		'after' => '',
 		'preprocess' => TRUE,
-		'tempdir' => '',
+		'tempdir' => sys_get_temp_dir() . '/deployment',
 	);
 
 	if (empty($cfg['remote'])) {
