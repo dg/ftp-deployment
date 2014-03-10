@@ -26,5 +26,6 @@ return array(
 			'temp/cache',
 		),
 		'preprocess' => TRUE,
+		'tempdir' => __DIR__ . '/temp',
 	),
 );

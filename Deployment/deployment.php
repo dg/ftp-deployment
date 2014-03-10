@@ -85,6 +85,7 @@ foreach ($config as $section => $cfg) {
 		'before' => '',
 		'after' => '',
 		'preprocess' => TRUE,
+		'tempdir' => '',
 	);
 
 	if (empty($cfg['remote'])) {
@@ -113,6 +114,7 @@ foreach ($config as $section => $cfg) {
 	$deployment->toPurge = toArray($cfg['purge']);
 	$deployment->runBefore = toArray($cfg['before']);
 	$deployment->runAfter = toArray($cfg['after']);
+	$deployment->tempDir = $cfg['tempdir'];
 
 	if ($deployment->testMode) {
 		$logger->log('Test mode');
