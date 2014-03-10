@@ -25,7 +25,7 @@ return array(
 		'purge' => array(
 			'temp/cache',
 		),
-		'preprocess' => TRUE,
+		'preprocess' => FALSE,
 		'tempdir' => __DIR__ . '/temp',
 	),
 );

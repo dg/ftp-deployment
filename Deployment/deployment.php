@@ -95,6 +95,7 @@ foreach ($config as $section => $cfg) {
 	$deployment = new Deployment($cfg['remote'], $cfg['local'], $logger);
 
 	if ($cfg['preprocess']) {
+		$deployment->preprocessMasks = $cfg['preprocess'] == 1 ? array('*.js', '*.css') : toArray($cfg['preprocess']); // intentionally ==
 		$preprocessor = new Preprocessor($logger);
 		$deployment->addFilter('js', array($preprocessor, 'expandApacheImports'));
 		$deployment->addFilter('js', array($preprocessor, 'compress'), TRUE);

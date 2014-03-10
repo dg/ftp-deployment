@@ -59,6 +59,9 @@ class Deployment
 	private $logger;
 
 	/** @var array */
+	public $preprocessMasks = array();
+
+	/** @var array */
 	private $filters;
 
 	/** @var Ftp */
@@ -376,7 +379,7 @@ class Deployment
 	{
 		$path = realpath($file);
 		$ext = pathinfo($path, PATHINFO_EXTENSION);
-		if (!isset($this->filters[$ext])) {
+		if (!isset($this->filters[$ext]) || !$this->matchMask($file, $this->preprocessMasks)) {
 			return $path;
 		}
 
