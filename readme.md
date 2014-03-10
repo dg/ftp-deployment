@@ -4,23 +4,22 @@ FTP Deployment: smart upload via FTP
 FTP deployment is a tool for automated deployment to an FTP server.
 
 There is nothing worse than uploading web applications to FTP server manually,
-using such tool as Total Commander. (Although, even worse is editing files directly
-on the server and then trying keep some kind of synchronization ;-)
+using tools like Total Commander. (Although, editing files directly on the server and then trying to keep some kind of synchronization is even worse ;-)
 
-Once the process is automated, it costs you fraction of time and minimizes risk of error
-(didn't I forget to upload some files?). Today exists sophisticated deploying techniques,
+Once the process is automated, it costs you a fraction of time and minimizes the risk of error
+(didn't I forget to upload some files?). There are lots of sophisticated deploying techniques available today,
 but many people are still using FTP. This tool is designed for them.
 
-FTP Deployment is a script written in PHP (requires PHP 5.3 or never) and will automate
-the entire process. Just say which local folder where upload to. This
-information is stored in a text file `deployment.ini`, which you can associate
-with script `deployment.php`, so deployment will become a one click thing.
+FTP Deployment is a script written in PHP (requires PHP 5.3 or newer) and will automate
+the entire process. Just say which local folder to upload and where. This
+information is stored in a `deployment.ini` text file, which you can associate
+with `deployment.php` script, so deployment will become a one click thing.
 
 ```
 php deployment.php deployment.ini
 ```
 
-And what file `deployment.ini` contains? Required is only item `remote`, all others are optional:
+And what does the `deployment.ini` file contain? Only the `remote` item is required, all the others are optional:
 
 ```ini
 [my site] ; There may be more than one section
@@ -33,7 +32,7 @@ passivemode = yes
 ; local path (optional)
 local = .
 
-; run in test-mode? (can be enabled by option -t or --test too)
+; run in test-mode? (can be enabled by option -t or --test)
 test = no
 
 ; files and directories to ignore
@@ -45,7 +44,7 @@ ignore = "
 	temp/*
 	!temp/.htaccess
 "
-; is allowed to delete remote files? (defaults to yes)
+; is the script allowed to delete remote files? (defaults to yes)
 allowdelete = yes
 
 ; jobs to run before file upload
@@ -60,7 +59,7 @@ purge[] = temp/cache
 ; files to preprocess (defaults to *.js *.css)
 preprocess = no
 
-; log file (defaults to config file with extension .log)
+; log file (defaults to config file with .log extension)
 log = ...
 
 ; directory for temporary files (defaults to system's temporary directory)
@@ -70,7 +69,7 @@ tempdir = /temp/deployment
 colors = yes
 ```
 
-Configuration can be also stored in PHP file.
+Configuration can also be stored in a PHP file.
 
 In test mode (with `-t` option) uploading or deleting files is skipped, so you can use it
 to verify your settings.
@@ -80,28 +79,28 @@ Item `ignore` uses the same format as [`.gitignore`](http://git-scm.com/docs/git
 ```
 log - ignore all 'log' files or directories in all subfolders
 /log - ignore 'log' file or directory in the root
-app/log - ignore 'log' file or directory in the subfolder 'app'
-data/* - ignore everything inside the folder 'data', but the folder will be created on FTP
+app/log - ignore 'log' file or directory in the 'app' subfolder
+data/* - ignore everything inside the 'data' folder, but the folder will be created on FTP
 !data/session - make an exception for the previous rules and do not ignore file or folder 'session'
 project.pp[jx] - ignore files or folders 'project.ppj' and 'project.ppx'
 ```
 
-Before uploading is started and after is finished you can call own scripts on
-server (see `before` and `after`), which may for example switch server to maintenance mode.
+Before the upload starts and after it finishes, you can call your own scripts on
+the server (see `before` and `after`), which can, for example, switch the server to a maintenance mode.
 If you use php-config - you can run lambda function with deployment environment.
 
-Syncing a large number of files attempts to run in (something like) transaction: all files are
-uploaded with extension `.deploytmp` and then are quickly renamed.
+Syncing a large number of files attempts to run in (something like) a transaction: all files are
+uploaded with extension `.deploytmp` and then quickly renamed.
 
-To the server is uploaded file `.htdeployment` with MD5 hashes of all the files and this
-is used for synchronization. So next time you run `deployment.php`, only the changed files are uploaded
-and deleted files are deleted on server (if it is not forbidden via directive `allowdelete`).
+An `.htdeployment` file is uploaded to the server, which contains MD5 hashes of all the files and
+is used for synchronization. So the next time you run `deployment.php`, only modified files are uploaded
+and deleted files are deleted on server (if it is not forbidden by the `allowdelete` directive).
 
-Uploaded files can be processed by preprocessor. In `deployment.php` there are predefined these rules: `.css` files
+Uploaded files can be processed by a preprocessor. These rules are predefined in the `deployment.php` file: `.css` files
 are compressed using the YUI Compressor and `.js` minified by Google Closure Compiler. These
 tools are already included in the distribution, however, they require the presence of Java.
 
-There is also rule for expanding [mod_include](http://httpd.apache.org/docs/current/mod/mod_include.html) Apache directives.
+There is also a rule for expanding [mod_include](http://httpd.apache.org/docs/current/mod/mod_include.html) Apache directives.
 For example, you can create a file `combined.js`:
 
 ```
@@ -110,8 +109,7 @@ For example, you can create a file `combined.js`:
 <!--#include file="main.js" -->
 ```
 
-This tool will combine scripts together and minifies them via Closure Compiler
-and speed-up your website.
+This tool will combine scripts together and minify them with the Closure Compiler to speed-up your website.
 
-In the `deployment.ini` you can create multiple sections, i.e. you may have separated
+In the `deployment.ini`, you can create multiple sections, i.e. you may have separate
 rules for data and for application.
