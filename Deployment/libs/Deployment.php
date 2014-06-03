@@ -18,8 +18,6 @@
  */
 class Deployment
 {
-	const RETRIES = 10;
-	const BLOCK_SIZE = 400000;
 	const TEMPORARY_SUFFIX = '.deploytmp';
 
 	/** @var string */
@@ -144,7 +142,10 @@ class Deployment
 
 		foreach ((array) $this->toPurge as $path) {
 			$this->logger->log("Cleaning $path");
-			$this->purge($path, TRUE);
+			$this->ftp->purge($path, function() {
+				static $counter;
+				echo str_pad(str_repeat('.', $counter++ % 40), 40), "\x0D";
+			});
 		}
 
 		unlink($this->deploymentFile);
@@ -183,7 +184,7 @@ class Deployment
 	{
 		$tempFile = tempnam($this->tempDir, 'deploy');
 		try {
-			$this->ftp->get($tempFile, $this->deploymentFile, Ftp::BINARY);
+			$this->ftp->readFile($this->deploymentFile, $tempFile);
 		} catch (FtpException $e) {
 			return FALSE;
 		}
@@ -218,8 +219,7 @@ class Deployment
 	 */
 	private function uploadFiles(array $files)
 	{
-		$root = $this->ftp->pwd();
-		$root = $root === '/' ? '' : $root;
+		$root = rtrim($this->ftp->getDir(), '/');
 		$prevDir = NULL;
 		$toRename = [];
 		foreach ($files as $num => $file) {
@@ -227,9 +227,7 @@ class Deployment
 			$remoteDir = substr($remoteFile, -1) === '/' ? $remoteFile : dirname($remoteFile);
 			if ($remoteDir !== $prevDir) {
 				$prevDir = $remoteDir;
-				if (trim($remoteDir, '\\/') !== '' && !$this->ftp->isDir($remoteDir)) {
-					$this->ftp->mkDirRecursive($remoteDir);
-				}
+				$this->ftp->createDir($remoteDir);
 			}
 
 			if (substr($remoteFile, -1) === '/') { // is dir?
@@ -243,35 +241,16 @@ class Deployment
 			}
 
 			$toRename[] = $remoteFile;
-			$size = filesize($localFile);
-			$retry = self::RETRIES;
-			upload:
-			$blocks = 0;
-			do {
-				$this->writeProgress($num + 1, count($files), $file, min(round($blocks * self::BLOCK_SIZE / max($size, 1)), 100), 'green');
-				try {
-					$ret = $blocks === 0
-						? $this->ftp->nbPut($remoteFile . self::TEMPORARY_SUFFIX, $localFile, Ftp::BINARY)
-						: $this->ftp->nbContinue(); // Ftp::AUTORESUME
-
-				} catch (FtpException $e) {
-					$this->ftp->reconnect();
-					if (--$retry) {
-						goto upload;
-					}
-					throw new Exception("Cannot upload file $file, number of retries exceeded. Error: {$e->getMessage()}");
-				}
-				$blocks++;
-			} while ($ret === Ftp::MOREDATA);
-
+			$this->ftp->writeFile($localFile, $remoteFile . self::TEMPORARY_SUFFIX, function($percent) use ($num, $files, $file) {
+				$this->writeProgress($num + 1, count($files), $file, $percent, 'green');
+			});
 			$this->writeProgress($num + 1, count($files), $file, NULL, 'green');
 		}
 
 		$this->logger->log("\nRenaming:");
 		foreach ($toRename as $num => $file) {
 			$this->writeProgress($num + 1, count($toRename), "Renaming $file", NULL, 'brown');
-			$this->ftp->tryDelete($file);
-			$this->ftp->rename($file . self::TEMPORARY_SUFFIX, $file); // TODO: zachovat permissions
+			$this->ftp->rename($file . self::TEMPORARY_SUFFIX, $file);
 		}
 	}
 
@@ -283,45 +262,19 @@ class Deployment
 	private function deleteFiles(array $files)
 	{
 		rsort($files);
-		$root = $this->ftp->pwd();
+		$root = rtrim($this->ftp->getDir(), '/');
 		foreach ($files as $num => $file) {
 			$remoteFile = $root . $file;
 			$this->writeProgress($num + 1, count($files), "Deleting $file", NULL, 'red');
-			if (substr($file, -1) === '/') { // is directory?
-				$res = $this->ftp->tryRmdir($remoteFile);
-			} else {
-				$res = $this->ftp->tryDelete($remoteFile);
-			}
-			if (!$res) {
+			try {
+				if (substr($file, -1) === '/') { // is directory?
+					$this->ftp->removeDir($remoteFile);
+				} else {
+					$this->ftp->removeFile($remoteFile);
+				}
+			} catch (FtpException $e) {
 				$this->logger->log("Unable to delete $remoteFile", 'light-red');
 			}
-		}
-	}
-
-
-	/**
-	 * Recursive deletes path.
-	 * @param  string
-	 * @return void
-	 */
-	private function purge($path, $onlyContent = FALSE)
-	{
-		static $counter;
-		echo str_pad(str_repeat('.', $counter++ % 40), 40), "\x0D";
-
-		if (!$onlyContent && $this->ftp->tryDelete($path)) {
-			return;
-		}
-		foreach ((array) $this->ftp->nlist($path) as $file) {
-			if ($file != NULL && !preg_match('#(^|/)\\.+$#', $file)) { // intentionally ==
-				$file = strpos($file, '/') === FALSE ? "$path/$file" : $file;
-				if ($file !== $path) {
-					$this->purge($file);
-				}
-			}
-		}
-		if (!$onlyContent) {
-			$this->ftp->tryRmdir($path);
 		}
 	}
 
@@ -435,7 +388,7 @@ class Deployment
 		if ($percent === NULL) {
 			$this->logger->log($s, $color);
 		} else {
-			echo $s . " [$percent%]\x0D";
+			echo $s . ' [' . round($percent) . "%]\x0D";
 		}
 	}
 
