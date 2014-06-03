@@ -94,7 +94,9 @@ foreach ($config as $section => $cfg) {
 	}
 
 	$logger->useColors = (bool) $cfg['colors'];
-	$deployment = new Deployment($cfg['remote'], $cfg['local'], $logger);
+
+	$ftp = new Ftp($cfg['remote'], (bool) $cfg['passivemode']);
+	$deployment = new Deployment($ftp, $cfg['local'], $logger);
 
 	if ($cfg['preprocess']) {
 		$deployment->preprocessMasks = $cfg['preprocess'] == 1 ? ['*.js', '*.css'] : toArray($cfg['preprocess']); // intentionally ==
@@ -111,7 +113,6 @@ foreach ($config as $section => $cfg) {
 		toArray($cfg['ignore'])
 	);
 	$deployment->deploymentFile = empty($cfg['deploymentfile']) ? $deployment->deploymentFile : $cfg['deploymentfile'];
-	$deployment->passiveMode = (bool) $cfg['passivemode'];
 	$deployment->testMode = !empty($cfg['test']) || $options['--test'];
 	$deployment->allowDelete = $cfg['allowdelete'];
 	$deployment->toPurge = toArray($cfg['purge']);
