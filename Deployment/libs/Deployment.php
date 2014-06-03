@@ -32,9 +32,6 @@ class Deployment
 	public $testMode = FALSE;
 
 	/** @var bool */
-	public $passiveMode = TRUE;
-
-	/** @var bool */
 	public $allowDelete = FALSE;
 
 	/** @var array */
@@ -48,9 +45,6 @@ class Deployment
 
 	/** @var string */
 	public $tempDir = '';
-
-	/** @var string */
-	private $remote;
 
 	/** @var string */
 	private $local;
@@ -70,15 +64,15 @@ class Deployment
 
 
 	/**
-	 * @param  string  remote FTP url
+	 * @param  Ftp
 	 * @param  string  local directory
 	 */
-	public function __construct($remote, $local, Logger $logger)
+	public function __construct(Ftp $ftp, $local, Logger $logger)
 	{
-		if (!$remote || !$local) {
+		if (!$local) {
 			throw new InvalidArgumentException;
 		}
-		$this->remote = $remote;
+		$this->ftp = $ftp;
 		$this->local = $local;
 		$this->logger = $logger;
 	}
@@ -91,8 +85,7 @@ class Deployment
 	public function deploy()
 	{
 		$this->logger->log("Connecting to server");
-		$this->logger->log("Passive FTP mode " . ($this->passiveMode ? "enabled" : "disabled"));
-		$this->ftp = new Ftp($this->remote, $this->passiveMode);
+		$this->ftp->connect();
 
 		if (!is_dir($this->tempDir)) {
 			$this->logger->log("Creating temporary directory $this->tempDir");
