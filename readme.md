@@ -26,6 +26,7 @@ And what file `deployment.ini` contains? Required is only item `remote`, all oth
 [my site] ; There may be more than one section
 ; remote FTP server
 remote = ftp://user:secretpassword@ftp.example.com/directory
+; you can use ftps:// or sftp:// protocols (sftp requires SSH2 extension)
 
 ; FTP passive mode
 passivemode = yes
