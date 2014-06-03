@@ -2,7 +2,7 @@
 	"name": "dg/ftp-deployment",
 	"type": "project",
 	"description": "A tool for automated deployment of web applications to an FTP server.",
-	"keywords": ["deployment", "ftp"],
+	"keywords": ["deployment", "ftp", "ssh"],
 	"homepage": "https://github.com/dg/ftp-deployment",
 	"license": ["BSD-3-Clause", "GPL-2.0", "GPL-3.0"],
 	"authors": [
