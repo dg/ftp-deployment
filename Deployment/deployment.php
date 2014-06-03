@@ -6,6 +6,7 @@ if (version_compare(PHP_VERSION, '5.4.0', '<')) {
 
 require __DIR__ . '/libs/Server.php';
 require __DIR__ . '/libs/FtpServer.php';
+require __DIR__ . '/libs/SshServer.php';
 require __DIR__ . '/libs/Logger.php';
 require __DIR__ . '/libs/Deployment.php';
 require __DIR__ . '/libs/Preprocessor.php';
@@ -96,8 +97,11 @@ foreach ($config as $section => $cfg) {
 
 	$logger->useColors = (bool) $cfg['colors'];
 
-	$ftp = new FtpServer($cfg['remote'], (bool) $cfg['passivemode']);
-	$deployment = new Deployment($ftp, $cfg['local'], $logger);
+	$server = @parse_url($cfg['remote'], PHP_URL_SCHEME) === 'sftp'
+		? new SshServer($cfg['remote'])
+		: new FtpServer($cfg['remote'], (bool) $cfg['passivemode']);
+
+	$deployment = new Deployment($server, $cfg['local'], $logger);
 
 	if ($cfg['preprocess']) {
 		$deployment->preprocessMasks = $cfg['preprocess'] == 1 ? ['*.js', '*.css'] : toArray($cfg['preprocess']); // intentionally ==
