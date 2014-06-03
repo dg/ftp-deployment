@@ -43,9 +43,14 @@ class Ftp
 	/** @var resource */
 	private $resource;
 
-	/** @var array */
-	private $state;
+	/** @var string */
+	private $dir;
 
+	/** @var string */
+	private $url;
+
+	/** @var bool */
+	private $passiveMode = TRUE;
 
 
 	/**
@@ -57,18 +62,32 @@ class Ftp
 		if (!extension_loaded('ftp')) {
 			throw new Exception('PHP extension FTP is not loaded.');
 		}
-		if ($url) {
-			$parts = parse_url($url);
-			if (!isset($parts['scheme']) || ($parts['scheme'] !== 'ftp' && $parts['scheme'] !== 'ftps')) {
-				throw new InvalidArgumentException('Invalid URL.');
-			}
-			$func = $parts['scheme'] === 'ftp' ? 'connect' : 'ssl_connect';
-			$this->$func($parts['host'], empty($parts['port']) ? NULL : (int) $parts['port']);
-			$this->login(urldecode($parts['user']), urldecode($parts['pass']));
-			$this->pasv((bool) $passiveMode);
-			if (isset($parts['path'])) {
-				$this->chdir($parts['path']);
-			}
+		$parts = parse_url($url);
+		if (!isset($parts['scheme']) || ($parts['scheme'] !== 'ftp' && $parts['scheme'] !== 'ftps')) {
+			throw new InvalidArgumentException('Invalid URL.');
+		}
+		$this->url = $url;
+		$this->passiveMode = (bool) $passiveMode;
+	}
+
+
+	/**
+	 * Connects to FTP server.
+	 * @return void
+	 */
+	public function connect()
+	{
+		$parts = parse_url($this->url);
+		$this->__call(
+			$parts['scheme'] === 'ftp' ? 'connect' : 'ssl_connect',
+			[$parts['host'], empty($parts['port']) ? NULL : (int) $parts['port']]
+		);
+		$this->login(urldecode($parts['user']), urldecode($parts['pass']));
+		$this->pasv($this->passiveMode);
+		if (isset($parts['path'])) {
+			$this->chdir($parts['path']);
+		} else {
+			$this->dir = ftp_pwd($this->resource);
 		}
 	}
 
@@ -96,7 +115,6 @@ class Ftp
 		});
 
 		if ($func === 'ftp_connect' || $func === 'ftp_ssl_connect') {
-			$this->state = [$name => $args];
 			$this->resource = call_user_func_array($func, $args);
 			$res = NULL;
 
@@ -105,15 +123,11 @@ class Ftp
 			throw new FtpException("Not connected to FTP server. Call connect() or ssl_connect() first.");
 
 		} else {
-			if ($func === 'ftp_login' || $func === 'ftp_pasv') {
-				$this->state[$name] = $args;
-			}
-
 			array_unshift($args, $this->resource);
 			$res = call_user_func_array($func, $args);
 
 			if ($func === 'ftp_chdir' || $func === 'ftp_cdup') {
-				$this->state['chdir'] = [ftp_pwd($this->resource)];
+				$this->dir = ftp_pwd($this->resource);
 			}
 		}
 
@@ -141,9 +155,8 @@ class Ftp
 	public function reconnect()
 	{
 		@ftp_close($this->resource); // intentionally @
-		foreach ($this->state as $name => $args) {
-			call_user_func_array([$this, $name], $args);
-		}
+		$this->connect();
+		$this->chdir($this->dir);
 	}
 
 
