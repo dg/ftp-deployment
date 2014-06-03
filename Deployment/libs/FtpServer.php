@@ -12,11 +12,11 @@
 
 
 /**
- * FTP server wrapper.
+ * FTP server.
  *
  * @author     David Grudl
  */
-class Ftp
+class FtpServer implements Server
 {
 	const RETRIES = 10;
 	const BLOCK_SIZE = 400000;
@@ -281,6 +281,6 @@ class Ftp
 
 
 
-class FtpException extends Exception
+class FtpException extends ServerException
 {
 }

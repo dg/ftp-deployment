@@ -4,7 +4,8 @@ if (version_compare(PHP_VERSION, '5.4.0', '<')) {
 	throw new Exception('Deployment requires PHP 5.4.0 or newer.');
 }
 
-require __DIR__ . '/libs/Ftp.php';
+require __DIR__ . '/libs/Server.php';
+require __DIR__ . '/libs/FtpServer.php';
 require __DIR__ . '/libs/Logger.php';
 require __DIR__ . '/libs/Deployment.php';
 require __DIR__ . '/libs/Preprocessor.php';
@@ -95,7 +96,7 @@ foreach ($config as $section => $cfg) {
 
 	$logger->useColors = (bool) $cfg['colors'];
 
-	$ftp = new Ftp($cfg['remote'], (bool) $cfg['passivemode']);
+	$ftp = new FtpServer($cfg['remote'], (bool) $cfg['passivemode']);
 	$deployment = new Deployment($ftp, $cfg['local'], $logger);
 
 	if ($cfg['preprocess']) {
