@@ -56,21 +56,21 @@ class Deployment
 	/** @var array */
 	private $filters;
 
-	/** @var Ftp */
-	private $ftp;
+	/** @var Server */
+	private $server;
 
 
 
 	/**
-	 * @param  Ftp
+	 * @param  Server
 	 * @param  string  local directory
 	 */
-	public function __construct(Ftp $ftp, $local, Logger $logger)
+	public function __construct(Server $server, $local, Logger $logger)
 	{
 		if (!$local) {
 			throw new InvalidArgumentException;
 		}
-		$this->ftp = $ftp;
+		$this->server = $server;
 		$this->local = $local;
 		$this->logger = $logger;
 	}
@@ -83,7 +83,7 @@ class Deployment
 	public function deploy()
 	{
 		$this->logger->log("Connecting to server");
-		$this->ftp->connect();
+		$this->server->connect();
 
 		if (!is_dir($this->tempDir)) {
 			$this->logger->log("Creating temporary directory $this->tempDir");
@@ -122,7 +122,7 @@ class Deployment
 				if (is_string($job)) {
 					$this->logger->log("$job: " . trim(file_get_contents($job)));
 				} elseif (is_callable($job)) {
-					$job($this->ftp, $this->logger, $this);
+					$job($this->server, $this->logger, $this);
 				}
 			}
 		}
@@ -142,7 +142,7 @@ class Deployment
 
 		foreach ((array) $this->toPurge as $path) {
 			$this->logger->log("Cleaning $path");
-			$this->ftp->purge($path, function() {
+			$this->server->purge($path, function() {
 				static $counter;
 				echo str_pad(str_repeat('.', $counter++ % 40), 40), "\x0D";
 			});
@@ -156,7 +156,7 @@ class Deployment
 				if (is_string($job)) {
 					$this->logger->log("$job: " . trim(file_get_contents($job)));
 				} elseif (is_callable($job)) {
-					$job($this->ftp, $this->logger, $this);
+					$job($this->server, $this->logger, $this);
 				}
 			}
 		}
@@ -177,15 +177,15 @@ class Deployment
 
 
 	/**
-	 * Downloads and decodes .htdeployment from the FTP server.
+	 * Downloads and decodes .htdeployment from the server.
 	 * @return void
 	 */
 	private function loadDeploymentFile()
 	{
 		$tempFile = tempnam($this->tempDir, 'deploy');
 		try {
-			$this->ftp->readFile($this->deploymentFile, $tempFile);
-		} catch (FtpException $e) {
+			$this->server->readFile($this->deploymentFile, $tempFile);
+		} catch (ServerException $e) {
 			return FALSE;
 		}
 		$content = gzinflate(file_get_contents($tempFile));
@@ -219,7 +219,7 @@ class Deployment
 	 */
 	private function uploadFiles(array $files)
 	{
-		$root = rtrim($this->ftp->getDir(), '/');
+		$root = rtrim($this->server->getDir(), '/');
 		$prevDir = NULL;
 		$toRename = [];
 		foreach ($files as $num => $file) {
@@ -227,7 +227,7 @@ class Deployment
 			$remoteDir = substr($remoteFile, -1) === '/' ? $remoteFile : dirname($remoteFile);
 			if ($remoteDir !== $prevDir) {
 				$prevDir = $remoteDir;
-				$this->ftp->createDir($remoteDir);
+				$this->server->createDir($remoteDir);
 			}
 
 			if (substr($remoteFile, -1) === '/') { // is dir?
@@ -241,7 +241,7 @@ class Deployment
 			}
 
 			$toRename[] = $remoteFile;
-			$this->ftp->writeFile($localFile, $remoteFile . self::TEMPORARY_SUFFIX, function($percent) use ($num, $files, $file) {
+			$this->server->writeFile($localFile, $remoteFile . self::TEMPORARY_SUFFIX, function($percent) use ($num, $files, $file) {
 				$this->writeProgress($num + 1, count($files), $file, $percent, 'green');
 			});
 			$this->writeProgress($num + 1, count($files), $file, NULL, 'green');
@@ -250,7 +250,7 @@ class Deployment
 		$this->logger->log("\nRenaming:");
 		foreach ($toRename as $num => $file) {
 			$this->writeProgress($num + 1, count($toRename), "Renaming $file", NULL, 'brown');
-			$this->ftp->rename($file . self::TEMPORARY_SUFFIX, $file);
+			$this->server->rename($file . self::TEMPORARY_SUFFIX, $file);
 		}
 	}
 
@@ -262,17 +262,17 @@ class Deployment
 	private function deleteFiles(array $files)
 	{
 		rsort($files);
-		$root = rtrim($this->ftp->getDir(), '/');
+		$root = rtrim($this->server->getDir(), '/');
 		foreach ($files as $num => $file) {
 			$remoteFile = $root . $file;
 			$this->writeProgress($num + 1, count($files), "Deleting $file", NULL, 'red');
 			try {
 				if (substr($file, -1) === '/') { // is directory?
-					$this->ftp->removeDir($remoteFile);
+					$this->server->removeDir($remoteFile);
 				} else {
-					$this->ftp->removeFile($remoteFile);
+					$this->server->removeFile($remoteFile);
 				}
-			} catch (FtpException $e) {
+			} catch (ServerException $e) {
 				$this->logger->log("Unable to delete $remoteFile", 'light-red');
 			}
 		}
