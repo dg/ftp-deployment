@@ -26,7 +26,7 @@ class Deployment
 	public $deploymentFile = '.htdeployment';
 
 	/** @var array */
-	public $ignoreMasks = array();
+	public $ignoreMasks = [];
 
 	/** @var bool */
 	public $testMode = FALSE;
@@ -59,7 +59,7 @@ class Deployment
 	private $logger;
 
 	/** @var array */
-	public $preprocessMasks = array();
+	public $preprocessMasks = [];
 
 	/** @var array */
 	private $filters;
@@ -104,7 +104,7 @@ class Deployment
 			$this->logger->log("Loaded remote $this->deploymentFile file");
 		} else {
 			$this->logger->log("Remote $this->deploymentFile file not found");
-			$remoteFiles = array();
+			$remoteFiles = [];
 		}
 
 		$this->logger->log("Scanning files in $this->local");
@@ -112,7 +112,7 @@ class Deployment
 		$localFiles = $this->collectFiles('');
 		unset($localFiles["/$this->deploymentFile"]);
 
-		$toDelete = $this->allowDelete ? array_keys(array_diff_key($remoteFiles, $localFiles)) : array();
+		$toDelete = $this->allowDelete ? array_keys(array_diff_key($remoteFiles, $localFiles)) : [];
 		$toUpload = array_keys(array_diff_assoc($localFiles, $remoteFiles));
 
 		if (!$toUpload && !$toDelete) {
@@ -177,7 +177,7 @@ class Deployment
 	 */
 	public function addFilter($extension, $filter, $cached = FALSE)
 	{
-		$this->filters[$extension][] = array('filter' => $filter, 'cached' => $cached);
+		$this->filters[$extension][] = ['filter' => $filter, 'cached' => $cached];
 		return $this;
 	}
 
@@ -195,7 +195,7 @@ class Deployment
 			return FALSE;
 		}
 		$content = gzinflate(file_get_contents($tempFile));
-		$res = array();
+		$res = [];
 		foreach (explode("\n", $content) as $item) {
 			if (count($item = explode('=', $item, 2)) === 2) {
 				$res[$item[1]] = $item[0];
@@ -228,7 +228,7 @@ class Deployment
 		$root = $this->ftp->pwd();
 		$root = $root === '/' ? '' : $root;
 		$prevDir = NULL;
-		$toRename = array();
+		$toRename = [];
 		foreach ($files as $num => $file) {
 			$remoteFile = $root . $file;
 			$remoteDir = substr($remoteFile, -1) === '/' ? $remoteFile : dirname($remoteFile);
@@ -340,7 +340,7 @@ class Deployment
 	 */
 	private function collectFiles($dir)
 	{
-		$list = array();
+		$list = [];
 		$iterator = dir(".$dir");
 		$counter = 0;
 		while (FALSE !== ($entry = $iterator->read())) {

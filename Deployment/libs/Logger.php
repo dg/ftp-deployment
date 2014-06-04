@@ -25,7 +25,7 @@ class Logger
 	public $useColors;
 
 	/** @var array */
-	public $colors = array(
+	public $colors = [
 		'black' => '0;30',
 		'dark-grey' => '1;30',
 		'light-grey' => '0;37',
@@ -41,7 +41,7 @@ class Logger
 		'light-purple' => '1;35',
 		'brown' => '0;33',
 		'yellow' => '1;33',
-	);
+	];
 
 
 	public function __construct($fileName)

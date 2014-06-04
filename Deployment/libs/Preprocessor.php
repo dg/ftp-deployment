@@ -72,8 +72,7 @@ class Preprocessor
 	public function expandCssImports($content, $origFile)
 	{
 		$dir = dirname($origFile);
-		$preprocessor = $this;
-		return preg_replace_callback('#@import\s+(?:url)?[(\'"]+(.+)[)\'"]+;#U', function($m) use ($dir, $preprocessor) {
+		return preg_replace_callback('#@import\s+(?:url)?[(\'"]+(.+)[)\'"]+;#U', function($m) use ($dir) {
 			$file = $dir . '/' . $m[1];
 			if (!is_file($file)) {
 				return $m[0];
@@ -81,7 +80,7 @@ class Preprocessor
 
 			$s = file_get_contents($file);
 			$newDir = dirname($file);
-			$s = $preprocessor->expandCssImports($s, $file);
+			$s = $this->expandCssImports($s, $file);
 			if ($newDir !== $dir) {
 				$tmp = $dir . '/';
 				if (substr($newDir, 0, strlen($tmp)) === $tmp) {
@@ -102,11 +101,10 @@ class Preprocessor
 	public function expandApacheImports($content, $origFile)
 	{
 		$dir = dirname($origFile);
-		$preprocessor = $this;
-		return preg_replace_callback('~<!--#include\s+file="(.+)"\s+-->~U', function($m) use ($dir, $preprocessor) {
+		return preg_replace_callback('~<!--#include\s+file="(.+)"\s+-->~U', function($m) use ($dir) {
 			$file = $dir . '/' . $m[1];
 			if (is_file($file)) {
-				return $preprocessor->expandApacheImports(file_get_contents($file), dirname($file));
+				return $this->expandApacheImports(file_get_contents($file), dirname($file));
 			}
 			return $m[0];
 		}, $content);
@@ -121,9 +119,9 @@ class Preprocessor
 	{
 		$process = proc_open(
 			$command,
-			array(array('pipe', 'r'), array('pipe', 'w'), array('pipe', 'w')),
+			[['pipe', 'r'], ['pipe', 'w'], ['pipe', 'w']],
 			$pipes,
-			NULL, NULL, array('bypass_shell' => TRUE)
+			NULL, NULL, ['bypass_shell' => TRUE]
 		);
 		if (!is_resource($process)) {
 			throw new Exception("Unable start process $command.");
@@ -136,10 +134,10 @@ class Preprocessor
 			$output = stream_get_contents($pipes[2]);
 		}
 
-		return array(
+		return [
 			proc_close($process) === 0,
 			$output
-		);
+		];
 	}
 
 }
