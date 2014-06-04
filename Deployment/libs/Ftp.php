@@ -59,7 +59,7 @@ class Ftp
 		}
 		if ($url) {
 			$parts = parse_url($url);
-			if (!isset($parts['scheme']) || ($parts['scheme'] !== 'ftp' && $parts['scheme'] !== 'sftp')) {
+			if (!isset($parts['scheme']) || ($parts['scheme'] !== 'ftp' && $parts['scheme'] !== 'ftps')) {
 				throw new InvalidArgumentException('Invalid URL.');
 			}
 			$func = $parts['scheme'] === 'ftp' ? 'connect' : 'ssl_connect';
