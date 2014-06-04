@@ -115,8 +115,14 @@ class SshServer implements Server
 	 */
 	public function rename($old, $new)
 	{
-		$this->removeFile($new);
-		$this->protect('ssh2_sftp_rename', [$this->sftp, $old, $new]); // TODO: remain permissions
+		if (file_exists($path = "ssh2.sftp://$this->sftp$new")) {
+			$perms = fileperms($path);
+			$this->removeFile($new);
+		}
+		$this->protect('ssh2_sftp_rename', [$this->sftp, $old, $new]);
+		if (!empty($perms)) {
+			$this->protect('ssh2_sftp_chmod', [$this->sftp, $new, $perms]);
+		}
 	}
 
 
