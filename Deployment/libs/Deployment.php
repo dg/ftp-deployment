@@ -140,9 +140,10 @@ class Deployment
 			$this->deleteFiles($toDelete);
 		}
 
+		$root = rtrim($this->server->getDir(), '/');
 		foreach ((array) $this->toPurge as $path) {
 			$this->logger->log("Cleaning $path");
-			$this->server->purge($path, function() {
+			$this->server->purge($root . '/' . $path, function() {
 				static $counter;
 				echo str_pad(str_repeat('.', $counter++ % 40), 40), "\x0D";
 			});
@@ -182,9 +183,10 @@ class Deployment
 	 */
 	private function loadDeploymentFile()
 	{
+		$root = rtrim($this->server->getDir(), '/');
 		$tempFile = tempnam($this->tempDir, 'deploy');
 		try {
-			$this->server->readFile($this->deploymentFile, $tempFile);
+			$this->server->readFile($root . '/' . $this->deploymentFile, $tempFile);
 		} catch (ServerException $e) {
 			return FALSE;
 		}
