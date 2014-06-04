@@ -11,5 +11,8 @@
 			"homepage": "http://davidgrudl.com"
 		}
 	],
+	"require": {
+		"dg/ftp-php": "1.*"
+	},
 	"bin": ["Deployment/deployment"]
 }
