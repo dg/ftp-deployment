@@ -29,7 +29,7 @@ class Ftp
 	const FINISHED = FTP_FINISHED;
 	const MOREDATA = FTP_MOREDATA;
 
-	private static $aliases = array(
+	private static $aliases = [
 		'sslconnect' => 'ssl_connect',
 		'getoption' => 'get_option',
 		'setoption' => 'set_option',
@@ -38,7 +38,7 @@ class Ftp
 		'nbfput' => 'nb_fput',
 		'nbget' => 'nb_get',
 		'nbput' => 'nb_put',
-	);
+	];
 
 	/** @var resource */
 	private $resource;
@@ -96,7 +96,7 @@ class Ftp
 		});
 
 		if ($func === 'ftp_connect' || $func === 'ftp_ssl_connect') {
-			$this->state = array($name => $args);
+			$this->state = [$name => $args];
 			$this->resource = call_user_func_array($func, $args);
 			$res = NULL;
 
@@ -113,7 +113,7 @@ class Ftp
 			$res = call_user_func_array($func, $args);
 
 			if ($func === 'ftp_chdir' || $func === 'ftp_cdup') {
-				$this->state['chdir'] = array(ftp_pwd($this->resource));
+				$this->state['chdir'] = [ftp_pwd($this->resource)];
 			}
 		}
 
@@ -142,7 +142,7 @@ class Ftp
 	{
 		@ftp_close($this->resource); // intentionally @
 		foreach ($this->state as $name => $args) {
-			call_user_func_array(array($this, $name), $args);
+			call_user_func_array([$this, $name], $args);
 		}
 	}
 

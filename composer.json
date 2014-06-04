@@ -1,6 +1,6 @@
 {
 	"name": "dg/ftp-deployment",
-	"type": "tool",
+	"type": "project",
 	"description": "A tool for automated deployment of web applications to an FTP server.",
 	"keywords": ["deployment", "ftp"],
 	"homepage": "https://github.com/dg/ftp-deployment",
@@ -11,5 +11,8 @@
 			"homepage": "http://davidgrudl.com"
 		}
 	],
+	"require": {
+		"php": ">=5.4.0"
+	},
 	"bin": ["Deployment/deployment"]
 }

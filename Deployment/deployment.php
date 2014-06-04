@@ -1,9 +1,5 @@
 <?php
 
-if (version_compare(PHP_VERSION, '5.3.0', '<')) {
-	throw new Exception('Deployment requires PHP 5.3.0 or newer.');
-}
-
 require __DIR__ . '/libs/Ftp.php';
 require __DIR__ . '/libs/Logger.php';
 require __DIR__ . '/libs/Deployment.php';
@@ -21,9 +17,9 @@ Usage:
 Options:
 	-t | --test      Run in test-mode.
 
-", array(
-	'config' => array(CommandLine::REALPATH => TRUE),
-));
+", [
+	'config' => [CommandLine::REALPATH => TRUE],
+]);
 
 if ($cmd->isEmpty()) {
 	$cmd->help();
@@ -69,13 +65,13 @@ $logger->log("Started at " . date('[Y/m/d H:i]'));
 $logger->log("Config file is $options[config]");
 
 if (isset($config['remote']) && is_string($config['remote'])) {
-	$config = array('' => $config);
+	$config = ['' => $config];
 }
 
 foreach ($config as $section => $cfg) {
 	$logger->log("\nDeploying $section");
 
-	$cfg = array_change_key_case($cfg, CASE_LOWER) + array(
+	$cfg = array_change_key_case($cfg, CASE_LOWER) + [
 		'local' => dirname($options['config']),
 		'passivemode' => TRUE,
 		'ignore' => '',
@@ -87,7 +83,7 @@ foreach ($config as $section => $cfg) {
 		'tempdir' => sys_get_temp_dir() . '/deployment',
 		'colors' => (PHP_SAPI === 'cli' && ((function_exists('posix_isatty') && posix_isatty(STDOUT))
 			|| getenv('ConEmuANSI') === 'ON' || getenv('ANSICON') !== FALSE)),
-	);
+	];
 
 	if (empty($cfg['remote'])) {
 		throw new Exception("Missing 'remote' in config.");
@@ -97,17 +93,17 @@ foreach ($config as $section => $cfg) {
 	$deployment = new Deployment($cfg['remote'], $cfg['local'], $logger);
 
 	if ($cfg['preprocess']) {
-		$deployment->preprocessMasks = $cfg['preprocess'] == 1 ? array('*.js', '*.css') : toArray($cfg['preprocess']); // intentionally ==
+		$deployment->preprocessMasks = $cfg['preprocess'] == 1 ? ['*.js', '*.css'] : toArray($cfg['preprocess']); // intentionally ==
 		$preprocessor = new Preprocessor($logger);
-		$deployment->addFilter('js', array($preprocessor, 'expandApacheImports'));
-		$deployment->addFilter('js', array($preprocessor, 'compress'), TRUE);
-		$deployment->addFilter('css', array($preprocessor, 'expandApacheImports'));
-		$deployment->addFilter('css', array($preprocessor, 'expandCssImports'));
-		$deployment->addFilter('css', array($preprocessor, 'compress'), TRUE);
+		$deployment->addFilter('js', [$preprocessor, 'expandApacheImports']);
+		$deployment->addFilter('js', [$preprocessor, 'compress'], TRUE);
+		$deployment->addFilter('css', [$preprocessor, 'expandApacheImports']);
+		$deployment->addFilter('css', [$preprocessor, 'expandCssImports']);
+		$deployment->addFilter('css', [$preprocessor, 'compress'], TRUE);
 	}
 
 	$deployment->ignoreMasks = array_merge(
-		array('*.bak', '.svn' , '.git*', 'Thumbs.db', '.DS_Store'),
+		['*.bak', '.svn' , '.git*', 'Thumbs.db', '.DS_Store'],
 		toArray($cfg['ignore'])
 	);
 	$deployment->deploymentFile = empty($cfg['deploymentfile']) ? $deployment->deploymentFile : $cfg['deploymentfile'];

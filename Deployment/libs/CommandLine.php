@@ -26,19 +26,19 @@ class CommandLine
 		VALUE = 'default';
 
 	/** @var array[] */
-	private $options = array();
+	private $options = [];
 
 	/** @var string[] */
-	private $aliases = array();
+	private $aliases = [];
 
 	/** @var bool[] */
-	private $positional = array();
+	private $positional = [];
 
 	/** @var string */
 	private $help;
 
 
-	public function __construct($help, array $defaults = array())
+	public function __construct($help, array $defaults = [])
 	{
 		$this->help = $help;
 		$this->options = $defaults;
@@ -51,13 +51,13 @@ class CommandLine
 			}
 
 			$name = end($m[1]);
-			$opts = isset($this->options[$name]) ? $this->options[$name] : array();
-			$this->options[$name] = $opts + array(
+			$opts = isset($this->options[$name]) ? $this->options[$name] : [];
+			$this->options[$name] = $opts + [
 				self::ARGUMENT => (bool) end($m[2]),
 				self::OPTIONAL => isset($line[2]) || (substr(end($m[2]), 0, 1) === '[') || isset($opts[self::VALUE]),
 				self::REPEATABLE => (bool) end($m[3]),
 				self::VALUE => isset($line[2]) ? $line[2] : NULL,
-			);
+			];
 			if ($name !== $m[1][0]) {
 				$this->aliases[$m[1][0]] = $name;
 			}
@@ -74,9 +74,9 @@ class CommandLine
 	public function parse(array $args = NULL)
 	{
 		if ($args === NULL) {
-			$args = isset($_SERVER['argv']) ? array_slice($_SERVER['argv'], 1) : array();
+			$args = isset($_SERVER['argv']) ? array_slice($_SERVER['argv'], 1) : [];
 		}
-		$params = array();
+		$params = [];
 		reset($this->positional);
 		$i = 0;
 		while ($i < count($args)) {
@@ -96,7 +96,7 @@ class CommandLine
 				continue;
 			}
 
-			list($name, $arg) = strpos($arg, '=') ? explode('=', $arg, 2) : array($arg, TRUE);
+			list($name, $arg) = strpos($arg, '=') ? explode('=', $arg, 2) : [$arg, TRUE];
 
 			if (isset($this->aliases[$name])) {
 				$name = $this->aliases[$name];
