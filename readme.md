@@ -1,4 +1,4 @@
-FTP Deployment: smart upload via FTP
+FTP Deployment: smart upload [![Buy me a coffee](http://files.nette.org/images/coffee1s.png)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=EVVM5U5T47AA2)
 ====================================
 
 FTP deployment is a tool for automated deployment to an FTP server.
