@@ -80,6 +80,11 @@ foreach ($config as $section => $cfg) {
 
 	if (!empty($cfg['repository'])) {
 
+		if (empty($cfg['zip_storage'])) {
+			$logger->log("Error: zip_storage is not specified");
+			exit;
+		}
+
 		$parsed_url = parse_url($cfg['repository']); 
 
 		$logger->log("\nDownloading repository from {$parsed_url['host']}, zip URL {$parsed_url['path']}.\n...");
@@ -89,7 +94,7 @@ foreach ($config as $section => $cfg) {
 		$git = new GitDownloader($cfg['repository']);
 
 		$git->zip_url = True;
-		$git->setTemporaryFolderPath('repos');
+		$git->setTemporaryFolderPath($cfg['zip_storage']);
 
 		$zip = realpath($git->downloadRepo());
 
