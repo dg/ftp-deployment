@@ -37,12 +37,15 @@ passivemode = yes
 ; local path (optional)
 local = .
 
-; optionaly override local config to download and deploy repository from github or bitbucket etc.
-; if repo is private use (HTTP auth) https://<your_username>:<your_password>@<url_to_zip>
+; Optionaly override local config to download and deploy repository from github or bitbucket etc.
+; If repo is private use (HTTP auth) https://<your_username>:<your_password>@<url_to_zip>
 ; eg. <url_to_zip> = github.com/jondoe/CodeIgniter/archive/2.2-stable.zip)
-; example: https://jondoe:jondoepass@github.com/jondoe/CodeIgniter/archive/2.2-stable.zip
-
+; You need to supply url to zipped repository.
+; example: repository = https://jondoe:jondoepass@github.com/jondoe/CodeIgniter/archive/2.2-stable.zip
 repository = 
+
+; Local folder where are downloaded repo zips stored
+zip_storage = repos
 
 ; run in test-mode? (can be enabled by option -t or --test too)
 test = no
