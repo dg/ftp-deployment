@@ -4,6 +4,7 @@ return array(
 	'my site' => array(
 		'remote' => 'ftp://user:secretpassword@ftp.example.com/directory',
 		'local' => '.',
+		'repository' => '',
 		'test' => FALSE,
 		'ignore' => '
 			.git*
