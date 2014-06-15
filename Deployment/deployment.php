@@ -23,12 +23,16 @@ Options:
 	'config' => [CommandLine::REALPATH => TRUE],
 ]);
 
+
+
 if ($cmd->isEmpty()) {
 	$cmd->help();
 	exit;
 }
 
 $options = $cmd->parse();
+
+
 
 if (pathinfo($options['config'], PATHINFO_EXTENSION) == 'php') {
 	$config = include $options['config'];
@@ -70,8 +74,33 @@ if (isset($config['remote']) && is_string($config['remote'])) {
 	$config = ['' => $config];
 }
 
+
 foreach ($config as $section => $cfg) {
 	$logger->log("\nDeploying $section");
+
+	if (!empty($cfg['repository'])) {
+
+		$parsed_url = parse_url($cfg['repository']); 
+
+		$logger->log("\nDownloading repository from {$parsed_url['host']}, zip URL {$parsed_url['path']}.\n...");
+
+		require(__DIR__.'/libs/Git.php');
+
+		$git = new GitDownloader($cfg['repository']);
+
+		$git->zip_url = True;
+		$git->setTemporaryFolderPath('repos');
+
+		$zip = realpath($git->downloadRepo());
+
+		$logger->log("Repo downloaded, unpacking...");
+
+		$unpacked_repo = $git->unpackRepo($zip, 'repositories');
+
+		$logger->log("Repo unpacked.");
+
+		$cfg['local'] = $unpacked_repo;
+	}
 
 	$cfg = array_change_key_case($cfg, CASE_LOWER) + [
 		'local' => dirname($options['config']),
