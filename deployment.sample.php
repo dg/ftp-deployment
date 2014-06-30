@@ -15,7 +15,7 @@ return array(
 		',
 		'allowdelete' => TRUE,
 		'before' => array(
-			function (Ftp $ftp, Logger $logger, Deployment $deployment) {
+			function (Server $server, Logger $logger, Deployment $deployment) {
 				$logger->log('Hello!');
 			},
 		),
