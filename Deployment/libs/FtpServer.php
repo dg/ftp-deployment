@@ -123,7 +123,7 @@ class FtpServer implements Server
 		try {
 			$this->ftp('delete', $file);
 		} catch (FtpException $e) {
-			if (strpos($e->getMessage(), 'No such file or directory') === FALSE) {
+			if ($this->ftp('nlist', $file)) {
 				throw $e;
 			}
 		}
@@ -195,7 +195,7 @@ class FtpServer implements Server
 		try {
 			$this->ftp('rmDir', $dir);
 		} catch (FtpException $e) {
-			if (strpos($e->getMessage(), 'No such file or directory') === FALSE) {
+			if ($this->ftp('nlist', $dir)) {
 				throw $e;
 			}
 		}
