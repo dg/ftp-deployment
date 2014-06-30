@@ -36,7 +36,11 @@ if (pathinfo($options['config'], PATHINFO_EXTENSION) == 'php') {
 	$config = parse_ini_file($options['config'], TRUE);
 }
 
-$logger = new Logger(empty($config['log']) ? preg_replace('#\.\w+$#', '.log', $options['config']) : $config['log']);
+$config += [
+	'log' => preg_replace('#\.\w+$#', '.log', $options['config']),
+];
+
+$logger = new Logger($config['log']);
 
 
 
@@ -71,6 +75,10 @@ if (isset($config['remote']) && is_string($config['remote'])) {
 }
 
 foreach ($config as $section => $cfg) {
+	if (!is_array($cfg)) {
+		continue;
+	}
+
 	$logger->log("\nDeploying $section");
 
 	$cfg = array_change_key_case($cfg, CASE_LOWER) + [

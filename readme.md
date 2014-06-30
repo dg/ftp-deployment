@@ -4,13 +4,14 @@ FTP Deployment: smart upload [![Buy me a coffee](http://files.nette.org/images/c
 FTP deployment is a tool for automated deployment to an FTP server.
 
 There is nothing worse than uploading web applications to FTP server manually,
-using tools like Total Commander. (Although, editing files directly on the server and then trying to keep some kind of synchronization is even worse ;-)
+using tools like Total Commander. (Although, editing files directly on the server
+and then trying to keep some kind of synchronization is even worse ;-)
 
 Once the process is automated, it costs you a fraction of time and minimizes the risk of error
 (didn't I forget to upload some files?). There are lots of sophisticated deploying techniques available today,
 but many people are still using FTP. This tool is designed for them.
 
-FTP Deployment is a script written in PHP (requires PHP 5.3 or newer) and will automate
+FTP Deployment is a script written in PHP (requires PHP 5.4 or newer) and will automate
 the entire process. Just say which local folder to upload and where. This
 information is stored in a `deployment.ini` text file, which you can associate
 with `deployment.php` script, so deployment will become a one click thing.
@@ -22,7 +23,10 @@ php deployment.php deployment.ini
 And what does the `deployment.ini` file contain? Only the `remote` item is required, all the others are optional:
 
 ```ini
-[my site] ; There may be more than one section
+; log file (defaults to config file with .log extension)
+log = ...
+
+[my site] ; Optional section (there may be more than one section).
 ; remote FTP server
 remote = ftp://user:secretpassword@ftp.example.com/directory
 ; you can use ftps:// or sftp:// protocols (sftp requires SSH2 extension)
@@ -59,9 +63,6 @@ purge[] = temp/cache
 
 ; files to preprocess (defaults to *.js *.css)
 preprocess = no
-
-; log file (defaults to config file with .log extension)
-log = ...
 
 ; directory for temporary files (defaults to system's temporary directory)
 tempdir = /temp/deployment
