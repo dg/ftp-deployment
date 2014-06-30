@@ -118,6 +118,10 @@ class Deployment
 			return;
 		}
 
+		$this->logger->log("Creating remote file $this->deploymentFile.running");
+		$root = $this->server->getDir();
+		$this->server->writeFile(tempnam($this->tempDir, 'deploy'), $runningFile = "$root/$this->deploymentFile.running");
+
 		if ($this->runBefore) {
 			$this->logger->log("\nBefore-jobs:");
 			foreach ((array) $this->runBefore as $job) {
@@ -140,9 +144,8 @@ class Deployment
 			$this->deleteFiles($toDelete);
 		}
 
-		$root = $this->server->getDir();
 		foreach ((array) $this->toPurge as $path) {
-			$this->logger->log("Cleaning $path");
+			$this->logger->log("\nCleaning $path");
 			$this->server->purge($root . '/' . $path, function($file) use ($root) {
 				static $counter;
 				$file = substr($file, strlen($root));
@@ -162,6 +165,9 @@ class Deployment
 				}
 			}
 		}
+
+		$this->logger->log("\nDeleting remote file $this->deploymentFile.running");
+		$this->server->removeFile($runningFile);
 	}
 
 
