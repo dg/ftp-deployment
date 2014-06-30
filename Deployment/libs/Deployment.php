@@ -67,11 +67,11 @@ class Deployment
 	 */
 	public function __construct(Server $server, $local, Logger $logger)
 	{
-		if (!$local) {
-			throw new InvalidArgumentException;
+		$this->local = realpath($local);
+		if (!$this->local) {
+			throw new InvalidArgumentException("Directory $local not found.");
 		}
 		$this->server = $server;
-		$this->local = $local;
 		$this->logger = $logger;
 	}
 
@@ -99,8 +99,7 @@ class Deployment
 		}
 
 		$this->logger->log("Scanning files in $this->local");
-		chdir($this->local);
-		$localFiles = $this->collectFiles('');
+		$localFiles = $this->collectFiles();
 		unset($localFiles["/$this->deploymentFile"]);
 
 		$toDelete = $this->allowDelete ? array_keys(array_diff_key($remoteFiles, $localFiles)) : [];
@@ -127,7 +126,7 @@ class Deployment
 			}
 		}
 
-		$this->writeDeploymentFile($localFiles);
+		$deploymentFile = $this->writeDeploymentFile($localFiles);
 		$toUpload[] = "/$this->deploymentFile"; // must be the last one
 
 		if ($toUpload) {
@@ -149,7 +148,7 @@ class Deployment
 			});
 		}
 
-		unlink($this->deploymentFile);
+		unlink($deploymentFile);
 
 		if ($this->runAfter) {
 			$this->logger->log("\nAfter-jobs:");
@@ -203,7 +202,7 @@ class Deployment
 
 	/**
 	 * Prepares .htdeployment for upload.
-	 * @return void
+	 * @return string
 	 */
 	private function writeDeploymentFile($localFiles)
 	{
@@ -211,7 +210,8 @@ class Deployment
 		foreach ($localFiles as $k => $v) {
 			$s .= "$v=$k\n";
 		}
-		file_put_contents($this->deploymentFile, gzdeflate($s, 9));
+		file_put_contents($file = $this->local . '/' . $this->deploymentFile, gzdeflate($s, 9));
+		return $file;
 	}
 
 
@@ -237,7 +237,7 @@ class Deployment
 				continue;
 			}
 
-			$localFile = $this->preprocess($orig = ".$file");
+			$localFile = $this->preprocess($orig = $this->local . $file);
 			if (realpath($orig) !== $localFile) {
 				$file .= ' (filters was applied)';
 			}
@@ -286,31 +286,32 @@ class Deployment
 	 * @param  string
 	 * @return array
 	 */
-	private function collectFiles($dir)
+	private function collectFiles($subdir = '')
 	{
 		$list = [];
-		$iterator = dir(".$dir");
+		$iterator = dir($this->local . $subdir);
 		$counter = 0;
 		while (FALSE !== ($entry = $iterator->read())) {
 			echo str_pad(str_repeat('.', $counter++ % 40), 40), "\x0D";
 
-			$path = ".$dir/$entry";
+			$path = "$this->local$subdir/$entry";
+			$short = "$subdir/$entry";
 			if ($entry == '.' || $entry == '..') {
 				continue;
 
 			} elseif (!is_readable($path)) {
 				continue;
 
-			} elseif ($this->matchMask($path, $this->ignoreMasks)) {
-				$this->logger->log("Ignoring $path", 'dark-grey');
+			} elseif ($this->matchMask($short, $this->ignoreMasks, is_dir($path))) {
+				$this->logger->log("Ignoring .$short", 'dark-grey');
 				continue;
 
 			} elseif (is_dir($path)) {
-				$list["$dir/$entry/"] = TRUE;
-				$list += $this->collectFiles("$dir/$entry");
+				$list[$short . '/'] = TRUE;
+				$list += $this->collectFiles($short);
 
 			} elseif (is_file($path)) {
-				$list["$dir/$entry"] = md5_file($this->preprocess($path));
+				$list[$short] = md5_file($this->preprocess($path));
 			}
 		}
 		$iterator->close();
@@ -357,7 +358,7 @@ class Deployment
 	 * @param  array   patterns
 	 * @return bool
 	 */
-	public static function matchMask($path, array $patterns)
+	public static function matchMask($path, array $patterns, $isDir = FALSE)
 	{
 		$res = FALSE;
 		foreach ($patterns as $pattern) {
@@ -366,7 +367,7 @@ class Deployment
 				$pattern = substr($pattern, 1);
 			}
 			if (substr($pattern, -1) === '/') { // trailing slash means directory
-				if (!is_dir($path)) {
+				if (!$isDir) {
 					continue;
 				}
 				$pattern = substr($pattern, 0, -1);
@@ -375,7 +376,7 @@ class Deployment
 				if (fnmatch($pattern, basename($path), FNM_CASEFOLD)) {
 					$res = !$neg;
 				}
-			} elseif (fnmatch('./' . ltrim($pattern, '/'), $path, FNM_CASEFOLD | FNM_PATHNAME)) { // $path always starts with ./
+			} elseif (fnmatch('/' . ltrim($pattern, '/'), $path, FNM_CASEFOLD | FNM_PATHNAME)) { // $path always starts with /
 				$res = !$neg;
 			}
 		}
