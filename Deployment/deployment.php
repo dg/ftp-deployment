@@ -68,9 +68,9 @@ set_exception_handler(function($e) use ($logger) {
 });
 
 
-function toArray($val)
+function toArray($val, $lines = FALSE)
 {
-	return is_array($val) ? array_filter($val) : preg_split('#\s+#', $val, -1, PREG_SPLIT_NO_EMPTY);
+	return is_array($val) ? array_filter($val) : preg_split($lines ? '#\s*\n\s*#' : '#\s+#', $val, -1, PREG_SPLIT_NO_EMPTY);
 }
 
 
@@ -128,9 +128,9 @@ foreach ($config as $section => $cfg) {
 	$deployment->deploymentFile = empty($cfg['deploymentfile']) ? $deployment->deploymentFile : $cfg['deploymentfile'];
 	$deployment->testMode = !empty($cfg['test']) || $options['--test'];
 	$deployment->allowDelete = $cfg['allowdelete'];
-	$deployment->toPurge = toArray($cfg['purge']);
-	$deployment->runBefore = toArray($cfg['before']);
-	$deployment->runAfter = toArray($cfg['after']);
+	$deployment->toPurge = toArray($cfg['purge'], TRUE);
+	$deployment->runBefore = toArray($cfg['before'], TRUE);
+	$deployment->runAfter = toArray($cfg['after'], TRUE);
 	$deployment->tempDir = $tempDir;
 
 	if ($deployment->testMode) {
