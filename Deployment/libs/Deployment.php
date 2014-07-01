@@ -124,13 +124,7 @@ class Deployment
 
 		if ($this->runBefore) {
 			$this->logger->log("\nBefore-jobs:");
-			foreach ((array) $this->runBefore as $job) {
-				if (is_string($job)) {
-					$this->logger->log("$job: " . trim(file_get_contents($job)));
-				} elseif (is_callable($job)) {
-					$job($this->server, $this->logger, $this);
-				}
-			}
+			$this->runJobs($this->runBefore);
 		}
 
 		if ($toUpload) {
@@ -157,13 +151,7 @@ class Deployment
 
 		if ($this->runAfter) {
 			$this->logger->log("\nAfter-jobs:");
-			foreach ((array) $this->runAfter as $job) {
-				if (is_string($job)) {
-					$this->logger->log("$job: " . trim(file_get_contents($job)));
-				} elseif (is_callable($job)) {
-					$job($this->server, $this->logger, $this);
-				}
-			}
+			$this->runJobs($this->runAfter);
 		}
 
 		$this->logger->log("\nDeleting remote file $this->deploymentFile.running");
@@ -357,6 +345,21 @@ class Deployment
 			file_put_contents($tempFile, $content);
 		}
 		return $tempFile;
+	}
+
+
+	/**
+	 * @return void
+	 */
+	private function runJobs(array $jobs)
+	{
+		foreach ($jobs as $job) {
+			if (is_string($job)) {
+				$this->logger->log("$job: " . trim(file_get_contents($job)));
+			} elseif (is_callable($job)) {
+				$job($this->server, $this->logger, $this);
+			}
+		}
 	}
 
 
