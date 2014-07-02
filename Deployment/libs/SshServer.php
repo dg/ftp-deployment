@@ -194,6 +194,20 @@ class SshServer implements Server
 	}
 
 
+	/**
+	 * Executes a command on a remote server.
+	 * @return string
+	 */
+	public function execute($command)
+	{
+		$stream = $this->protect('ssh2_exec', [$this->connection, $command]);
+		stream_set_blocking($stream, TRUE);
+		$out = stream_get_contents($stream);
+		fclose($stream);
+		return $out;
+	}
+
+
 	private function protect(callable $func, $args = [])
 	{
 		set_error_handler(function($severity, $message) {

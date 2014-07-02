@@ -247,6 +247,16 @@ class FtpServer implements Server
 
 
 	/**
+	 * Executes a command on a remote server.
+	 * @return string
+	 */
+	public function execute($command)
+	{
+		return $this->ftp('exec', $command);
+	}
+
+
+	/**
 	 * @param  string  method name
 	 * @param  array   arguments
 	 * @return mixed

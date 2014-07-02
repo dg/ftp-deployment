@@ -63,6 +63,7 @@ before[] = local: lessc assets/combined.less assets/combined.css
 before[] = http://example.com/deployment.php?before
 
 ; jobs to run after file upload
+after[] = remote: unzip api.zip
 after[] = http://example.com/deployment.php?after
 
 ; directories to purge after file upload

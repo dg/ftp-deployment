@@ -74,6 +74,12 @@ interface Server
 	 */
 	function getDir();
 
+	/**
+	 * Executes a command on a remote server.
+	 * @return string
+	 */
+	function execute($command);
+
 }
 
 

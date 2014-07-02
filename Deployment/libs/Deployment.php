@@ -365,10 +365,13 @@ class Deployment
 	private function runJobs(array $jobs)
 	{
 		foreach ($jobs as $job) {
-			if (is_string($job) && preg_match('#^(https?|local):(.+)#', $job, $m)) {
+			if (is_string($job) && preg_match('#^(https?|local|remote):(.+)#', $job, $m)) {
 				if ($m[1] === 'local') {
 					$out = @system($m[2], $code);
 					$err = $code !== 0;
+				} elseif ($m[1] === 'remote') {
+					$out = $this->server->execute($m[2]);
+					$err = FALSE;
 				} else {
 					$err = ($out = @file_get_contents($job)) === FALSE;
 				}
