@@ -49,13 +49,13 @@ set_time_limit(0);
 date_default_timezone_set('Europe/Prague');
 set_error_handler(function($severity, $message, $file, $line) use ($logger) {
 	if (($severity & error_reporting()) === $severity) {
-		$logger->log("Error: $message in $file on $line");
+		$logger->log("Error: $message in $file on $line", 'light-red');
 		exit;
 	}
 	return FALSE;
 });
 set_exception_handler(function($e) use ($logger) {
-	$logger->log("Error: {$e->getMessage()} in {$e->getFile()} on {$e->getLine()}");
+	$logger->log("Error: {$e->getMessage()}\n\n$e", 'light-red');
 });
 
 
