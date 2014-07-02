@@ -110,8 +110,8 @@ class Deployment
 			return;
 
 		} elseif ($this->testMode) {
-			$this->logger->log("\nUploading:\n" . implode("\n", $toUpload), 'green');
-			$this->logger->log("\nDeleting:\n" . implode("\n", $toDelete), 'red');
+			$this->logger->log("\nUploading:\n" . implode("\n", $toUpload), 'green', FALSE);
+			$this->logger->log("\nDeleting:\n" . implode("\n", $toDelete), 'red', FALSE);
 			return;
 		}
 

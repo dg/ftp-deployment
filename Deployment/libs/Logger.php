@@ -50,12 +50,18 @@ class Logger
 	}
 
 
-	public function log($s, $color = NULL)
+	public function log($s, $color = NULL, $shorten = TRUE)
 	{
-		echo $this->useColors && isset($this->colors[$color])
-			? "\033[{$this->colors[$color]}m$s\033[0m        \n"
-			: "$s        \n";
-		fwrite($this->file, "$s\n");
+		fwrite($this->file, $s . "\n");
+
+		if ($shorten && preg_match('#^\n?.*#', $s, $m)) {
+			$s = $m[0];
+		}
+		$s .= "        \n";
+		if ($this->useColors && isset($this->colors[$color])) {
+			$s = "\033[{$this->colors[$color]}m$s\033[0m";
+		}
+		echo $s;
 	}
 
 }
