@@ -355,9 +355,18 @@ class Deployment
 	{
 		foreach ($jobs as $job) {
 			if (is_string($job)) {
-				$this->logger->log("$job: " . trim(file_get_contents($job)));
+				if (($out = @file_get_contents($job)) === FALSE) {
+					throw new RuntimeException("Error in job $job");
+				}
+				$this->logger->log("$job: $out");
+
 			} elseif (is_callable($job)) {
-				$job($this->server, $this->logger, $this);
+				if ($job($this->server, $this->logger, $this) === FALSE) {
+					throw new RuntimeException('Error in job');
+				}
+
+			} else {
+				throw new InvalidArgumentException("Invalid job $job.");
 			}
 		}
 	}
