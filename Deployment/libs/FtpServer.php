@@ -209,30 +209,29 @@ class FtpServer implements Server
 	 */
 	public function purge($path, callable $progress = NULL)
 	{
-		if (!$this->isDir($path)) {
-			$this->removeFile($path);
-			if ($progress) {
-				$progress($path);
+		$dirs = [];
+		foreach ((array) $this->ftp('nlist', $path) as $file) {
+			if ($file == NULL || $file === $path || preg_match('#(^|/)\\.+$#', $file)) { // intentionally ==
+				continue;
+			} elseif (strpos($file, '/') === FALSE) {
+				$file = "$path/$file";
 			}
-			return;
+
+			if ($this->isDir($file)) {
+				$dirs[] = $tmp = "$path/.delete" . uniqid();
+				$this->ftp('rename', $file, $tmp);
+			} else {
+				$this->ftp('delete', $file);
+			}
+
+			if ($progress) {
+				$progress($file);
+			}
 		}
 
-		foreach ((array) $this->ftp('nlist', $path) as $file) {
-			if ($file == NULL || preg_match('#(^|/)\\.+$#', $file)) { // intentionally ==
-				continue;
-			}
-			$file = strpos($file, '/') === FALSE ? "$path/$file" : $file;
-			if ($file === $path) {
-				continue;
-			}
-			$this->purge($file, $progress);
-			try {
-				$this->removeDir($file);
-			} catch (FtpException $e) {
-				if (strpos($e->getMessage(), 'Directory not empty') === FALSE) {
-					throw $e;
-				}
-			}
+		foreach ($dirs as $dir) {
+			$this->purge($dir, $progress);
+			$this->ftp('rmDir', $dir);
 		}
 	}
 
