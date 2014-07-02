@@ -85,6 +85,17 @@ class Deployment
 		$this->logger->log("Connecting to server");
 		$this->server->connect();
 
+		$runBefore = [NULL, NULL];
+		foreach ($this->runBefore as $job) {
+			$runBefore[is_string($job) && preg_match('#^local:#', $job)][] = $job;
+		}
+
+		if ($runBefore[1]) {
+			$this->logger->log("\nLocal-jobs:");
+			$this->runJobs($runBefore[1]);
+			$this->logger->log('');
+		}
+
 		$remoteFiles = $this->loadDeploymentFile();
 		if (is_array($remoteFiles)) {
 			$this->logger->log("Loaded remote $this->deploymentFile file");
@@ -122,9 +133,9 @@ class Deployment
 		$root = $this->server->getDir();
 		$this->server->writeFile(tempnam($this->tempDir, 'deploy'), $runningFile = "$root/$this->deploymentFile.running");
 
-		if ($this->runBefore) {
+		if ($runBefore[0]) {
 			$this->logger->log("\nBefore-jobs:");
-			$this->runJobs($this->runBefore);
+			$this->runJobs($runBefore[0]);
 		}
 
 		if ($toUpload) {
@@ -354,11 +365,17 @@ class Deployment
 	private function runJobs(array $jobs)
 	{
 		foreach ($jobs as $job) {
-			if (is_string($job)) {
-				if (($out = @file_get_contents($job)) === FALSE) {
-					throw new RuntimeException("Error in job $job");
+			if (is_string($job) && preg_match('#^(https?|local):(.+)#', $job, $m)) {
+				if ($m[1] === 'local') {
+					$out = @system($m[2], $code);
+					$err = $code !== 0;
+				} else {
+					$err = ($out = @file_get_contents($job)) === FALSE;
 				}
 				$this->logger->log("$job: $out");
+				if ($err) {
+					throw new RuntimeException("Error in job $job");
+				}
 
 			} elseif (is_callable($job)) {
 				if ($job($this->server, $this->logger, $this) === FALSE) {

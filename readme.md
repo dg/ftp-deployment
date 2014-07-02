@@ -59,6 +59,7 @@ ignore = "
 allowdelete = yes
 
 ; jobs to run before file upload
+before[] = local: lessc assets/combined.less assets/combined.css
 before[] = http://example.com/deployment.php?before
 
 ; jobs to run after file upload
@@ -87,7 +88,7 @@ data/* - ignore everything inside the 'data' folder, but the folder will be crea
 project.pp[jx] - ignore files or folders 'project.ppj' and 'project.ppx'
 ```
 
-Before the upload starts and after it finishes, you can call your own scripts on
+Before the upload starts and after it finishes, you can execute commands or call your scripts on
 the server (see `before` and `after`), which can, for example, switch the server to a maintenance mode.
 If you use php-config - you can run lambda function with deployment environment.
 
