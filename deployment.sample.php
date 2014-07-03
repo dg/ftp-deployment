@@ -26,7 +26,8 @@ return array(
 			'temp/cache',
 		),
 		'preprocess' => FALSE,
-		'tempdir' => __DIR__ . '/temp',
-		'colors' => TRUE,
 	),
+
+	'tempdir' => __DIR__ . '/temp',
+	'colors' => TRUE,
 );

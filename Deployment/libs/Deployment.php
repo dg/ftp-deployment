@@ -85,11 +85,6 @@ class Deployment
 		$this->logger->log("Connecting to server");
 		$this->server->connect();
 
-		if (!is_dir($this->tempDir)) {
-			$this->logger->log("Creating temporary directory $this->tempDir");
-			mkdir($this->tempDir);
-		}
-
 		$remoteFiles = $this->loadDeploymentFile();
 		if (is_array($remoteFiles)) {
 			$this->logger->log("Loaded remote $this->deploymentFile file");

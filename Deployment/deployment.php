@@ -38,10 +38,19 @@ if (pathinfo($options['config'], PATHINFO_EXTENSION) == 'php') {
 
 $config += [
 	'log' => preg_replace('#\.\w+$#', '.log', $options['config']),
+	'tempdir' => sys_get_temp_dir() . '/deployment',
+	'colors' => (PHP_SAPI === 'cli' && ((function_exists('posix_isatty') && posix_isatty(STDOUT))
+		|| getenv('ConEmuANSI') === 'ON' || getenv('ANSICON') !== FALSE)),
 ];
 
 $logger = new Logger($config['log']);
+$logger->useColors = (bool) $config['colors'];
 
+
+if (!is_dir($tempDir = $config['tempdir'])) {
+	$this->logger->log("Creating temporary directory $tempDir");
+	mkdir($tempDir);
+}
 
 
 // configure PHP
@@ -90,16 +99,11 @@ foreach ($config as $section => $cfg) {
 		'before' => '',
 		'after' => '',
 		'preprocess' => TRUE,
-		'tempdir' => sys_get_temp_dir() . '/deployment',
-		'colors' => (PHP_SAPI === 'cli' && ((function_exists('posix_isatty') && posix_isatty(STDOUT))
-			|| getenv('ConEmuANSI') === 'ON' || getenv('ANSICON') !== FALSE)),
 	];
 
 	if (empty($cfg['remote']) || !parse_url($cfg['remote'])) {
 		throw new Exception("Missing or invalid 'remote' URL in config.");
 	}
-
-	$logger->useColors = (bool) $cfg['colors'];
 
 	$server = parse_url($cfg['remote'], PHP_URL_SCHEME) === 'sftp'
 		? new SshServer($cfg['remote'])
@@ -127,7 +131,7 @@ foreach ($config as $section => $cfg) {
 	$deployment->toPurge = toArray($cfg['purge']);
 	$deployment->runBefore = toArray($cfg['before']);
 	$deployment->runAfter = toArray($cfg['after']);
-	$deployment->tempDir = $cfg['tempdir'];
+	$deployment->tempDir = $tempDir;
 
 	if ($deployment->testMode) {
 		$logger->log('Test mode');

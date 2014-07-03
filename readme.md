@@ -26,6 +26,12 @@ And what does the `deployment.ini` file contain? Only the `remote` item is requi
 ; log file (defaults to config file with .log extension)
 log = ...
 
+; directory for temporary files (defaults to system's temporary directory)
+tempdir = /temp/deployment
+
+; enable colored highlights? (defaults to autodetect)
+colors = yes
+
 [my site] ; Optional section (there may be more than one section).
 ; remote FTP server
 remote = ftp://user:secretpassword@ftp.example.com/directory
@@ -63,12 +69,6 @@ purge[] = temp/cache
 
 ; files to preprocess (defaults to *.js *.css)
 preprocess = no
-
-; directory for temporary files (defaults to system's temporary directory)
-tempdir = /temp/deployment
-
-; enable colored highlights? (defaults to autodetect)
-colors = yes
 ```
 
 Configuration can also be stored in a PHP file.
