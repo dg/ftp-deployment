@@ -139,7 +139,7 @@ class Deployment
 			$this->deleteFiles($toDelete);
 		}
 
-		$root = rtrim($this->server->getDir(), '/');
+		$root = $this->server->getDir();
 		foreach ((array) $this->toPurge as $path) {
 			$this->logger->log("Cleaning $path");
 			$this->server->purge($root . '/' . $path, function($file) use ($root) {
@@ -185,7 +185,7 @@ class Deployment
 	 */
 	private function loadDeploymentFile()
 	{
-		$root = rtrim($this->server->getDir(), '/');
+		$root = $this->server->getDir();
 		$tempFile = tempnam($this->tempDir, 'deploy');
 		try {
 			$this->server->readFile($root . '/' . $this->deploymentFile, $tempFile);
@@ -224,7 +224,7 @@ class Deployment
 	 */
 	private function uploadFiles(array $files)
 	{
-		$root = rtrim($this->server->getDir(), '/');
+		$root = $this->server->getDir();
 		$prevDir = NULL;
 		$toRename = [];
 		foreach ($files as $num => $file) {
@@ -267,7 +267,7 @@ class Deployment
 	private function deleteFiles(array $files)
 	{
 		rsort($files);
-		$root = rtrim($this->server->getDir(), '/');
+		$root = $this->server->getDir();
 		foreach ($files as $num => $file) {
 			$remoteFile = $root . $file;
 			$this->writeProgress($num + 1, count($files), "Deleting $file", NULL, 'red');
