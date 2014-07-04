@@ -6,6 +6,7 @@
  * Copyright (c) 2009 David Grudl (http://davidgrudl.com)
  */
 
+namespace Deployment;
 
 
 /**
@@ -81,6 +82,6 @@ interface Server
 
 
 
-class ServerException extends Exception
+class ServerException extends \Exception
 {
 }

@@ -6,6 +6,7 @@
  * Copyright (c) 2009 David Grudl (http://davidgrudl.com)
  */
 
+namespace Deployment;
 
 
 /**
@@ -121,7 +122,7 @@ class Preprocessor
 			NULL, NULL, ['bypass_shell' => TRUE]
 		);
 		if (!is_resource($process)) {
-			throw new Exception("Unable start process $command.");
+			throw new \Exception("Unable start process $command.");
 		}
 
 		fwrite($pipes[0], $input);

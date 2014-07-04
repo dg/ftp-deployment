@@ -6,6 +6,7 @@
  * Copyright (c) 2009 David Grudl (http://davidgrudl.com)
  */
 
+namespace Deployment;
 
 
 /**
@@ -35,11 +36,11 @@ class FtpServer implements Server
 	public function __construct($url, $passiveMode = TRUE)
 	{
 		if (!extension_loaded('ftp')) {
-			throw new Exception('PHP extension FTP is not loaded.');
+			throw new \Exception('PHP extension FTP is not loaded.');
 		}
 		$parts = parse_url($url);
 		if (!isset($parts['scheme'], $parts['user'], $parts['pass']) || ($parts['scheme'] !== 'ftp' && $parts['scheme'] !== 'ftps')) {
-			throw new InvalidArgumentException("Invalid URL or missing username or password: $url");
+			throw new \InvalidArgumentException("Invalid URL or missing username or password: $url");
 		}
 		$this->url = $url;
 		$this->passiveMode = (bool) $passiveMode;

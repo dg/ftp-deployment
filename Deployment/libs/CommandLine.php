@@ -6,6 +6,7 @@
  * Copyright (c) 2009 David Grudl (http://davidgrudl.com)
  */
 
+namespace Deployment;
 
 
 /**

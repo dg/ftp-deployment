@@ -6,6 +6,7 @@
  * Copyright (c) 2009 David Grudl (http://davidgrudl.com)
  */
 
+namespace Deployment;
 
 
 /**
@@ -98,7 +99,7 @@ class CliRunner
 		];
 
 		if (empty($config['remote']) || !parse_url($config['remote'])) {
-			throw new Exception("Missing or invalid 'remote' URL in config.");
+			throw new \Exception("Missing or invalid 'remote' URL in config.");
 		}
 
 		$server = parse_url($config['remote'], PHP_URL_SCHEME) === 'sftp'

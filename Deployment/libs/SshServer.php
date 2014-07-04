@@ -6,6 +6,7 @@
  * Copyright (c) 2009 David Grudl (http://davidgrudl.com)
  */
 
+namespace Deployment;
 
 
 /**
@@ -32,11 +33,11 @@ class SshServer implements Server
 	public function __construct($url)
 	{
 		if (!extension_loaded('ssh2')) {
-			throw new Exception('PHP extension SSH2 is not loaded.');
+			throw new \Exception('PHP extension SSH2 is not loaded.');
 		}
 		$parts = parse_url($url);
 		if (!isset($parts['scheme'], $parts['user']) || $parts['scheme'] !== 'sftp') {
-			throw new InvalidArgumentException("Invalid URL or missing username: $url");
+			throw new \InvalidArgumentException("Invalid URL or missing username: $url");
 		}
 		$this->url = $url;
 	}

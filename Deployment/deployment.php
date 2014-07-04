@@ -1,5 +1,7 @@
 <?php
 
+namespace Deployment;
+
 require __DIR__ . '/libs/Server.php';
 require __DIR__ . '/libs/FtpServer.php';
 require __DIR__ . '/libs/SshServer.php';

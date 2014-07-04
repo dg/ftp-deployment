@@ -6,6 +6,7 @@
  * Copyright (c) 2009 David Grudl (http://davidgrudl.com)
  */
 
+namespace Deployment;
 
 
 /**
@@ -66,7 +67,7 @@ class Deployer
 	{
 		$this->local = realpath($local);
 		if (!$this->local) {
-			throw new InvalidArgumentException("Directory $local not found.");
+			throw new \InvalidArgumentException("Directory $local not found.");
 		}
 		$this->server = $server;
 		$this->logger = $logger;
@@ -374,16 +375,16 @@ class Deployer
 				}
 				$this->logger->log("$job: $out");
 				if ($err) {
-					throw new RuntimeException("Error in job $job");
+					throw new \RuntimeException("Error in job $job");
 				}
 
 			} elseif (is_callable($job)) {
 				if ($job($this->server, $this->logger, $this) === FALSE) {
-					throw new RuntimeException('Error in job');
+					throw new \RuntimeException('Error in job');
 				}
 
 			} else {
-				throw new InvalidArgumentException("Invalid job $job.");
+				throw new \InvalidArgumentException("Invalid job $job.");
 			}
 		}
 	}
