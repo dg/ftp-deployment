@@ -113,7 +113,7 @@ class SshServer implements Server
 	 * Renames and rewrites file on FTP server.
 	 * @return void
 	 */
-	public function rename($old, $new)
+	public function renameFile($old, $new)
 	{
 		if (file_exists($path = "ssh2.sftp://$this->sftp$new")) {
 			$perms = fileperms($path);

@@ -255,7 +255,7 @@ class Deployment
 		$this->logger->log("\nRenaming:");
 		foreach ($toRename as $num => $file) {
 			$this->writeProgress($num + 1, count($toRename), "Renaming $file", NULL, 'brown');
-			$this->server->rename($file . self::TEMPORARY_SUFFIX, $file);
+			$this->server->renameFile($file . self::TEMPORARY_SUFFIX, $file);
 		}
 	}
 

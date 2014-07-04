@@ -47,7 +47,7 @@ interface Server
 	 * Renames and rewrites file on server.
 	 * @return void
 	 */
-	function rename($old, $new);
+	function renameFile($old, $new);
 
 	/**
 	 * Creates directories on server.

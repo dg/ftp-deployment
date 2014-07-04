@@ -134,7 +134,7 @@ class FtpServer implements Server
 	 * Renames and rewrites file on FTP server.
 	 * @return void
 	 */
-	public function rename($old, $new)
+	public function renameFile($old, $new)
 	{
 		$this->removeFile($new);
 		$this->ftp('rename', $old, $new); // TODO: zachovat permissions
