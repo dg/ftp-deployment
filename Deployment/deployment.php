@@ -11,7 +11,7 @@ require __DIR__ . '/libs/CommandLine.php';
 
 
 $cmd = new CommandLine("
-FTP deployment v1.4
+FTP deployment v1.5
 -------------------
 Usage:
 	deployment.php <config_file> [-t | --test]
