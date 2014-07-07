@@ -145,8 +145,8 @@ class Deployment
 			$this->server->purge($root . '/' . $path, function($file) use ($root) {
 				static $counter;
 				$file = substr($file, strlen($root));
-				$file = preg_match('#/.{1,60}$#', $file, $m) ? $m[0] : substr(basename($file), 0, 60);
-				echo str_pad($file . ' ' . str_repeat('.', $counter++ % 30 + 61 - strlen($file)), 90), "\x0D";
+				$file = preg_match('#/(.{1,60})$#', $file, $m) ? $m[1] : substr(basename($file), 0, 60);
+				echo str_pad($file . ' ' . str_repeat('.', $counter++ % 30 + 60 - strlen($file)), 90), "\x0D";
 			});
 			echo str_repeat(' ', 91) . "\x0D";
 		}
