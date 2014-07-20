@@ -4,7 +4,7 @@ require __DIR__ . '/libs/Server.php';
 require __DIR__ . '/libs/FtpServer.php';
 require __DIR__ . '/libs/SshServer.php';
 require __DIR__ . '/libs/Logger.php';
-require __DIR__ . '/libs/Deployment.php';
+require __DIR__ . '/libs/Deployer.php';
 require __DIR__ . '/libs/Preprocessor.php';
 require __DIR__ . '/libs/CommandLine.php';
 
@@ -109,7 +109,7 @@ foreach ($config as $section => $cfg) {
 		? new SshServer($cfg['remote'])
 		: new FtpServer($cfg['remote'], (bool) $cfg['passivemode']);
 
-	$deployment = new Deployment($server, $cfg['local'], $logger);
+	$deployment = new Deployer($server, $cfg['local'], $logger);
 
 	if ($cfg['preprocess']) {
 		$deployment->preprocessMasks = $cfg['preprocess'] == 1 ? ['*.js', '*.css'] : toArray($cfg['preprocess']); // intentionally ==

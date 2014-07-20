@@ -16,7 +16,7 @@
  *
  * @author     David Grudl
  */
-class Deployment
+class Deployer
 {
 	const TEMPORARY_SUFFIX = '.deploytmp';
 

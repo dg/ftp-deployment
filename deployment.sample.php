@@ -15,7 +15,7 @@ return array(
 		',
 		'allowdelete' => TRUE,
 		'before' => array(
-			function (Server $server, Logger $logger, Deployment $deployment) {
+			function (Server $server, Logger $logger, Deployer $deployer) {
 				$logger->log('Hello!');
 			},
 		),
