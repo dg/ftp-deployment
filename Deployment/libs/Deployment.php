@@ -105,6 +105,11 @@ class Deployment
 		$toDelete = $this->allowDelete ? array_keys(array_diff_key($remoteFiles, $localFiles)) : [];
 		$toUpload = array_keys(array_diff_assoc($localFiles, $remoteFiles));
 
+		if ($localFiles !== $remoteFiles) { // ignores allowDelete
+			$deploymentFile = $this->writeDeploymentFile($localFiles);
+			$toUpload[] = "/$this->deploymentFile"; // must be last
+		}
+
 		if (!$toUpload && !$toDelete) {
 			$this->logger->log('Already synchronized.', 'light-green');
 			return;
@@ -112,6 +117,9 @@ class Deployment
 		} elseif ($this->testMode) {
 			$this->logger->log("\nUploading:\n" . implode("\n", $toUpload), 'green', FALSE);
 			$this->logger->log("\nDeleting:\n" . implode("\n", $toDelete), 'red', FALSE);
+			if (isset($deploymentFile)) {
+				unlink($deploymentFile);
+			}
 			return;
 		}
 
@@ -126,12 +134,10 @@ class Deployment
 			}
 		}
 
-		$deploymentFile = $this->writeDeploymentFile($localFiles);
-		$toUpload[] = "/$this->deploymentFile"; // must be the last one
-
 		if ($toUpload) {
 			$this->logger->log("\nUploading:");
 			$this->uploadFiles($toUpload);
+			unlink($deploymentFile);
 		}
 
 		if ($toDelete) {
@@ -150,8 +156,6 @@ class Deployment
 			});
 			echo str_repeat(' ', 91) . "\x0D";
 		}
-
-		unlink($deploymentFile);
 
 		if ($this->runAfter) {
 			$this->logger->log("\nAfter-jobs:");
@@ -196,7 +200,7 @@ class Deployment
 		$res = [];
 		foreach (explode("\n", $content) as $item) {
 			if (count($item = explode('=', $item, 2)) === 2) {
-				$res[$item[1]] = $item[0];
+				$res[$item[1]] = $item[0] === '1' ? TRUE : $item[0];
 			}
 		}
 		return $res;
