@@ -155,9 +155,32 @@ class SshServer implements Server
 	 * @param  string
 	 * @return void
 	 */
-	public function purge($path, callable $progress = NULL)
+	public function purge($dir, callable $progress = NULL)
 	{
-		throw new SshException('Purge is not supported.');
+		$dirs = [];
+		$iterator = dir($path = "ssh2.sftp://$this->sftp$dir");
+
+		while (FALSE !== ($file = $iterator->read())) {
+			if ($file === '.' || $file === '..') {
+				continue;
+			}
+
+			if (is_dir("$path/$file")) {
+				$dirs[] = $tmp = '.delete' . uniqid();
+				$this->protect('rename', ["$path/$file", "$path/$tmp"]);
+			} else {
+				$this->protect('unlink', ["$path/$file"]);
+			}
+
+			if ($progress) {
+				$progress($file);
+			}
+		}
+
+		foreach ($dirs as $subdir) {
+			$this->purge("$dir/$subdir", $progress);
+			$this->protect('rmdir', ["$path/$subdir"]);
+		}
 	}
 
 
