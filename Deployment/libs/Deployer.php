@@ -231,13 +231,14 @@ class Deployer
 		$toRename = [];
 		foreach ($files as $num => $file) {
 			$remoteFile = $root . $file;
-			$remoteDir = substr($remoteFile, -1) === '/' ? $remoteFile : dirname($remoteFile);
+			$isDir = substr($remoteFile, -1) === '/';
+			$remoteDir = $isDir ? substr($remoteFile, 0, -1) : dirname($remoteFile);
 			if ($remoteDir !== $prevDir) {
 				$prevDir = $remoteDir;
 				$this->server->createDir($remoteDir);
 			}
 
-			if (substr($remoteFile, -1) === '/') { // is dir?
+			if ($isDir) {
 				$this->writeProgress($num + 1, count($files), $file, NULL, 'green');
 				continue;
 			}

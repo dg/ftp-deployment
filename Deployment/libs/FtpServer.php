@@ -145,7 +145,7 @@ class FtpServer implements Server
 	 */
 	public function createDir($dir)
 	{
-		if (trim($dir, '\\/') === '' || $this->isDir($dir)) {
+		if (trim($dir, '/') === '' || $this->isDir($dir)) {
 			return;
 		}
 
