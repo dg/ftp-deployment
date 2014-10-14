@@ -49,7 +49,7 @@ class CliRunner
 
 		if (!is_dir($tempDir = $config['tempdir'])) {
 			$this->logger->log("Creating temporary directory $tempDir");
-			mkdir($tempDir);
+			mkdir($tempDir,0777,true);
 		}
 
 		$time = time();
