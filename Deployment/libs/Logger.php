@@ -23,22 +23,23 @@ class Logger
 	public $useColors;
 
 	/** @var array */
-	public $colors = [
+	private $colors = [
 		'black' => '0;30',
-		'dark-grey' => '1;30',
-		'light-grey' => '0;37',
-		'blue' => '0;34',
-		'light-blue' => '1;34',
+		'gray' => '1;30',
+		'silver' => '0;37',
+		'navy' => '0;34',
+		'blue' => '1;34',
 		'green' => '0;32',
-		'light-green' => '1;32',
-		'cyan' => '0;36',
-		'light-cyan' => '1;36',
-		'red' => '0;31',
-		'light-red' => '1;31',
+		'lime' => '1;32',
+		'teal' => '0;36',
+		'aqua' => '1;36',
+		'maroon' => '0;31',
+		'red' => '1;31',
 		'purple' => '0;35',
-		'light-purple' => '1;35',
-		'brown' => '0;33',
+		'fuchsia' => '1;35',
+		'olive' => '0;33',
 		'yellow' => '1;33',
+		'white' => '1;37',
 	];
 
 
@@ -56,8 +57,10 @@ class Logger
 			$s = $m[0];
 		}
 		$s .= "        \n";
-		if ($this->useColors && isset($this->colors[$color])) {
-			$s = "\033[{$this->colors[$color]}m$s\033[0m";
+		if ($this->useColors && $color) {
+			$c = explode('/', $color);
+			$s = "\033[" . ($c[0] ? $this->colors[$c[0]] : '')
+				. (empty($c[1]) ? '' : ';4' . substr($this->colors[$c[1]], -1)) . "m$s\033[0m";
 		}
 		echo $s;
 	}

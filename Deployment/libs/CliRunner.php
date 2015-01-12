@@ -80,7 +80,7 @@ class CliRunner
 		}
 
 		$time = time() - $time;
-		$this->logger->log("\nFinished at " . date('[Y/m/d H:i]') . " (in $time seconds)", 'light-green');
+		$this->logger->log("\nFinished at " . date('[Y/m/d H:i]') . " (in $time seconds)", 'lime');
 	}
 
 
@@ -141,13 +141,13 @@ class CliRunner
 
 		set_error_handler(function($severity, $message, $file, $line) {
 			if (($severity & error_reporting()) === $severity) {
-				$this->logger->log("Error: $message in $file on $line", 'light-red');
+				$this->logger->log("Error: $message in $file on $line", 'red');
 				exit;
 			}
 			return FALSE;
 		});
 		set_exception_handler(function($e) {
-			$this->logger->log("Error: {$e->getMessage()}\n\n$e", 'light-red');
+			$this->logger->log("Error: {$e->getMessage()}\n\n$e", 'red');
 		});
 	}
 

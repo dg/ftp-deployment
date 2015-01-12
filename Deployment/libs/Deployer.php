@@ -115,12 +115,12 @@ class Deployer
 		}
 
 		if (!$toUpload && !$toDelete) {
-			$this->logger->log('Already synchronized.', 'light-green');
+			$this->logger->log('Already synchronized.', 'lime');
 			return;
 
 		} elseif ($this->testMode) {
 			$this->logger->log("\nUploading:\n" . implode("\n", $toUpload), 'green', FALSE);
-			$this->logger->log("\nDeleting:\n" . implode("\n", $toDelete), 'red', FALSE);
+			$this->logger->log("\nDeleting:\n" . implode("\n", $toDelete), 'maroon', FALSE);
 			if (isset($deploymentFile)) {
 				unlink($deploymentFile);
 			}
@@ -257,7 +257,7 @@ class Deployer
 
 		$this->logger->log("\nRenaming:");
 		foreach ($toRename as $num => $file) {
-			$this->writeProgress($num + 1, count($toRename), "Renaming $file", NULL, 'brown');
+			$this->writeProgress($num + 1, count($toRename), "Renaming $file", NULL, 'olive');
 			$this->server->renameFile($file . self::TEMPORARY_SUFFIX, $file);
 		}
 	}
@@ -273,7 +273,7 @@ class Deployer
 		$root = $this->server->getDir();
 		foreach ($files as $num => $file) {
 			$remoteFile = $root . $file;
-			$this->writeProgress($num + 1, count($files), "Deleting $file", NULL, 'red');
+			$this->writeProgress($num + 1, count($files), "Deleting $file", NULL, 'maroon');
 			try {
 				if (substr($file, -1) === '/') { // is directory?
 					$this->server->removeDir($remoteFile);
@@ -281,7 +281,7 @@ class Deployer
 					$this->server->removeFile($remoteFile);
 				}
 			} catch (ServerException $e) {
-				$this->logger->log("Unable to delete $remoteFile", 'light-red');
+				$this->logger->log("Unable to delete $remoteFile", 'red');
 			}
 		}
 	}
@@ -309,7 +309,7 @@ class Deployer
 				continue;
 
 			} elseif ($this->matchMask($short, $this->ignoreMasks, is_dir($path))) {
-				$this->logger->log("Ignoring .$short", 'dark-grey');
+				$this->logger->log("Ignoring .$short", 'gray');
 				continue;
 
 			} elseif (is_dir($path)) {
