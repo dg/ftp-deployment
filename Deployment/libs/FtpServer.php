@@ -240,7 +240,7 @@ class FtpServer implements Server
 	 */
 	public function getDir()
 	{
-		return '/' . trim($this->ftp('pwd'), '/');
+		return rtrim($this->ftp('pwd'), '/');
 	}
 
 
