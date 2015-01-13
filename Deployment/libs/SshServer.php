@@ -164,7 +164,7 @@ class SshServer implements Server
 			}
 
 			if (is_dir("$path/$file")) {
-				$dirs[] = $tmp = '.delete' . uniqid();
+				$dirs[] = $tmp = '.delete' . uniqid() . count($dirs);
 				$this->protect('rename', ["$path/$file", "$path/$tmp"]);
 			} else {
 				$this->protect('unlink', ["$path/$file"]);

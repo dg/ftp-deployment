@@ -216,7 +216,7 @@ class FtpServer implements Server
 			}
 
 			if ($this->isDir($file)) {
-				$dirs[] = $tmp = "$path/.delete" . uniqid();
+				$dirs[] = $tmp = "$path/.delete" . uniqid() . count($dirs);
 				$this->ftp('rename', $file, $tmp);
 			} else {
 				$this->ftp('delete', $file);
