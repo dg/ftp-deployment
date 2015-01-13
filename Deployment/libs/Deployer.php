@@ -309,7 +309,7 @@ class Deployer
 				continue;
 
 			} elseif ($this->matchMask($short, $this->ignoreMasks, is_dir($path))) {
-				$this->logger->log("Ignoring .$short", 'gray');
+				$this->logger->log(str_pad("Ignoring .$short", 40), 'gray');
 				continue;
 
 			} elseif (is_dir($path)) {

@@ -46,7 +46,7 @@ class Preprocessor
 		}
 		$this->logger->log("Compressing $origFile");
 
-		$dir = dirname(__DIR__) . '/vendor';;
+		$dir = dirname(__DIR__) . '/vendor';
 		$cmd = escapeshellarg($this->javaBinary) . ' -jar ';
 		if (substr($origFile, -3) === '.js') {
 			$cmd .= escapeshellarg($dir . '/Google-Closure-Compiler/compiler.jar') . ' --warning_level QUIET';
