@@ -232,7 +232,7 @@ class Deployer
 		foreach ($files as $num => $file) {
 			$remoteFile = $root . $file;
 			$isDir = substr($remoteFile, -1) === '/';
-			$remoteDir = $isDir ? substr($remoteFile, 0, -1) : dirname($remoteFile);
+			$remoteDir = $isDir ? substr($remoteFile, 0, -1) : str_replace('\\', '/', dirname($remoteFile));
 			if ($remoteDir !== $prevDir) {
 				$prevDir = $remoteDir;
 				$this->server->createDir($remoteDir);
