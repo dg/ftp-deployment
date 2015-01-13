@@ -104,8 +104,8 @@ class Deployer
 
 		$this->logger->log("Scanning files in $this->local");
 		$localFiles = $this->collectFiles();
-		unset($localFiles["/$this->deploymentFile"]);
 
+		unset($localFiles["/$this->deploymentFile"], $remoteFiles["/$this->deploymentFile"]);
 		$toDelete = $this->allowDelete ? array_keys(array_diff_key($remoteFiles, $localFiles)) : [];
 		$toUpload = array_keys(array_diff_assoc($localFiles, $remoteFiles));
 
@@ -209,7 +209,7 @@ class Deployer
 	 * Prepares .htdeployment for upload.
 	 * @return string
 	 */
-	private function writeDeploymentFile($localFiles)
+	public function writeDeploymentFile($localFiles)
 	{
 		$s = '';
 		foreach ($localFiles as $k => $v) {
@@ -292,7 +292,7 @@ class Deployer
 	 * @param  string
 	 * @return array
 	 */
-	private function collectFiles($subdir = '')
+	public function collectFiles($subdir = '')
 	{
 		$list = [];
 		$iterator = dir($this->local . $subdir);

@@ -22,8 +22,8 @@ class CliRunner
 	/** @var string */
 	private $configFile;
 
-	/** @var bool */
-	private $testMode;
+	/** @var string  test|generate|NULL */
+	private $mode;
 
 
 	/** @return int|NULL */
@@ -69,6 +69,13 @@ class CliRunner
 
 			$deployment = $this->createDeployer($cfg);
 			$deployment->tempDir = $tempDir;
+
+			if ($this->mode === 'generate') {
+				$this->logger->log('Scanning files');
+				$localFiles = $deployment->collectFiles();
+				$this->logger->log("Saved " . $deployment->writeDeploymentFile($localFiles));
+				continue;
+			}
 
 			if ($deployment->testMode) {
 				$this->logger->log('Test mode');
@@ -127,7 +134,7 @@ class CliRunner
 		$deployment->toPurge = self::toArray($config['purge'], TRUE);
 		$deployment->runBefore = self::toArray($config['before'], TRUE);
 		$deployment->runAfter = self::toArray($config['after'], TRUE);
-		$deployment->testMode = !empty($config['test']) || $this->testMode;
+		$deployment->testMode = !empty($config['test']) || $this->mode === 'test';
 
 		return $deployment;
 	}
@@ -164,6 +171,7 @@ Usage:
 
 Options:
 	-t | --test      Run in test-mode.
+	--generate       Only generates deployment file.
 
 XX
 		, [
@@ -176,7 +184,7 @@ XX
 		}
 
 		$options = $cmd->parse();
-		$this->testMode = (bool) $options['--test'];
+		$this->mode = $options['--generate'] ? 'generate' : ($options['--test'] ? 'test' : NULL);
 		$this->configFile = $options['config'];
 
 		if (pathinfo($options['config'], PATHINFO_EXTENSION) == 'php') {
