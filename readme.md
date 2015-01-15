@@ -78,14 +78,14 @@ Configuration can also be stored in a PHP file.
 In test mode (with `-t` option) uploading or deleting files is skipped, so you can use it
 to verify your settings.
 
-Item `ignore` uses the same format as [`.gitignore`](http://git-scm.com/docs/gitignore):
+Item `ignore` uses the similar format to [`.gitignore`](http://git-scm.com/docs/gitignore):
 
 ```
 log - ignore all 'log' files or directories in all subfolders
 /log - ignore 'log' file or directory in the root
-app/log - ignore 'log' file or directory in the 'app' subfolder
+app/log - ignore 'log' file or directory in the 'app' in the root
 data/* - ignore everything inside the 'data' folder, but the folder will be created on FTP
-!data/session - make an exception for the previous rules and do not ignore file or folder 'session'
+!data/db/file.sdb - make an exception for the previous rule and do not ignore file 'file.sdb'
 project.pp[jx] - ignore files or folders 'project.ppj' and 'project.ppx'
 ```
 

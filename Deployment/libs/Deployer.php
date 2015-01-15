@@ -400,6 +400,7 @@ class Deployer
 	public static function matchMask($path, array $patterns, $isDir = FALSE)
 	{
 		$res = FALSE;
+		$path = explode('/', ltrim($path, '/'));
 		foreach ($patterns as $pattern) {
 			$pattern = strtr($pattern, '\\', '/');
 			if ($neg = substr($pattern, 0, 1) === '!') {
@@ -412,10 +413,17 @@ class Deployer
 				$pattern = substr($pattern, 0, -1);
 			}
 			if (strpos($pattern, '/') === FALSE) { // no slash means file name
-				if (fnmatch($pattern, basename($path), FNM_CASEFOLD)) {
+				if (fnmatch($pattern, end($path), FNM_CASEFOLD)) {
 					$res = !$neg;
 				}
-			} elseif (fnmatch(ltrim($pattern, '/'), ltrim($path, '/'), FNM_CASEFOLD | FNM_PATHNAME)) {
+			}
+
+			$parts = explode('/', ltrim($pattern, '/'));
+			if (fnmatch(
+				implode('/', $neg && $isDir ? array_slice($parts, 0, count($path)) : $parts),
+				implode('/', array_slice($path, 0, count($parts))),
+				FNM_CASEFOLD | FNM_PATHNAME
+			)) {
 				$res = !$neg;
 			}
 		}
