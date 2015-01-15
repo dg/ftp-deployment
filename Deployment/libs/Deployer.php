@@ -415,7 +415,7 @@ class Deployer
 				if (fnmatch($pattern, basename($path), FNM_CASEFOLD)) {
 					$res = !$neg;
 				}
-			} elseif (fnmatch('/' . ltrim($pattern, '/'), $path, FNM_CASEFOLD | FNM_PATHNAME)) { // $path always starts with /
+			} elseif (fnmatch(ltrim($pattern, '/'), ltrim($path, '/'), FNM_CASEFOLD | FNM_PATHNAME)) {
 				$res = !$neg;
 			}
 		}
