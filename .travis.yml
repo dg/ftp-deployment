@@ -1,0 +1,16 @@
+language: php
+php:
+    - 5.4
+
+script:
+    - vendor/bin/tester tests -s
+    - php code-checker/src/code-checker.php
+
+after_failure:
+    # Print *.actual content
+    - for i in $(find tests -name \*.actual); do echo "--- $i"; cat $i; echo; echo; done
+
+before_script:
+    # Install Nette Tester & Code Checker
+    - composer install --no-interaction --dev --prefer-source
+    - composer create-project nette/code-checker code-checker ~2.3 --no-interaction --prefer-source

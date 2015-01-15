@@ -1,1 +1,4 @@
-*.log
+/vendor
+/composer.lock
+/tests/tmp
+/tests/output
