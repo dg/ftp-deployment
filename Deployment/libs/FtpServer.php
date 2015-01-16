@@ -179,7 +179,7 @@ class FtpServer implements Server
 			$this->ftp('chdir', $dir);
 		} catch (FtpException $e) {
 		}
-		$this->ftp('chdir', $current);
+		$this->ftp('chdir', $current ?: '/');
 		return empty($e);
 	}
 
