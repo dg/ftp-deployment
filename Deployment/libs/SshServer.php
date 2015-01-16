@@ -155,14 +155,16 @@ class SshServer implements Server
 	 */
 	public function purge($dir, callable $progress = NULL)
 	{
-		$dirs = [];
+		$dirs = $files = [];
+
 		$iterator = dir($path = "ssh2.sftp://$this->sftp$dir");
-
 		while (FALSE !== ($file = $iterator->read())) {
-			if ($file === '.' || $file === '..') {
-				continue;
+			if ($file !== '.' && $file !== '..') {
+				$files[] = $file;
 			}
+		}
 
+		foreach ($files as $file) {
 			if (is_dir("$path/$file")) {
 				$dirs[] = $tmp = '.delete' . uniqid() . count($dirs);
 				$this->protect('rename', ["$path/$file", "$path/$tmp"]);
