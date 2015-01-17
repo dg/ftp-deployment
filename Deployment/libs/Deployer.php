@@ -245,7 +245,7 @@ class Deployer
 
 			$localFile = $this->preprocess($orig = $this->local . $file);
 			if (realpath($orig) !== $localFile) {
-				$file .= ' (filters was applied)';
+				$file .= ' (filters applied)';
 			}
 
 			$toRename[] = $remoteFile;
