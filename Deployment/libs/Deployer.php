@@ -406,15 +406,17 @@ class Deployer
 			if ($neg = substr($pattern, 0, 1) === '!') {
 				$pattern = substr($pattern, 1);
 			}
-			if (substr($pattern, -1) === '/') { // trailing slash means directory
-				if (!$isDir) {
-					continue;
-				}
-				$pattern = substr($pattern, 0, -1);
-			}
-			if (strpos($pattern, '/') === FALSE) { // no slash means file name
+
+			if (strpos($pattern, '/') === FALSE) { // no slash means base name
 				if (fnmatch($pattern, end($path), FNM_CASEFOLD)) {
 					$res = !$neg;
+				}
+				continue;
+
+			} elseif (substr($pattern, -1) === '/') { // trailing slash means directory
+				$pattern = trim($pattern, '/');
+				if (!$isDir && count($path) <= count(explode('/', $pattern))) {
+					continue;
 				}
 			}
 
