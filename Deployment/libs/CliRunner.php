@@ -187,10 +187,16 @@ XX
 		$this->mode = $options['--generate'] ? 'generate' : ($options['--test'] ? 'test' : NULL);
 		$this->configFile = $options['config'];
 
-		if (pathinfo($options['config'], PATHINFO_EXTENSION) == 'php') {
-			return include $options['config'];
+		return $this->loadConfigFile($options['config']);
+	}
+
+
+	protected function loadConfigFile($file)
+	{
+		if (pathinfo($file, PATHINFO_EXTENSION) == 'php') {
+			return include $file;
 		} else {
-			return parse_ini_file($options['config'], TRUE);
+			return parse_ini_file($file, TRUE);
 		}
 	}
 
