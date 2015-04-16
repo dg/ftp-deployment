@@ -35,7 +35,8 @@ colors = yes
 [my site] ; Optional section (there may be more than one section).
 ; remote FTP server
 remote = ftp://user:secretpassword@ftp.example.com/directory
-; you can use ftps:// or sftp:// protocols (sftp requires SSH2 extension)
+; you can use ftps:// or sftp:// protocols
+; sftp requires SSH2 extension and an absolute path to target directory
 
 ; FTP passive mode
 passivemode = yes
