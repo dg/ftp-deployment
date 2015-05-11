@@ -2,9 +2,9 @@ FTP Deployment: smart upload [![Buy me a coffee](http://files.nette.org/images/c
 ====================================
 
 [![Build Status](https://travis-ci.org/dg/ftp-deployment.svg?branch=master)](https://travis-ci.org/dg/ftp-deployment)
-[![Latest Stable Version](https://poser.pugx.org/dg/ftp-deployment/v/stable.svg)](https://packagist.org/packages/hyyan/admin-color-schema)
-[![Total Downloads](https://poser.pugx.org/dg/ftp-deployment/downloads.svg)](https://packagist.org/packages/hyyan/admin-color-schema)
-[![License](https://poser.pugx.org/dg/ftp-deployment/license.svg)](https://packagist.org/packages/hyyan/admin-color-schema)
+[![Latest Stable Version](https://poser.pugx.org/dg/ftp-deployment/v/stable.svg)](https://packagist.org/packages/dg/ftp-deployment)
+[![Total Downloads](https://poser.pugx.org/dg/ftp-deployment/downloads.svg)](https://packagist.org/packages/dg/ftp-deployment)
+[![License](https://poser.pugx.org/dg/ftp-deployment/license.svg)](https://packagist.org/packages/dg/ftp-deployment)
 
 
 FTP deployment is a tool for automated deployment to an FTP server.
