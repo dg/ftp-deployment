@@ -40,7 +40,7 @@ remote = ftp://user:secretpassword@ftp.example.com/directory
 ; FTP passive mode
 passivemode = yes
 
-; local path (optional)
+; local path (optional can be set by option -local=<PATH>)
 local = .
 
 ; run in test-mode? (can be enabled by option -t or --test)
