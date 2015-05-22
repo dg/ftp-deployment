@@ -135,7 +135,18 @@ class FtpServer implements Server
 	public function renameFile($old, $new)
 	{
 		$this->removeFile($new);
-		$this->ftp('rename', $old, $new); // TODO: zachovat permissions
+		$retry = self::RETRIES;
+		upload:
+        try {
+            $this->ftp('rename', $old, $new); // TODO: zachovat permissions
+        } catch (FtpException $e) {
+            @ftp_close($this->connection); // intentionally @
+            $this->connect();
+            if (--$retry) {
+                goto upload;
+            }
+            throw new FtpException("Cannot rename file $old to $new, number of retries exceeded. Error: {$e->getMessage()}");
+        }
 	}
 
 
