@@ -129,7 +129,9 @@ class Deployer
 
 		$this->logger->log("Creating remote file $this->deploymentFile.running");
 		$root = $this->server->getDir();
-		$this->server->writeFile(tempnam($this->tempDir, 'deploy'), $runningFile = "$root/$this->deploymentFile.running");
+		$runningFile = "$root/$this->deploymentFile.running";
+		$this->server->createDir(str_replace('\\', '/', dirname($runningFile)));
+		$this->server->writeFile(tempnam($this->tempDir, 'deploy'), $runningFile);
 
 		if ($runBefore[0]) {
 			$this->logger->log("\nBefore-jobs:");
@@ -215,7 +217,9 @@ class Deployer
 		foreach ($localFiles as $k => $v) {
 			$s .= "$v=$k\n";
 		}
-		file_put_contents($file = $this->local . '/' . $this->deploymentFile, gzdeflate($s, 9));
+		$file = $this->local . '/' . $this->deploymentFile;
+		@mkdir(dirname($file)); // @ dir may exists
+		file_put_contents($file, gzdeflate($s, 9));
 		return $file;
 	}
 
