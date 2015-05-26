@@ -317,7 +317,7 @@ class Deployer
 				$list += $this->collectFiles($short);
 
 			} elseif (is_file($path)) {
-				$list[$short] = md5_file($this->preprocess($path));
+				$list[$short] = self::hashFile($this->preprocess($path));
 			}
 		}
 		$iterator->close();
@@ -387,6 +387,25 @@ class Deployer
 			} else {
 				throw new \InvalidArgumentException("Invalid job $job.");
 			}
+		}
+	}
+
+
+	/**
+	 * Computes hash.
+	 * @param  string
+	 * @return string
+	 */
+	public static function hashFile($file)
+	{
+		if (filesize($file) > 5e6) {
+			return md5_file($file);
+		} else {
+			$s = file_get_contents($file);
+			if (preg_match('#^[\x09\x0A\x0D\x20-\x7E\x80-\xFF]*+\z#', $s)) {
+				$s = str_replace("\r\n", "\n", $s);
+			}
+			return md5($s);
 		}
 	}
 
