@@ -71,6 +71,9 @@ purge[] = temp/cache
 
 ; files to preprocess (defaults to *.js *.css)
 preprocess = no
+
+; file which contains hashes of all uploaded files (defaults to .htdeployment)
+deploymentfile = .deployment
 ```
 
 Configuration can also be stored in a PHP file.
