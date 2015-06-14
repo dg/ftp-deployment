@@ -24,7 +24,9 @@ class CliRunner
 
 	/** @var string  test|generate|NULL */
 	private $mode;
-
+        
+        /** @var string local path */
+        private $local;
 
 	/** @return int|NULL */
 	public function run()
@@ -95,7 +97,7 @@ class CliRunner
 	private function createDeployer($config)
 	{
 		$config = array_change_key_case($config, CASE_LOWER) + [
-			'local' => dirname($this->configFile),
+			'local' => $this->local ? $this->local : dirname($this->configFile),
 			'passivemode' => TRUE,
 			'ignore' => '',
 			'allowdelete' => TRUE,
@@ -167,15 +169,17 @@ class CliRunner
 FTP deployment v2.1
 -------------------
 Usage:
-	deployment.php <config_file> [-t | --test]
+	deployment.php <config_file> -local=<PATH> [-t | --test]
 
 Options:
 	-t | --test      Run in test-mode.
 	--generate       Only generates deployment file.
+        -local=<PATH>    set the local path
 
 XX
 		, [
 			'config' => [CommandLine::REALPATH => TRUE],
+                        '-local'  =>  [CommandLine::ARGUMENT => TRUE],
 		]);
 
 		if ($cmd->isEmpty()) {
@@ -185,6 +189,7 @@ XX
 
 		$options = $cmd->parse();
 		$this->mode = $options['--generate'] ? 'generate' : ($options['--test'] ? 'test' : NULL);
+                $this->local = isset($options['-local']) ? $options['-local'] : NULL;
 		$this->configFile = $options['config'];
 
 		return $this->loadConfigFile($options['config']);
