@@ -95,7 +95,7 @@ class CliRunner
 	private function createDeployer($config)
 	{
 		$config = array_change_key_case($config, CASE_LOWER) + [
-			'local' => dirname($this->configFile),
+			'local' => '',
 			'passivemode' => TRUE,
 			'ignore' => '',
 			'allowdelete' => TRUE,
@@ -112,6 +112,13 @@ class CliRunner
 		$server = parse_url($config['remote'], PHP_URL_SCHEME) === 'sftp'
 			? new SshServer($config['remote'])
 			: new FtpServer($config['remote'], (bool) $config['passivemode']);
+
+		if (!preg_match('#/|\\\\|[a-z]:#iA', $config['local'])) {
+			if ($config['local'] && getcwd() !== dirname($this->configFile)) {
+				$this->logger->log('WARNING: the "local" path is now relative to the directory where ' . basename($this->configFile) . ' is placed', 'red');
+			}
+			$config['local'] = dirname($this->configFile) . '/' . $config['local'];
+		}
 
 		$deployment = new Deployer($server, $config['local'], $this->logger);
 
