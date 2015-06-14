@@ -51,7 +51,7 @@ class Preprocessor
 		if (substr($origFile, -3) === '.js') {
 			$cmd .= escapeshellarg($dir . '/Google-Closure-Compiler/compiler.jar') . ' --warning_level QUIET';
 		} else {
-			$cmd .= escapeshellarg($dir . '/YUI-Compressor/yuicompressor-2.4.7.jar') . ' --type css';
+			$cmd .= escapeshellarg($dir . '/YUI-Compressor/yuicompressor-2.4.8.jar') . ' --type css';
 		}
 		list($ok, $output) = $this->execute($cmd, $content);
 		if (!$ok) {
