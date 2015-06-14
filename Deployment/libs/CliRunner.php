@@ -164,7 +164,7 @@ class CliRunner
 	{
 		$cmd = new CommandLine(<<<XX
 
-FTP deployment v2.1
+FTP deployment v2.2
 -------------------
 Usage:
 	deployment.php <config_file> [-t | --test]
