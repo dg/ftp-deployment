@@ -1,7 +1,7 @@
 <?php
 
-return array(
-	'my site' => array(
+return [
+	'my site' => [
 		'remote' => 'ftp://user:secretpassword@ftp.example.com/directory',
 		'local' => '.',
 		'test' => FALSE,
@@ -14,20 +14,20 @@ return array(
 			!temp/.htaccess
 		',
 		'allowdelete' => TRUE,
-		'before' => array(
+		'before' => [
 			function (Deployment\Server $server, Deployment\Logger $logger, Deployment\Deployer $deployer) {
 				$logger->log('Hello!');
 			},
-		),
-		'after' => array(
+		],
+		'after' => [
 			'http://example.com/deployment.php?after'
-		),
-		'purge' => array(
+		],
+		'purge' => [
 			'temp/cache',
-		),
+		],
 		'preprocess' => FALSE,
-	),
+	],
 
 	'tempdir' => __DIR__ . '/temp',
 	'colors' => TRUE,
-);
+];
