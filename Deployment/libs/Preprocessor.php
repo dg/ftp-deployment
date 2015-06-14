@@ -34,25 +34,49 @@ class Preprocessor
 
 
 	/**
-	 * Compress JS or CSS file.
+	 * Compress JS file.
 	 * @param  string  source code
 	 * @param  string  original file name
 	 * @return string  compressed source
 	 */
-	public function compress($content, $origFile)
+	public function compressJs($content, $origFile)
 	{
 		if ($this->requireCompressMark && !preg_match('#/\*+!#', $content)) { // must contain /**!
 			return $content;
 		}
 		$this->logger->log("Compressing $origFile");
 
-		$dir = dirname(__DIR__) . '/vendor';
-		$cmd = escapeshellarg($this->javaBinary) . ' -jar ';
-		if (substr($origFile, -3) === '.js') {
-			$cmd .= escapeshellarg($dir . '/Google-Closure-Compiler/compiler.jar') . ' --warning_level QUIET';
-		} else {
-			$cmd .= escapeshellarg($dir . '/YUI-Compressor/yuicompressor-2.4.8.jar') . ' --type css';
+		$output = @file_get_contents('https://closure-compiler.appspot.com/compile', FALSE, stream_context_create([
+			'http' => [
+				'method' => 'POST',
+				'header' => 'Content-type: application/x-www-form-urlencoded',
+				'content' => 'output_info=compiled_code&js_code=' . urlencode($content),
+			]
+		]));
+		if (!$output) {
+			$error = error_get_last();
+			$this->logger->log("Unable to minfy: $error[message]\n");
+			return $content;
 		}
+		return $output;
+	}
+
+
+	/**
+	 * Compress CSS file.
+	 * @param  string  source code
+	 * @param  string  original file name
+	 * @return string  compressed source
+	 */
+	public function compressCss($content, $origFile)
+	{
+		if ($this->requireCompressMark && !preg_match('#/\*+!#', $content)) { // must contain /**!
+			return $content;
+		}
+		$this->logger->log("Compressing $origFile");
+
+		$cmd = escapeshellarg($this->javaBinary) . ' -jar '
+			. escapeshellarg(dirname(__DIR__) . '/vendor/YUI-Compressor/yuicompressor-2.4.8.jar') . ' --type css';
 		list($ok, $output) = $this->execute($cmd, $content);
 		if (!$ok) {
 			$this->logger->log("Error while executing $cmd");

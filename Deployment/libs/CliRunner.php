@@ -119,10 +119,10 @@ class CliRunner
 			$deployment->preprocessMasks = $config['preprocess'] == 1 ? ['*.js', '*.css'] : self::toArray($config['preprocess']); // intentionally ==
 			$preprocessor = new Preprocessor($this->logger);
 			$deployment->addFilter('js', [$preprocessor, 'expandApacheImports']);
-			$deployment->addFilter('js', [$preprocessor, 'compress'], TRUE);
+			$deployment->addFilter('js', [$preprocessor, 'compressJs'], TRUE);
 			$deployment->addFilter('css', [$preprocessor, 'expandApacheImports']);
 			$deployment->addFilter('css', [$preprocessor, 'expandCssImports']);
-			$deployment->addFilter('css', [$preprocessor, 'compress'], TRUE);
+			$deployment->addFilter('css', [$preprocessor, 'compressCss'], TRUE);
 		}
 
 		$deployment->ignoreMasks = array_merge(
