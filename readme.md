@@ -1,6 +1,11 @@
 FTP Deployment: smart upload [![Buy me a coffee](http://files.nette.org/images/coffee1s.png)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=EVVM5U5T47AA2)
 ====================================
 
+[![Downloads this Month](https://img.shields.io/packagist/dm/dg/ftp-deployment.svg)](https://packagist.org/packages/dg/ftp-deployment)
+[![Build Status](https://travis-ci.org/dg/ftp-deployment.svg?branch=master)](https://travis-ci.org/dg/ftp-deployment)
+[![Latest Stable Version](https://poser.pugx.org/dg/ftp-deployment/v/stable)](https://github.com/dg/ftp-deployment/releases)
+[![License](https://img.shields.io/badge/license-New%20BSD-blue.svg)](https://github.com/dg/ftp-deployment/blob/master/license.md)
+
 FTP deployment is a tool for automated deployment to an FTP server.
 
 There is nothing worse than uploading web applications to FTP server manually,
