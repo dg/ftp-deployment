@@ -231,9 +231,3 @@ class SshServer implements Server
 	}
 
 }
-
-
-
-class SshException extends ServerException
-{
-}

@@ -285,9 +285,3 @@ class FtpServer implements Server
 	}
 
 }
-
-
-
-class FtpException extends ServerException
-{
-}

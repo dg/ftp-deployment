@@ -79,9 +79,3 @@ interface Server
 	function execute($command);
 
 }
-
-
-
-class ServerException extends \Exception
-{
-}
