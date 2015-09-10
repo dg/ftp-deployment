@@ -218,7 +218,7 @@ class Deployer
 			$s .= "$v=$k\n";
 		}
 		$file = $this->local . '/' . $this->deploymentFile;
-		@mkdir(dirname($file)); // @ dir may exists
+		@mkdir(dirname($file), 0777, TRUE); // @ dir may exists
 		file_put_contents($file, gzdeflate($s, 9));
 		return $file;
 	}
