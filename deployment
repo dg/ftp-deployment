@@ -1,9 +1,3 @@
 #!/usr/bin/env php
 <?php
-
-if (version_compare(PHP_VERSION, '5.4.0', '<')) {
-	echo 'Error: Deployment requires PHP 5.4.0 or newer.';
-	exit(1);
-}
-
 require __DIR__ . '/src/deployment.php';
