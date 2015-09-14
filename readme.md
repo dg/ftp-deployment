@@ -19,10 +19,10 @@ but many people are still using FTP. This tool is designed for them.
 FTP Deployment is a script written in PHP (requires PHP 5.4 or newer) and will automate
 the entire process. Just say which local folder to upload and where. This
 information is stored in a `deployment.ini` text file, which you can associate
-with `deployment.php` script, so deployment will become a one click thing.
+with `deploy.php` script, so deployment will become a one click thing.
 
 ```
-php deployment.php deployment.ini
+php deploy.php deployment.ini
 ```
 
 And what does the `deployment.ini` file contain? Only the `remote` item is required, all the others are optional:
@@ -105,10 +105,10 @@ Syncing a large number of files attempts to run in (something like) a transactio
 uploaded with extension `.deploytmp` and then quickly renamed.
 
 An `.htdeployment` file is uploaded to the server, which contains MD5 hashes of all the files and
-is used for synchronization. So the next time you run `deployment.php`, only modified files are uploaded
+is used for synchronization. So the next time you run `deploy.php`, only modified files are uploaded
 and deleted files are deleted on server (if it is not forbidden by the `allowdelete` directive).
 
-Uploaded files can be processed by a preprocessor. These rules are predefined in the `deployment.php` file: `.css` files
+Uploaded files can be processed by a preprocessor. These rules are predefined in the `CliRunner.php` file: `.css` files
 are compressed using the YUI Compressor and `.js` minified by Google Closure Compiler. These
 tools are already included in the distribution, however, they require the presence of Java.
 
