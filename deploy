@@ -6,4 +6,4 @@ if (version_compare(PHP_VERSION, '5.4.0', '<')) {
 	exit(1);
 }
 
-require __DIR__ . '/deploy.php';
+require __DIR__ . '/src/deploy.php';

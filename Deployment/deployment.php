@@ -1,2 +1,2 @@
 <?php
-require __DIR__ . '/deploy.php';
+require __DIR__ . '/../src/deploy.php';
