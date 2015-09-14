@@ -19,7 +19,7 @@
 		"nette/tester": "~1.3"
 	},
 	"autoload": {
-		"classmap": ["Deployment/"]
+		"classmap": ["src/"]
 	},
-	"bin": ["Deployment/deployment"]
+	"bin": ["deployment"]
 }
