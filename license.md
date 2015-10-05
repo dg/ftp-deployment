@@ -1,7 +1,7 @@
 New BSD License
 ---------------
 
-Copyright (c) 2009 David Grudl (http://davidgrudl.com)
+Copyright (c) 2009 David Grudl (https://davidgrudl.com)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,

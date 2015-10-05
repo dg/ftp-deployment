@@ -3,7 +3,7 @@
 /**
  * FTP Deployment
  *
- * Copyright (c) 2009 David Grudl (http://davidgrudl.com)
+ * Copyright (c) 2009 David Grudl (https://davidgrudl.com)
  */
 
 namespace Deployment;
