@@ -53,9 +53,9 @@ class SshServer implements Server
 			$parts = parse_url($this->url);
 			$this->connection = ssh2_connect($parts['host'], empty($parts['port']) ? 22 : (int) $parts['port']);
 			if (isset($parts['pass'])) {
-				ssh2_auth_password($this->connection, $parts['user'], $parts['pass']);
+				ssh2_auth_password($this->connection, urldecode($parts['user']), urldecode($parts['pass']));
 			} else {
-				ssh2_auth_agent($this->connection, $parts['user']);
+				ssh2_auth_agent($this->connection, urldecode($parts['user']));
 			}
 			$this->sftp = ssh2_sftp($this->connection);
 		});
