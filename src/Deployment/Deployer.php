@@ -309,9 +309,6 @@ class Deployer
 			if ($entry == '.' || $entry == '..') {
 				continue;
 
-			} elseif (!is_readable($path)) {
-				continue;
-
 			} elseif ($this->matchMask($short, $this->ignoreMasks, is_dir($path))) {
 				$this->logger->log(str_pad("Ignoring .$short", 40), 'gray');
 				continue;
@@ -336,18 +333,17 @@ class Deployer
 	 */
 	private function preprocess($file)
 	{
-		$path = realpath($file);
-		$ext = pathinfo($path, PATHINFO_EXTENSION);
+		$ext = pathinfo($file, PATHINFO_EXTENSION);
 		if (!isset($this->filters[$ext]) || !$this->matchMask($file, $this->preprocessMasks)) {
-			return $path;
+			return $file;
 		}
 
-		$content = file_get_contents($path);
+		$content = file_get_contents($file);
 		foreach ($this->filters[$ext] as $info) {
 			if ($info['cached'] && is_file($tempFile = $this->tempDir . '/' . md5($content))) {
 				$content = file_get_contents($tempFile);
 			} else {
-				$content = call_user_func($info['filter'], $content, $path);
+				$content = call_user_func($info['filter'], $content, $file);
 				if ($info['cached']) {
 					file_put_contents($tempFile, $content);
 				}
