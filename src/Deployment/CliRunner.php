@@ -16,6 +16,9 @@ namespace Deployment;
  */
 class CliRunner
 {
+	/** @var string[] */
+	public $ignoreMasks = ['*.bak', '.svn' , '.git*', 'Thumbs.db', '.DS_Store', '.idea'];
+
 	/** @var Logger */
 	private $logger;
 
@@ -132,10 +135,7 @@ class CliRunner
 			$deployment->addFilter('css', [$preprocessor, 'compressCss'], TRUE);
 		}
 
-		$deployment->ignoreMasks = array_merge(
-			['*.bak', '.svn' , '.git*', 'Thumbs.db', '.DS_Store'],
-			self::toArray($config['ignore'])
-		);
+		$deployment->ignoreMasks = array_merge($this->ignoreMasks, self::toArray($config['ignore']));
 		$deployment->deploymentFile = empty($config['deploymentfile']) ? $deployment->deploymentFile : $config['deploymentfile'];
 		$deployment->allowDelete = $config['allowdelete'];
 		$deployment->toPurge = self::toArray($config['purge'], TRUE);
