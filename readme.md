@@ -67,7 +67,10 @@ allowdelete = yes
 before[] = local: lessc assets/combined.less assets/combined.css
 before[] = http://example.com/deployment.php?before
 
-; jobs to run after file upload
+; jobs to run immediately after file upload
+afterupload[] = http://example.com/deployment.php?afterUpload
+
+; jobs to run after everything is done
 after[] = remote: unzip api.zip
 after[] = http://example.com/deployment.php?after
 
@@ -97,8 +100,8 @@ data/* - ignore everything inside the 'data' folder, but the folder will be crea
 project.pp[jx] - ignore files or folders 'project.ppj' and 'project.ppx'
 ```
 
-Before the upload starts and after it finishes, you can execute commands or call your scripts on
-the server (see `before` and `after`), which can, for example, switch the server to a maintenance mode.
+Before the upload starts, after it finishes and after all jobs, you can execute commands or call your scripts on
+the server (see `before`, `afterupload`, `after`), which can, for example, switch the server to a maintenance mode.
 If you use php-config - you can run lambda function with deployment environment.
 
 Syncing a large number of files attempts to run in (something like) a transaction: all files are
