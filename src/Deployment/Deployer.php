@@ -45,6 +45,9 @@ class Deployer
 	/** @var string */
 	private $localDir;
 
+	/** @var string */
+	private $remoteDir;
+
 	/** @var Logger */
 	private $logger;
 
@@ -82,6 +85,7 @@ class Deployer
 	{
 		$this->logger->log("Connecting to server");
 		$this->server->connect();
+		$this->remoteDir = $this->server->getDir();
 
 		$runBefore = [NULL, NULL];
 		foreach ($this->runBefore as $job) {
@@ -128,8 +132,7 @@ class Deployer
 		}
 
 		$this->logger->log("Creating remote file $this->deploymentFile.running");
-		$root = $this->server->getDir();
-		$runningFile = "$root/$this->deploymentFile.running";
+		$runningFile = "$this->remoteDir/$this->deploymentFile.running";
 		$this->server->createDir(str_replace('\\', '/', dirname($runningFile)));
 		$this->server->writeFile(tempnam($this->tempDir, 'deploy'), $runningFile);
 
@@ -151,9 +154,9 @@ class Deployer
 
 		foreach ((array) $this->toPurge as $path) {
 			$this->logger->log("\nCleaning $path");
-			$this->server->purge($root . '/' . $path, function($path) use ($root) {
+			$this->server->purge($this->remoteDir . '/' . $path, function($path) {
 				static $counter;
-				$path = substr($path, strlen($root));
+				$path = substr($path, strlen($this->remoteDir));
 				$path = preg_match('#/(.{1,60})$#', $path, $m) ? $m[1] : substr(basename($path), 0, 60);
 				echo str_pad($path . ' ' . str_repeat('.', $counter++ % 30 + 60 - strlen($path)), 90), "\x0D";
 			});
@@ -189,10 +192,9 @@ class Deployer
 	 */
 	private function loadDeploymentFile()
 	{
-		$root = $this->server->getDir();
 		$tempFile = tempnam($this->tempDir, 'deploy');
 		try {
-			$this->server->readFile($root . '/' . $this->deploymentFile, $tempFile);
+			$this->server->readFile($this->remoteDir . '/' . $this->deploymentFile, $tempFile);
 		} catch (ServerException $e) {
 			return;
 		}
@@ -231,11 +233,10 @@ class Deployer
 	 */
 	private function uploadPaths(array $paths)
 	{
-		$root = $this->server->getDir();
 		$prevDir = NULL;
 		$toRename = [];
 		foreach ($paths as $num => $path) {
-			$remotePath = $root . $path;
+			$remotePath = $this->remoteDir . $path;
 			$isDir = substr($remotePath, -1) === '/';
 			$remoteDir = $isDir ? substr($remotePath, 0, -1) : str_replace('\\', '/', dirname($remotePath));
 			if ($remoteDir !== $prevDir) {
@@ -276,9 +277,8 @@ class Deployer
 	private function deletePaths(array $paths)
 	{
 		rsort($paths);
-		$root = $this->server->getDir();
 		foreach ($paths as $num => $path) {
-			$remotePath = $root . $path;
+			$remotePath = $this->remoteDir . $path;
 			$this->writeProgress($num + 1, count($paths), "Deleting $path", NULL, 'maroon');
 			try {
 				if (substr($path, -1) === '/') { // is directory?
