@@ -248,8 +248,8 @@ class Deployer
 				continue;
 			}
 
-			$localFile = $this->preprocess($orig = $this->localDir . $path);
-			if (realpath($orig) !== $localFile) {
+			$localFile = $this->preprocess($path);
+			if ($localFile !== $this->localDir . $path) {
 				$path .= ' (filters applied)';
 			}
 
@@ -320,7 +320,7 @@ class Deployer
 				$list += $this->collectPaths($short);
 
 			} elseif (is_file($path)) {
-				$list[$short] = self::hashFile($this->preprocess($path));
+				$list[$short] = self::hashFile($this->preprocess($short));
 			}
 		}
 		$iterator->close();
@@ -330,22 +330,23 @@ class Deployer
 
 	/**
 	 * Calls preprocessors on file.
-	 * @param  string  full path
+	 * @param  string  relative path, starts with /
 	 * @return string  full path
 	 */
 	private function preprocess($file)
 	{
 		$ext = pathinfo($file, PATHINFO_EXTENSION);
 		if (!isset($this->filters[$ext]) || !$this->matchMask($file, $this->preprocessMasks)) {
-			return $file;
+			return $this->localDir . $file;
 		}
 
-		$content = file_get_contents($file);
+		$full = $this->localDir . str_replace('/', DIRECTORY_SEPARATOR, $file);
+		$content = file_get_contents($full);
 		foreach ($this->filters[$ext] as $info) {
 			if ($info['cached'] && is_file($tempFile = $this->tempDir . '/' . md5($content))) {
 				$content = file_get_contents($tempFile);
 			} else {
-				$content = call_user_func($info['filter'], $content, $file);
+				$content = call_user_func($info['filter'], $content, $full);
 				if ($info['cached']) {
 					file_put_contents($tempFile, $content);
 				}
