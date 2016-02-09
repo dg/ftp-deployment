@@ -37,6 +37,9 @@ class Deployer
 	public $runBefore;
 
 	/** @var array of string|callable */
+	public $runAfterUpload;
+
+	/** @var array of string|callable */
 	public $runAfter;
 
 	/** @var string */
@@ -144,6 +147,10 @@ class Deployer
 		if ($toUpload) {
 			$this->logger->log("\nUploading:");
 			$this->uploadPaths($toUpload);
+			if ($this->runAfterUpload) {
+				$this->logger->log("\nAfter-upload-jobs:");
+				$this->runJobs($this->runAfterUpload);
+			}
 			$this->logger->log("\nRenaming:");
 			$this->renamePaths($toUpload);
 			unlink($deploymentFile);
