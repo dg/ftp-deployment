@@ -16,6 +16,18 @@ namespace Deployment;
  */
 class CliRunner
 {
+	/** @var array */
+	public $defaults = [
+		'local' => '',
+		'passivemode' => TRUE,
+		'ignore' => '',
+		'allowdelete' => TRUE,
+		'purge' => '',
+		'before' => '',
+		'after' => '',
+		'preprocess' => TRUE,
+	];
+
 	/** @var string[] */
 	public $ignoreMasks = ['*.bak', '.svn' , '.git*', 'Thumbs.db', '.DS_Store', '.idea'];
 
@@ -97,16 +109,7 @@ class CliRunner
 	/** @return Deployer */
 	private function createDeployer($config)
 	{
-		$config = array_change_key_case($config, CASE_LOWER) + [
-			'local' => '',
-			'passivemode' => TRUE,
-			'ignore' => '',
-			'allowdelete' => TRUE,
-			'purge' => '',
-			'before' => '',
-			'after' => '',
-			'preprocess' => TRUE,
-		];
+		$config = array_change_key_case($config, CASE_LOWER) + $this->defaults;
 
 		if (empty($config['remote']) || !parse_url($config['remote'])) {
 			throw new \Exception("Missing or invalid 'remote' URL in config.");
