@@ -32,7 +32,7 @@ And what does the `deployment.ini` file contain? Only the `remote` item is requi
 log = ...
 
 ; directory for temporary files (defaults to system's temporary directory)
-tempdir = /temp/deployment
+tempDir = /temp/deployment
 
 ; enable colored highlights? (defaults to autodetect)
 colors = yes
@@ -43,7 +43,7 @@ remote = ftp://user:secretpassword@ftp.example.com/directory
 ; you can use ftps:// or sftp:// protocols (sftp requires SSH2 extension)
 
 ; FTP passive mode
-passivemode = yes
+passiveMode = yes
 
 ; local path (optional)
 local = .
@@ -61,14 +61,14 @@ ignore = "
 	!temp/.htaccess
 "
 ; is the script allowed to delete remote files? (defaults to yes)
-allowdelete = yes
+allowDelete = yes
 
 ; jobs to run before file upload
 before[] = local: lessc assets/combined.less assets/combined.css
 before[] = http://example.com/deployment.php?before
 
 ; jobs to run immediately after file upload
-afterupload[] = http://example.com/deployment.php?afterUpload
+afterUpload[] = http://example.com/deployment.php?afterUpload
 
 ; jobs to run after everything is done
 after[] = remote: unzip api.zip
@@ -81,7 +81,7 @@ purge[] = temp/cache
 preprocess = no
 
 ; file which contains hashes of all uploaded files (defaults to .htdeployment)
-deploymentfile = .deployment
+deploymentFile = .deployment
 ```
 
 Configuration can also be stored in a PHP file.
@@ -101,7 +101,7 @@ project.pp[jx] - ignore files or folders 'project.ppj' and 'project.ppx'
 ```
 
 Before the upload starts, after it finishes and after all jobs, you can execute commands or call your scripts on
-the server (see `before`, `afterupload`, `after`), which can, for example, switch the server to a maintenance mode.
+the server (see `before`, `afterUpload`, `after`), which can, for example, switch the server to a maintenance mode.
 If you use php-config - you can run lambda function with deployment environment.
 
 Syncing a large number of files attempts to run in (something like) a transaction: all files are
@@ -109,7 +109,7 @@ uploaded with extension `.deploytmp` and then quickly renamed.
 
 An `.htdeployment` file is uploaded to the server, which contains MD5 hashes of all the files and
 is used for synchronization. So the next time you run `deployment.php`, only modified files are uploaded
-and deleted files are deleted on server (if it is not forbidden by the `allowdelete` directive).
+and deleted files are deleted on server (if it is not forbidden by the `allowDelete` directive).
 
 Uploaded files can be processed by a preprocessor. These rules are predefined in the `deployment.php` file: `.css` files
 are compressed using the YUI Compressor and `.js` minified by Google Closure Compiler. These

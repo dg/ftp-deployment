@@ -13,13 +13,13 @@ return [
 			temp/*
 			!temp/.htaccess
 		',
-		'allowdelete' => TRUE,
+		'allowDelete' => TRUE,
 		'before' => [
 			function (Deployment\Server $server, Deployment\Logger $logger, Deployment\Deployer $deployer) {
 				$logger->log('Hello!');
 			},
 		],
-		'afterupload' => [
+		'afterUpload' => [
 			'http://example.com/deployment.php?afterUpload'
 		],
 		'after' => [
@@ -31,6 +31,6 @@ return [
 		'preprocess' => FALSE,
 	],
 
-	'tempdir' => __DIR__ . '/temp',
+	'tempDir' => __DIR__ . '/temp',
 	'colors' => TRUE,
 ];
