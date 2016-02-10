@@ -94,7 +94,9 @@ class CliRunner
 			}
 
 			if ($deployment->testMode) {
-				$this->logger->log('Test mode');
+				$this->logger->log('Test mode', 'lime');
+			} else {
+				$this->logger->log('Live mode', 'aqua');
 			}
 			if (!$deployment->allowDelete) {
 				$this->logger->log('Deleting disabled');
