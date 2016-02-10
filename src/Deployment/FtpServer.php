@@ -250,7 +250,21 @@ class FtpServer implements Server
 	 */
 	public function execute($command)
 	{
-		return $this->ftp('exec', $command);
+		if (preg_match('#^(mkdir|rmdir|unlink|mv|chmod)\s+(\S+)(?:\s+(\S+))?$#', $command, $m)) {
+			if ($m[1] === 'mkdir') {
+				$this->createDir($m[2]);
+			} elseif ($m[1] === 'rmdir') {
+				$this->removeDir($m[2]);
+			} elseif ($m[1] === 'unlink') {
+				$this->removeFile($m[2]);
+			} elseif ($m[1] === 'mv') {
+				$this->renameFile($m[2], $m[3]);
+			} elseif ($m[1] === 'chmod') {
+				$this->ftp('chmod', octdec($m[2]), $m[3]);
+			}
+		} else {
+			return $this->ftp('exec', $command);
+		}
 	}
 
 
