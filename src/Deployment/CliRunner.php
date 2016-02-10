@@ -53,17 +53,17 @@ class CliRunner
 			return 1;
 		}
 
-		$config += [
+		$options = array_change_key_case($config, CASE_LOWER) + [
 			'log' => preg_replace('#\.\w+$#', '.log', $this->configFile),
 			'tempdir' => sys_get_temp_dir() . '/deployment',
 			'colors' => (PHP_SAPI === 'cli' && ((function_exists('posix_isatty') && posix_isatty(STDOUT))
 				|| getenv('ConEmuANSI') === 'ON' || getenv('ANSICON') !== FALSE)),
 		];
 
-		$this->logger = new Logger($config['log']);
-		$this->logger->useColors = (bool) $config['colors'];
+		$this->logger = new Logger($options['log']);
+		$this->logger->useColors = (bool) $options['colors'];
 
-		if (!is_dir($tempDir = $config['tempdir'])) {
+		if (!is_dir($tempDir = $options['tempdir'])) {
 			$this->logger->log("Creating temporary directory $tempDir");
 			mkdir($tempDir, 0777, TRUE);
 		}
@@ -72,7 +72,7 @@ class CliRunner
 		$this->logger->log("Started at " . date('[Y/m/d H:i]'));
 		$this->logger->log("Config file is $this->configFile");
 
-		if (isset($config['remote']) && is_string($config['remote'])) {
+		if (isset($options['remote']) && is_string($options['remote'])) {
 			$config = ['' => $config];
 		}
 
