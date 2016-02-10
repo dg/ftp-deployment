@@ -144,6 +144,8 @@ class Deployer
 		if ($toUpload) {
 			$this->logger->log("\nUploading:");
 			$this->uploadPaths($toUpload);
+			$this->logger->log("\nRenaming:");
+			$this->renamePaths($toUpload);
 			unlink($deploymentFile);
 		}
 
@@ -234,7 +236,6 @@ class Deployer
 	private function uploadPaths(array $paths)
 	{
 		$prevDir = NULL;
-		$toRename = [];
 		foreach ($paths as $num => $path) {
 			$remotePath = $this->remoteDir . $path;
 			$isDir = substr($remotePath, -1) === '/';
@@ -254,17 +255,26 @@ class Deployer
 				$path .= ' (filters applied)';
 			}
 
-			$toRename[] = $remotePath;
 			$this->server->writeFile($localFile, $remotePath . self::TEMPORARY_SUFFIX, function($percent) use ($num, $paths, $path) {
 				$this->writeProgress($num + 1, count($paths), $path, $percent, 'green');
 			});
 			$this->writeProgress($num + 1, count($paths), $path, NULL, 'green');
 		}
+	}
 
-		$this->logger->log("\nRenaming:");
-		foreach ($toRename as $num => $path) {
-			$this->writeProgress($num + 1, count($toRename), "Renaming $path", NULL, 'olive');
-			$this->server->renameFile($path . self::TEMPORARY_SUFFIX, $path);
+
+	/**
+	 * Renames uploaded files.
+	 * @param  string[]  relative paths, starts with /
+	 * @return void
+	 */
+	private function renamePaths(array $paths)
+	{
+		$files = array_filter($paths, function ($path) { return substr($path, -1) !== '/'; });
+		foreach ($files as $num => $file) {
+			$this->writeProgress($num + 1, count($files), "Renaming $file", NULL, 'olive');
+			$remoteFile = $this->remoteDir . $file;
+			$this->server->renameFile($remoteFile . self::TEMPORARY_SUFFIX, $remoteFile);
 		}
 	}
 
