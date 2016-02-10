@@ -385,19 +385,23 @@ class Deployer
 	private function runJobs(array $jobs)
 	{
 		foreach ($jobs as $job) {
-			if (is_string($job) && preg_match('#^(https?|local|remote):(.+)#', $job, $m)) {
+			if (is_string($job) && preg_match('#^(https?|local|remote):\s*(.+)#', $job, $m)) {
 				if ($m[1] === 'local') {
 					$out = @system($m[2], $code);
 					$err = $code !== 0;
 				} elseif ($m[1] === 'remote') {
-					$out = $this->server->execute($m[2]);
-					$err = FALSE;
+					try {
+						$out = $this->server->execute($m[2]);
+					} catch (ServerException $e) {
+						$out = $e->getMessage();
+					}
+					$err = isset($e);
 				} else {
 					$err = ($out = @file_get_contents($job)) === FALSE;
 				}
-				$this->logger->log("$job: $out");
+				$this->logger->log($job . ($out == NULL ? '' : ": $out")); // intentionally ==
 				if ($err) {
-					throw new \RuntimeException("Error in job $job");
+					throw new \RuntimeException('Error in job');
 				}
 
 			} elseif (is_callable($job)) {
