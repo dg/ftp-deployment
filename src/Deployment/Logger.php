@@ -43,9 +43,9 @@ class Logger
 	];
 
 
-	public function __construct($fileName)
+	public function __construct($file)
 	{
-		$this->file = fopen($fileName, 'w');
+		$this->file = fopen($file, 'w');
 	}
 
 

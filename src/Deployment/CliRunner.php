@@ -75,8 +75,8 @@ class CliRunner
 
 			if ($this->mode === 'generate') {
 				$this->logger->log('Scanning files');
-				$localFiles = $deployment->collectFiles();
-				$this->logger->log("Saved " . $deployment->writeDeploymentFile($localFiles));
+				$localPaths = $deployment->collectPaths();
+				$this->logger->log("Saved " . $deployment->writeDeploymentFile($localPaths));
 				continue;
 			}
 

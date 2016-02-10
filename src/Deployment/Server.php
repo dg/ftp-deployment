@@ -24,44 +24,43 @@ interface Server
 	function connect();
 
 	/**
-	 * Reads file from server.
+	 * Reads file from server. Paths are absolute.
 	 * @return void
 	 */
 	function readFile($remote, $local);
 
 	/**
-	 * Uploads file to server.
+	 * Uploads file to server. Paths are absolute.
 	 * @return void
 	 */
 	function writeFile($local, $remote, callable $progress = NULL);
 
 	/**
-	 * Removes file from server if exists.
+	 * Removes file from server if exists. Path is absolute.
 	 * @return void
 	 */
 	function removeFile($file);
 
 	/**
-	 * Renames and rewrites file on server.
+	 * Renames and rewrites file on server. Paths are absolute.
 	 * @return void
 	 */
 	function renameFile($old, $new);
 
 	/**
-	 * Creates directories on server.
+	 * Creates directories on server. Path is absolute.
 	 * @return void
 	 */
 	function createDir($dir);
 
 	/**
-	 * Removes directory from server if exists.
+	 * Removes directory from server if exists. Path is absolute.
 	 * @return void
 	 */
 	function removeDir($dir);
 
 	/**
-	 * Recursive deletes content of directory or file.
-	 * @param  string
+	 * Recursive deletes content of directory or file. Path is absolute.
 	 * @return void
 	 */
 	function purge($path, callable $progress = NULL);

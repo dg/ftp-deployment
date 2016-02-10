@@ -205,31 +205,31 @@ class FtpServer implements Server
 	 * @param  string
 	 * @return void
 	 */
-	public function purge($path, callable $progress = NULL)
+	public function purge($dir, callable $progress = NULL)
 	{
 		$dirs = [];
-		foreach ((array) $this->ftp('nlist', $path) as $file) {
-			if ($file == NULL || $file === $path || preg_match('#(^|/)\\.+$#', $file)) { // intentionally ==
+		foreach ((array) $this->ftp('nlist', $dir) as $entry) {
+			if ($entry == NULL || $entry === $dir || preg_match('#(^|/)\\.+$#', $entry)) { // intentionally ==
 				continue;
-			} elseif (strpos($file, '/') === FALSE) {
-				$file = "$path/$file";
+			} elseif (strpos($entry, '/') === FALSE) {
+				$entry = "$dir/$entry";
 			}
 
-			if ($this->isDir($file)) {
-				$dirs[] = $tmp = "$path/.delete" . uniqid() . count($dirs);
-				$this->ftp('rename', $file, $tmp);
+			if ($this->isDir($entry)) {
+				$dirs[] = $tmp = "$dir/.delete" . uniqid() . count($dirs);
+				$this->ftp('rename', $entry, $tmp);
 			} else {
-				$this->ftp('delete', $file);
+				$this->ftp('delete', $entry);
 			}
 
 			if ($progress) {
-				$progress($file);
+				$progress($entry);
 			}
 		}
 
-		foreach ($dirs as $dir) {
-			$this->purge($dir, $progress);
-			$this->ftp('rmDir', $dir);
+		foreach ($dirs as $subdir) {
+			$this->purge($subdir, $progress);
+			$this->ftp('rmDir', $subdir);
 		}
 	}
 
