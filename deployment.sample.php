@@ -19,6 +19,9 @@ return [
 				$logger->log('Hello!');
 			},
 		],
+		'afterupload' => [
+			'http://example.com/deployment.php?afterUpload'
+		],
 		'after' => [
 			'http://example.com/deployment.php?after'
 		],

@@ -24,6 +24,7 @@ class CliRunner
 		'allowdelete' => TRUE,
 		'purge' => '',
 		'before' => '',
+		'afterupload' => '',
 		'after' => '',
 		'preprocess' => TRUE,
 	];
@@ -143,6 +144,7 @@ class CliRunner
 		$deployment->allowDelete = $config['allowdelete'];
 		$deployment->toPurge = self::toArray($config['purge'], TRUE);
 		$deployment->runBefore = self::toArray($config['before'], TRUE);
+		$deployment->runAfterUpload = self::toArray($config['afterupload'], TRUE);
 		$deployment->runAfter = self::toArray($config['after'], TRUE);
 		$deployment->testMode = !empty($config['test']) || $this->mode === 'test';
 

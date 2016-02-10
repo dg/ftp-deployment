@@ -37,6 +37,9 @@ class Deployer
 	public $runBefore;
 
 	/** @var array of string|callable */
+	public $runAfterUpload;
+
+	/** @var array of string|callable */
 	public $runAfter;
 
 	/** @var string */
@@ -260,9 +263,25 @@ class Deployer
 			$this->writeProgress($num + 1, count($paths), $path, NULL, 'green');
 		}
 
+		if ($this->runAfterUpload) {
+			$this->logger->log("\nAfter-upload-jobs:");
+			$this->runJobs($this->runAfterUpload);
+		}
+
+		$this->renameFiles($toRename);
+	}
+
+
+	/**
+	 * Renames uploaded files.
+	 * @param  string[]  relative paths, starts with /
+	 * @return void
+	 */
+	private function renameFiles(array $files)
+	{
 		$this->logger->log("\nRenaming:");
-		foreach ($toRename as $num => $path) {
-			$this->writeProgress($num + 1, count($toRename), "Renaming $path", NULL, 'olive');
+		foreach ($files as $num => $path) {
+			$this->writeProgress($num + 1, count($files), "Renaming $path", NULL, 'olive');
 			$this->server->renameFile($path . self::TEMPORARY_SUFFIX, $path);
 		}
 	}
