@@ -121,7 +121,7 @@ class FtpServer implements Server
 		try {
 			$this->ftp('delete', $file);
 		} catch (FtpException $e) {
-			if ($this->ftp('nlist', $file)) {
+			if (in_array($file, (array) $this->ftp('nlist', $file . '*'))) {
 				throw $e;
 			}
 		}
@@ -193,7 +193,7 @@ class FtpServer implements Server
 		try {
 			$this->ftp('rmDir', $dir);
 		} catch (FtpException $e) {
-			if ($this->ftp('nlist', $dir)) {
+			if (in_array($dir, (array) $this->ftp('nlist', $dir . '*'))) {
 				throw $e;
 			}
 		}
