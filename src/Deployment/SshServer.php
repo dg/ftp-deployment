@@ -210,21 +210,21 @@ class SshServer implements Server
 
 	private function protect(callable $func, $args = [])
 	{
-		set_error_handler(function ($severity, $message) {
-			restore_error_handler();
-			if (ini_get('html_errors')) {
-				$message = html_entity_decode(strip_tags($message));
-			}
-			if (preg_match('#^\w+\(\):\s*(.+)#', $message, $m)) {
-				$message = $m[1];
-			}
-			throw new SshException($message);
+		set_error_handler(function ($severity, $message) use (& $error) {
+			$error = $message;
 		});
-
 		$res = call_user_func_array($func, $args);
-
 		restore_error_handler();
-		if ($res === FALSE) {
+
+		if ($error) {
+			if (ini_get('html_errors')) {
+				$error = html_entity_decode(strip_tags($error));
+			}
+			if (preg_match('#^\w+\(\):\s*(.+)#', $error, $m)) {
+				$error = $m[1];
+			}
+			throw new SshException($error);
+		} elseif ($res === FALSE) {
 			throw new SshException(is_string($func) ? "$func failures." : NULL);
 		}
 		return $res;
