@@ -62,6 +62,7 @@ class CliRunner
 
 		$this->logger = new Logger($options['log']);
 		$this->logger->useColors = (bool) $options['colors'];
+		$this->logger->noProgress = $this->noProgress;
 
 		if (!is_dir($tempDir = $options['tempdir'])) {
 			$this->logger->log("Creating temporary directory $tempDir");
