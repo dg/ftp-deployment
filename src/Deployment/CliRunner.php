@@ -58,6 +58,7 @@ class CliRunner
 
 		$this->logger = new Logger($config['log']);
 		$this->logger->useColors = (bool) $config['colors'];
+		$this->logger->showProgress = (bool) $config['progress'];
 
 		if (!is_dir($tempDir = $config['tempdir'])) {
 			$this->logger->log("Creating temporary directory $tempDir");
@@ -173,6 +174,7 @@ Usage:
 Options:
 	-t | --test      Run in test-mode.
 	--generate       Only generates deployment file.
+	--no-progress    Hide the progress indicators.
 
 XX
 		, [
@@ -204,10 +206,11 @@ XX
 		$config = array_change_key_case($config, CASE_LOWER) + [
 			'log' => preg_replace('#\.\w+$#', '.log', $this->configFile),
 			'tempdir' => sys_get_temp_dir() . '/deployment',
+			'progress' => TRUE,
 			'colors' => (PHP_SAPI === 'cli' && ((function_exists('posix_isatty') && posix_isatty(STDOUT))
 				|| getenv('ConEmuANSI') === 'ON' || getenv('ANSICON') !== FALSE)),
 		];
-
+		$config['progress'] = $options['--no-progress'] ? FALSE : $config['progress'];
 		return $config;
 	}
 

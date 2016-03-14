@@ -22,6 +22,9 @@ class Logger
 	/** @var bool */
 	public $useColors;
 
+	/** @var bool */
+	public $showProgress = TRUE;
+
 	/** @var array */
 	private $colors = [
 		'black' => '0;30',
@@ -63,6 +66,19 @@ class Logger
 				. (empty($c[1]) ? '' : ';4' . substr($this->colors[$c[1]], -1)) . "m$s\033[0m";
 		}
 		echo $s;
+	}
+
+
+	/**
+	 * Echos a progress message.
+	 * @param  string
+	 * @return void
+	 */
+	public function progress($message)
+	{
+		if ($this->showProgress) {
+			echo $message, "\x0D";
+		}
 	}
 
 }
