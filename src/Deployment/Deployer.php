@@ -167,9 +167,9 @@ class Deployer
 				static $counter;
 				$path = substr($path, strlen($this->remoteDir));
 				$path = preg_match('#/(.{1,60})$#', $path, $m) ? $m[1] : substr(basename($path), 0, 60);
-				echo str_pad($path . ' ' . str_repeat('.', $counter++ % 30 + 60 - strlen($path)), 90), "\x0D";
+				$this->logger->progress(str_pad($path . ' ' . str_repeat('.', $counter++ % 30 + 60 - strlen($path)), 90));
 			});
-			echo str_repeat(' ', 91) . "\x0D";
+			$this->logger->progress(str_repeat(' ', 91));
 		}
 
 		if ($this->runAfter) {
@@ -321,7 +321,7 @@ class Deployer
 		$iterator = dir($this->localDir . $subdir);
 		$counter = 0;
 		while (FALSE !== ($entry = $iterator->read())) {
-			echo str_pad(str_repeat('.', $counter++ % 40), 40), "\x0D";
+			$this->logger->progress(str_pad(str_repeat('.', $counter++ % 40), 40));
 
 			$path = "$this->localDir$subdir/$entry";
 			$short = "$subdir/$entry";
@@ -484,7 +484,7 @@ class Deployer
 		if ($percent === NULL) {
 			$this->logger->log($s, $color);
 		} else {
-			echo $s . ' [' . round($percent) . "%]\x0D";
+			$this->logger->progress($s . ' [' . round($percent) . "%]");
 		}
 	}
 

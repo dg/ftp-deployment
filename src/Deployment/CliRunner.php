@@ -62,6 +62,7 @@ class CliRunner
 
 		$this->logger = new Logger($options['log']);
 		$this->logger->useColors = (bool) $options['colors'];
+		$this->logger->noProgress = $this->noProgress;
 
 		if (!is_dir($tempDir = $options['tempdir'])) {
 			$this->logger->log("Creating temporary directory $tempDir");
@@ -187,6 +188,7 @@ Usage:
 Options:
 	-t | --test      Run in test-mode.
 	--generate       Only generates deployment file.
+	--no-progress    Prevent progress indicator prints.
 
 XX
 		, [
@@ -200,6 +202,7 @@ XX
 
 		$options = $cmd->parse();
 		$this->mode = $options['--generate'] ? 'generate' : ($options['--test'] ? 'test' : NULL);
+		$this->noProgress = !is_null($options['--no-progress']);
 		$this->configFile = $options['config'];
 
 		return $this->loadConfigFile($options['config']);
