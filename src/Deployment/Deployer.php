@@ -163,7 +163,7 @@ class Deployer
 
 		foreach ((array) $this->toPurge as $path) {
 			$this->logger->log("\nCleaning $path");
-			$this->server->purge($this->remoteDir . '/' . $path, function($path) {
+			$this->server->purge($this->remoteDir . '/' . $path, function ($path) {
 				static $counter;
 				$path = substr($path, strlen($this->remoteDir));
 				$path = preg_match('#/(.{1,60})$#', $path, $m) ? $m[1] : substr(basename($path), 0, 60);
@@ -262,7 +262,7 @@ class Deployer
 				$path .= ' (filters applied)';
 			}
 
-			$this->server->writeFile($localFile, $remotePath . self::TEMPORARY_SUFFIX, function($percent) use ($num, $paths, $path) {
+			$this->server->writeFile($localFile, $remotePath . self::TEMPORARY_SUFFIX, function ($percent) use ($num, $paths, $path) {
 				$this->writeProgress($num + 1, count($paths), $path, $percent, 'green');
 			});
 			$this->writeProgress($num + 1, count($paths), $path, NULL, 'green');

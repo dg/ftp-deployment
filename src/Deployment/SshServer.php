@@ -49,7 +49,7 @@ class SshServer implements Server
 	 */
 	public function connect()
 	{
-		$this->protect(function() {
+		$this->protect(function () {
 			$parts = parse_url($this->url);
 			$this->connection = ssh2_connect($parts['host'], empty($parts['port']) ? 22 : (int) $parts['port']);
 			if (isset($parts['pass'])) {
@@ -78,7 +78,7 @@ class SshServer implements Server
 	 */
 	public function writeFile($local, $remote, callable $progress = NULL)
 	{
-		$this->protect(function() use ($local, $remote, $progress) {
+		$this->protect(function () use ($local, $remote, $progress) {
 			$size = max(filesize($local), 1);
 			$len = 0;
 			$i = fopen($local, 'rb');
@@ -210,7 +210,7 @@ class SshServer implements Server
 
 	private function protect(callable $func, $args = [])
 	{
-		set_error_handler(function($severity, $message) {
+		set_error_handler(function ($severity, $message) {
 			restore_error_handler();
 			if (ini_get('html_errors')) {
 				$message = html_entity_decode(strip_tags($message));

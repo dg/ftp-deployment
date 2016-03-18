@@ -283,7 +283,7 @@ class FtpServer implements Server
 
 	private function protect(callable $func, $args = [])
 	{
-		set_error_handler(function($severity, $message) {
+		set_error_handler(function ($severity, $message) {
 			restore_error_handler();
 			if (ini_get('html_errors')) {
 				$message = html_entity_decode(strip_tags($message));

@@ -147,14 +147,14 @@ class CliRunner
 		set_time_limit(0);
 		date_default_timezone_set('Europe/Prague');
 
-		set_error_handler(function($severity, $message, $file, $line) {
+		set_error_handler(function ($severity, $message, $file, $line) {
 			if (($severity & error_reporting()) === $severity) {
 				$this->logger->log("Error: $message in $file on $line", 'red');
 				exit(1);
 			}
 			return FALSE;
 		});
-		set_exception_handler(function($e) {
+		set_exception_handler(function ($e) {
 			$this->logger->log("Error: {$e->getMessage()}\n\n$e", 'red');
 			exit(1);
 		});

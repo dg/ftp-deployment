@@ -94,7 +94,7 @@ class Preprocessor
 	public function expandCssImports($content, $origFile)
 	{
 		$dir = dirname($origFile);
-		return preg_replace_callback('#@import\s+(?:url)?[(\'"]+(.+)[)\'"]+;#U', function($m) use ($dir) {
+		return preg_replace_callback('#@import\s+(?:url)?[(\'"]+(.+)[)\'"]+;#U', function ($m) use ($dir) {
 			$file = $dir . '/' . $m[1];
 			if (!is_file($file)) {
 				return $m[0];
@@ -123,7 +123,7 @@ class Preprocessor
 	public function expandApacheImports($content, $origFile)
 	{
 		$dir = dirname($origFile);
-		return preg_replace_callback('~<!--#include\s+file="(.+)"\s+-->~U', function($m) use ($dir) {
+		return preg_replace_callback('~<!--#include\s+file="(.+)"\s+-->~U', function ($m) use ($dir) {
 			$file = $dir . '/' . $m[1];
 			if (is_file($file)) {
 				return $this->expandApacheImports(file_get_contents($file), dirname($file));
