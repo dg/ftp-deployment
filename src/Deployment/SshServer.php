@@ -210,8 +210,7 @@ class SshServer implements Server
 
 	private function protect(callable $func, $args = [])
 	{
-		set_error_handler(function($severity, $message) {
-			restore_error_handler();
+		$sshExceptionErrorHandler = function($severity, $message) {
 			if (ini_get('html_errors')) {
 				$message = html_entity_decode(strip_tags($message));
 			}
@@ -219,15 +218,29 @@ class SshServer implements Server
 				$message = $m[1];
 			}
 			throw new SshException($message);
-		});
+		};
 
-		$res = call_user_func_array($func, $args);
+		set_error_handler($sshExceptionErrorHandler);
+
+		// It's ugly code bellow due to PHP 5.4 compatibility.
+		// for PHP >= 5.5, 'finally' construct is a cleaner way.
+		try {
+			$return = call_user_func_array($func, $args);
+		} catch (\Exception $e) {
+			$return = $e;
+		}
 
 		restore_error_handler();
-		if ($res === FALSE) {
+
+		if ($return instanceof \Exception) {
+			throw $return;
+		}
+
+		if ($return === FALSE) {
 			throw new SshException(is_string($func) ? "$func failures." : NULL);
 		}
-		return $res;
+
+		return $return;
 	}
 
 }
