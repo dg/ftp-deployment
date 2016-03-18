@@ -41,6 +41,9 @@ class CliRunner
 	/** @var string  test|generate|NULL */
 	private $mode;
 
+	/** @var array[] */
+	private $batches;
+
 
 	/** @return int|NULL */
 	public function run()
@@ -53,17 +56,10 @@ class CliRunner
 			return 1;
 		}
 
-		$options = array_change_key_case($config, CASE_LOWER) + [
-			'log' => preg_replace('#\.\w+$#', '.log', $this->configFile),
-			'tempdir' => sys_get_temp_dir() . '/deployment',
-			'colors' => (PHP_SAPI === 'cli' && ((function_exists('posix_isatty') && posix_isatty(STDOUT))
-				|| getenv('ConEmuANSI') === 'ON' || getenv('ANSICON') !== FALSE)),
-		];
+		$this->logger = new Logger($config['log']);
+		$this->logger->useColors = (bool) $config['colors'];
 
-		$this->logger = new Logger($options['log']);
-		$this->logger->useColors = (bool) $options['colors'];
-
-		if (!is_dir($tempDir = $options['tempdir'])) {
+		if (!is_dir($tempDir = $config['tempdir'])) {
 			$this->logger->log("Creating temporary directory $tempDir");
 			mkdir($tempDir, 0777, TRUE);
 		}
@@ -72,18 +68,10 @@ class CliRunner
 		$this->logger->log("Started at " . date('[Y/m/d H:i]'));
 		$this->logger->log("Config file is $this->configFile");
 
-		if (isset($options['remote']) && is_string($options['remote'])) {
-			$config = ['' => $config];
-		}
+		foreach ($this->batches as $name => $batch) {
+			$this->logger->log("\nDeploying $name");
 
-		foreach ($config as $section => $cfg) {
-			if (!is_array($cfg)) {
-				continue;
-			}
-
-			$this->logger->log("\nDeploying $section");
-
-			$deployment = $this->createDeployer($cfg);
+			$deployment = $this->createDeployer($batch);
 			$deployment->tempDir = $tempDir;
 
 			if ($this->mode === 'generate') {
@@ -112,8 +100,6 @@ class CliRunner
 	/** @return Deployer */
 	private function createDeployer($config)
 	{
-		$config = array_change_key_case($config, CASE_LOWER) + $this->defaults;
-
 		if (empty($config['remote']) || !parse_url($config['remote'])) {
 			throw new \Exception("Missing or invalid 'remote' URL in config.");
 		}
@@ -202,7 +188,27 @@ XX
 		$this->mode = $options['--generate'] ? 'generate' : ($options['--test'] ? 'test' : NULL);
 		$this->configFile = $options['config'];
 
-		return $this->loadConfigFile($options['config']);
+		$config = $this->loadConfigFile($options['config']);
+		if (!$config) {
+			throw new \Exception('Missing config.');
+		}
+
+		$this->batches = isset($config['remote']) && is_string($config['remote'])
+			? ['' => $config]
+			: array_filter($config, 'is_array');
+
+		foreach ($this->batches as & $batch) {
+			$batch = array_change_key_case($batch, CASE_LOWER) + $this->defaults;
+		}
+
+		$config = array_change_key_case($config, CASE_LOWER) + [
+			'log' => preg_replace('#\.\w+$#', '.log', $this->configFile),
+			'tempdir' => sys_get_temp_dir() . '/deployment',
+			'colors' => (PHP_SAPI === 'cli' && ((function_exists('posix_isatty') && posix_isatty(STDOUT))
+				|| getenv('ConEmuANSI') === 'ON' || getenv('ANSICON') !== FALSE)),
+		];
+
+		return $config;
 	}
 
 
