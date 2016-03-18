@@ -277,7 +277,7 @@ class Deployer
 	 */
 	private function renamePaths(array $paths)
 	{
-		$files = array_filter($paths, function ($path) { return substr($path, -1) !== '/'; });
+		$files = array_values(array_filter($paths, function ($path) { return substr($path, -1) !== '/'; }));
 		foreach ($files as $num => $file) {
 			$this->writeProgress($num + 1, count($files), "Renaming $file", NULL, 'olive');
 			$remoteFile = $this->remoteDir . $file;
