@@ -25,7 +25,7 @@ with `deployment.php` script, so deployment will become a one click thing.
 php deployment.php deployment.ini
 ```
 
-And what does the `deployment.ini` file contain? Only the `remote` item is required, all the others are optional:
+And what does the `deployment.ini` file contain? **Only the `remote` item is required**, all the others are optional:
 
 ```ini
 ; log file (defaults to config file with .log extension)
@@ -41,6 +41,10 @@ colors = yes
 ; remote FTP server
 remote = ftp://user:secretpassword@ftp.example.com/directory
 ; you can use ftps:// or sftp:// protocols (sftp requires SSH2 extension)
+
+; do not like to specify user & password in 'remote'? Use these options:
+user = ...
+password = ...
 
 ; FTP passive mode
 passiveMode = yes

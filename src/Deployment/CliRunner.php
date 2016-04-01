@@ -101,13 +101,19 @@ class CliRunner
 	/** @return Deployer */
 	private function createDeployer($config)
 	{
-		if (empty($config['remote']) || !parse_url($config['remote'])) {
+		if (empty($config['remote']) || !($urlParts = parse_url($config['remote'])) || !isset($urlParts['scheme'], $urlParts['host'])) {
 			throw new \Exception("Missing or invalid 'remote' URL in config.");
 		}
+		if (isset($config['user'])) {
+			$urlParts['user'] = urlencode($config['user']);
+		}
+		if (isset($config['password'])) {
+			$urlParts['pass'] = urlencode($config['password']);
+		}
 
-		$server = parse_url($config['remote'], PHP_URL_SCHEME) === 'sftp'
-			? new SshServer($config['remote'])
-			: new FtpServer($config['remote'], (bool) $config['passivemode']);
+		$server = $urlParts['scheme'] === 'sftp'
+			? new SshServer($urlParts)
+			: new FtpServer($urlParts, (bool) $config['passivemode']);
 
 		if (!preg_match('#/|\\\\|[a-z]:#iA', $config['local'])) {
 			if ($config['local'] && getcwd() !== dirname($this->configFile)) {
