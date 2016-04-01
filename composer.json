@@ -12,11 +12,14 @@
 		}
 	],
 	"require": {
-		"php": ">=5.4.0",
-		"ext-openssl": "*"
+		"php": ">=5.4.0"
 	},
 	"require-dev": {
 		"nette/tester": "~1.3"
+	},
+	"suggest": {
+		"ext-openssl": "to connect to ftps:// server",
+		"ext-ssh2": "to connect to sftp:// server"
 	},
 	"autoload": {
 		"classmap": ["src/"]

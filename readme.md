@@ -132,3 +132,17 @@ This tool will combine scripts together and minify them with the Closure Compile
 
 In the `deployment.ini`, you can create multiple sections, i.e. you may have separate
 rules for data and for application.
+
+
+Installing FTP Deployment
+-------------------------
+
+FTP Deployment requires PHP 5.4 or later. It also requires openssl extensions for ftps:// and SSH2 extension for sftp:// connections.
+
+The easiest way to obtain FTP Deployment is to download [a single PHAR file](https://github.com/dg/ftp-deployment/releases).
+
+Or you can install it using Composer:
+
+```
+composer create-project dg/ftp-deployment
+```
