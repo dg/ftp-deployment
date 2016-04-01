@@ -22,12 +22,12 @@ class SshServer implements Server
 	/** @var resource */
 	private $sftp;
 
-	/** @var string */
+	/** @var array  see parse_url() */
 	private $url;
 
 
 	/**
-	 * @param  string  URL ftp://...
+	 * @param  string|array  URL ftp://...
 	 * @param  bool
 	 */
 	public function __construct($url)
@@ -35,11 +35,10 @@ class SshServer implements Server
 		if (!extension_loaded('ssh2')) {
 			throw new \Exception('PHP extension SSH2 is not loaded.');
 		}
-		$parts = parse_url($url);
-		if (!isset($parts['scheme'], $parts['user']) || $parts['scheme'] !== 'sftp') {
-			throw new \InvalidArgumentException("Invalid URL or missing username: $url");
+		$this->url = is_array($url) ? $url : parse_url($url);
+		if (!isset($this->url['scheme'], $this->url['user']) || $this->url['scheme'] !== 'sftp') {
+			throw new \InvalidArgumentException("Invalid URL or missing username");
 		}
-		$this->url = $url;
 	}
 
 
@@ -50,12 +49,11 @@ class SshServer implements Server
 	public function connect()
 	{
 		$this->protect(function () {
-			$parts = parse_url($this->url);
-			$this->connection = ssh2_connect($parts['host'], empty($parts['port']) ? 22 : (int) $parts['port']);
-			if (isset($parts['pass'])) {
-				ssh2_auth_password($this->connection, urldecode($parts['user']), urldecode($parts['pass']));
+			$this->connection = ssh2_connect($this->url['host'], empty($this->url['port']) ? 22 : (int) $this->url['port']);
+			if (isset($this->url['pass'])) {
+				ssh2_auth_password($this->connection, urldecode($this->url['user']), urldecode($this->url['pass']));
 			} else {
-				ssh2_auth_agent($this->connection, urldecode($parts['user']));
+				ssh2_auth_agent($this->connection, urldecode($this->url['user']));
 			}
 			$this->sftp = ssh2_sftp($this->connection);
 		});
@@ -190,7 +188,7 @@ class SshServer implements Server
 	 */
 	public function getDir()
 	{
-		return rtrim(parse_url($this->url, PHP_URL_PATH), '/');
+		return isset($this->url['path']) ? rtrim($this->url['path'], '/') : '';
 	}
 
 

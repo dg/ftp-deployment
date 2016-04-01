@@ -22,7 +22,7 @@ class FtpServer implements Server
 	/** @var resource */
 	private $connection;
 
-	/** @var string */
+	/** @var array  see parse_url() */
 	private $url;
 
 	/** @var bool */
@@ -30,7 +30,7 @@ class FtpServer implements Server
 
 
 	/**
-	 * @param  string  URL ftp://...
+	 * @param  string|array  URL ftp://...
 	 * @param  bool
 	 */
 	public function __construct($url, $passiveMode = TRUE)
@@ -38,11 +38,10 @@ class FtpServer implements Server
 		if (!extension_loaded('ftp')) {
 			throw new \Exception('PHP extension FTP is not loaded.');
 		}
-		$parts = parse_url($url);
-		if (!isset($parts['scheme'], $parts['user'], $parts['pass']) || ($parts['scheme'] !== 'ftp' && $parts['scheme'] !== 'ftps')) {
-			throw new \InvalidArgumentException("Invalid URL or missing username or password: $url");
+		$this->url = $url = is_array($url) ? $url : parse_url($url);
+		if (!isset($url['scheme'], $url['user'], $url['pass']) || ($url['scheme'] !== 'ftp' && $url['scheme'] !== 'ftps')) {
+			throw new \InvalidArgumentException("Invalid URL or missing username or password");
 		}
-		$this->url = $url;
 		$this->passiveMode = (bool) $passiveMode;
 	}
 
@@ -53,15 +52,14 @@ class FtpServer implements Server
 	 */
 	public function connect()
 	{
-		$parts = parse_url($this->url);
 		$this->connection = $this->protect(
-			$parts['scheme'] === 'ftp' ? 'ftp_connect' : 'ftp_ssl_connect',
-			[$parts['host'], empty($parts['port']) ? NULL : (int) $parts['port']]
+			$this->url['scheme'] === 'ftp' ? 'ftp_connect' : 'ftp_ssl_connect',
+			[$this->url['host'], empty($this->url['port']) ? NULL : (int) $this->url['port']]
 		);
-		$this->ftp('login', urldecode($parts['user']), urldecode($parts['pass']));
+		$this->ftp('login', urldecode($this->url['user']), urldecode($this->url['pass']));
 		$this->ftp('pasv', $this->passiveMode);
-		if (isset($parts['path'])) {
-			$this->ftp('chdir', $parts['path']);
+		if (isset($this->url['path'])) {
+			$this->ftp('chdir', $this->url['path']);
 		}
 	}
 
