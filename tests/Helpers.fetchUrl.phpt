@@ -11,5 +11,9 @@ Assert::contains('Example Domain', $output);
 Assert::null($error);
 
 $output = Helpers::fetchUrl('http://example.com/404', $error);
-Assert::same('', $output);
+if (extension_loaded('curl')) {
+	Assert::contains('Example Domain', $output);
+} else {
+	Assert::same('', $output);
+}
 Assert::contains('404', $error);

@@ -82,16 +82,36 @@ class Helpers
 	 */
 	public static function fetchUrl($url, & $error, array $postData = NULL)
 	{
-		$output = @file_get_contents($url, FALSE, stream_context_create([
-			'http' => $postData === NULL ? [] : [
-				'method' => 'POST',
-				'header' => 'Content-type: application/x-www-form-urlencoded',
-				'content' => http_build_query($postData, NULL, '&'),
-			]
-		]));
-		$error = $output === FALSE
-			? preg_replace("#^file_get_contents\(.*?\): #", '', error_get_last()['message'])
-			: NULL;
+		if (extension_loaded('curl')) {
+			$ch = curl_init($url);
+			$options = [
+				CURLOPT_RETURNTRANSFER => 1,
+				CURLOPT_FOLLOWLOCATION => 1,
+			];
+			if ($postData !== NULL) {
+				$options[CURLOPT_POST] = TRUE;
+				$options[CURLOPT_POSTFIELDS] = $postData;
+			}
+			curl_setopt_array($ch, $options);
+			$output = curl_exec($ch);
+			if (curl_errno($ch)) {
+				$error = curl_error($ch);
+			} elseif (($code = curl_getinfo($ch, CURLINFO_HTTP_CODE)) >= 400) {
+				$error = "responds with HTTP code $code";
+			}
+
+		} else {
+			$output = @file_get_contents($url, FALSE, stream_context_create([
+				'http' => $postData === NULL ? [] : [
+					'method' => 'POST',
+					'header' => 'Content-type: application/x-www-form-urlencoded',
+					'content' => http_build_query($postData, NULL, '&'),
+				]
+			]));
+			$error = $output === FALSE
+				? preg_replace("#^file_get_contents\(.*?\): #", '', error_get_last()['message'])
+				: NULL;
+		}
 		return (string) $output;
 	}
 
