@@ -10,13 +10,10 @@ namespace Deployment;
 
 
 /**
- * CSS and JS preprocessors. It requires Java, Google Closure Compiler and YUI Compressor.
+ * CSS and JS preprocessors.
  */
 class Preprocessor
 {
-	/** @var string  path to java binary */
-	public $javaBinary = 'java';
-
 	/** @var bool  compress only file when contains /**! */
 	public $requireCompressMark = TRUE;
 
@@ -67,15 +64,29 @@ class Preprocessor
 		}
 		$this->logger->log("Compressing $origFile");
 
-		$cmd = escapeshellarg($this->javaBinary) . ' -jar '
-			. escapeshellarg(dirname(__DIR__) . '/vendor/YUI-Compressor/yuicompressor-2.4.8.jar') . ' --type css';
-		list($ok, $output) = $this->execute($cmd, $content);
-		if (!$ok) {
-			$this->logger->log("Error while executing $cmd");
-			$this->logger->log($output);
+		$data = [
+			'code' => $content,
+			'type' => 'css',
+			'options' => [
+				'advanced' => TRUE,
+				'aggressiveMerging' => TRUE,
+				'rebase' => FALSE,
+				'processImport' => FALSE,
+				'compatibility' => 'ie8',
+				'keepSpecialComments' => '1',
+			],
+		];
+		$output = Helpers::fetchUrl('https://refresh-sf.herokuapp.com/css/', $error, $data);
+		if ($error) {
+			$this->logger->log("Unable to minfy: $error\n");
 			return $content;
 		}
-		return $output;
+		$json = @json_decode($output, TRUE);
+		if (!isset($json['code'])) {
+			$this->logger->log("Unable to minfy. Server response: $output\n");
+			return $content;
+		}
+		return $json['code'];
 	}
 
 
@@ -122,36 +133,6 @@ class Preprocessor
 			}
 			return $m[0];
 		}, $content);
-	}
-
-
-	/**
-	 * Executes command.
-	 * @return string
-	 */
-	private function execute($command, $input)
-	{
-		$process = proc_open(
-			$command,
-			[['pipe', 'r'], ['pipe', 'w'], ['pipe', 'w']],
-			$pipes,
-			NULL, NULL, ['bypass_shell' => TRUE]
-		);
-		if (!is_resource($process)) {
-			throw new \Exception("Unable start process $command.");
-		}
-
-		fwrite($pipes[0], $input);
-		fclose($pipes[0]);
-		$output = stream_get_contents($pipes[1]);
-		if (!$output) {
-			$output = stream_get_contents($pipes[2]);
-		}
-
-		return [
-			proc_close($process) === 0,
-			$output
-		];
 	}
 
 }

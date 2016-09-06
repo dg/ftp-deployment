@@ -90,7 +90,7 @@ class Helpers
 			];
 			if ($postData !== NULL) {
 				$options[CURLOPT_POST] = TRUE;
-				$options[CURLOPT_POSTFIELDS] = $postData;
+				$options[CURLOPT_POSTFIELDS] = http_build_query($postData, NULL, '&');
 			}
 			curl_setopt_array($ch, $options);
 			$output = curl_exec($ch);
