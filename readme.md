@@ -116,8 +116,7 @@ is used for synchronization. So the next time you run `deployment.php`, only mod
 and deleted files are deleted on server (if it is not forbidden by the `allowDelete` directive).
 
 Uploaded files can be processed by a preprocessor. These rules are predefined in the `deployment.php` file: `.css` files
-are compressed using the YUI Compressor and `.js` minified by Google Closure Compiler. These
-tools are already included in the distribution, however, they require the presence of Java.
+are compressed using the Clean-CSS and `.js` minified by Google Closure Compiler via online services.
 
 There is also a rule for expanding [mod_include](http://httpd.apache.org/docs/current/mod/mod_include.html) Apache directives.
 For example, you can create a file `combined.js`:
