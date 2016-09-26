@@ -48,15 +48,13 @@ class SshServer implements Server
 	 */
 	public function connect()
 	{
-		$this->protect(function () {
-			$this->connection = ssh2_connect($this->url['host'], empty($this->url['port']) ? 22 : (int) $this->url['port']);
-			if (isset($this->url['pass'])) {
-				ssh2_auth_password($this->connection, urldecode($this->url['user']), urldecode($this->url['pass']));
-			} else {
-				ssh2_auth_agent($this->connection, urldecode($this->url['user']));
-			}
-			$this->sftp = ssh2_sftp($this->connection);
-		});
+		$this->connection = $this->protect('ssh2_connect', [$this->url['host'], empty($this->url['port']) ? 22 : (int) $this->url['port']]);
+		if (isset($this->url['pass'])) {
+			$this->protect('ssh2_auth_password', [$this->connection, urldecode($this->url['user']), urldecode($this->url['pass'])]);
+		} else {
+			$this->protect('ssh2_auth_agent', [$this->connection, urldecode($this->url['user'])]);
+		}
+		$this->sftp = $this->protect('ssh2_sftp', [$this->connection]);
 	}
 
 
