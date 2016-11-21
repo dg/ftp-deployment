@@ -126,7 +126,7 @@ class SshServer implements Server
 	 */
 	public function createDir($dir)
 	{
-		if (!file_exists("ssh2.sftp://$this->sftp$dir")) {
+		if (trim($dir, '/') !== '' && !file_exists("ssh2.sftp://$this->sftp$dir")) {
 			$this->protect('ssh2_sftp_mkdir', [$this->sftp, $dir, 0777, TRUE]);
 		}
 	}
