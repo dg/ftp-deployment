@@ -395,7 +395,7 @@ class Deployer
 					}
 					$err = isset($e);
 				} else {
-					$err = ($out = @file_get_contents($job)) === FALSE;
+					$out = Helpers::fetchUrl($job, $err);
 				}
 				$this->logger->log($job . ($out == NULL ? '' : ": $out")); // intentionally ==
 				if ($err) {

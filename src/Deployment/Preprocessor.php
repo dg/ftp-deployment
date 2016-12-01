@@ -44,16 +44,10 @@ class Preprocessor
 		}
 		$this->logger->log("Compressing $origFile");
 
-		$output = @file_get_contents('https://closure-compiler.appspot.com/compile', FALSE, stream_context_create([
-			'http' => [
-				'method' => 'POST',
-				'header' => 'Content-type: application/x-www-form-urlencoded',
-				'content' => 'output_info=compiled_code&js_code=' . urlencode($content),
-			]
-		]));
-		if (!$output) {
-			$error = error_get_last();
-			$this->logger->log("Unable to minfy: $error[message]\n");
+		$data = ['output_info' => 'compiled_code', 'js_code' => $content];
+		$output = Helpers::fetchUrl('https://closure-compiler.appspot.com/compile', $error, $data);
+		if ($error) {
+			$this->logger->log("Unable to minfy: $error\n");
 			return $content;
 		}
 		return $output;

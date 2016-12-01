@@ -75,4 +75,24 @@ class Helpers
 		return $res;
 	}
 
+
+	/**
+	 * Processes HTTP request.
+	 * @return string
+	 */
+	public static function fetchUrl($url, & $error, array $postData = NULL)
+	{
+		$output = @file_get_contents($url, FALSE, stream_context_create([
+			'http' => $postData === NULL ? [] : [
+				'method' => 'POST',
+				'header' => 'Content-type: application/x-www-form-urlencoded',
+				'content' => http_build_query($postData, NULL, '&'),
+			]
+		]));
+		$error = $output === FALSE
+			? preg_replace("#^file_get_contents\(.*?\): #", '', error_get_last()['message'])
+			: NULL;
+		return (string) $output;
+	}
+
 }
