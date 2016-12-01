@@ -1,0 +1,118 @@
+<?php
+
+use Tester\Assert;
+use Deployment\Helpers;
+
+require __DIR__ . '/bootstrap.php';
+
+
+Assert::false( Helpers::matchMask('/deployment.ini', ['*.i[xy]i']) );
+Assert::false( Helpers::matchMask('/deployment.ini', ['*.i[!n]i']) );
+Assert::true( Helpers::matchMask('/deployment.ini', ['*.ini']) );
+Assert::false( Helpers::matchMask('deployment.ini', ['*.ini/']) );
+Assert::true( Helpers::matchMask('deployment.ini', ['/*.ini']) );
+Assert::true( Helpers::matchMask('.git', ['.g*']) );
+Assert::false( Helpers::matchMask('.git', ['.g*/']) );
+
+Assert::false( Helpers::matchMask('deployment.ini', ['*.ini', '!dep*']) );
+Assert::true( Helpers::matchMask('deployment.ini', ['*.ini', '!dep*', '*ment*']) );
+
+// a/* disallowes everything to the right, i.e. a/*/*/*
+// !a/*/c allowes directories to the left, i.e. a, a/*
+Assert::true(  Helpers::matchMask('a',     ['a']      ) );
+Assert::true(  Helpers::matchMask('a',     ['a'], TRUE) );
+Assert::false( Helpers::matchMask('a/b',   ['a']      ) );
+Assert::false( Helpers::matchMask('a/b',   ['a'], TRUE) );
+Assert::true(  Helpers::matchMask('a/b',   ['b']      ) );
+Assert::true(  Helpers::matchMask('a/b',   ['b'], TRUE) );
+Assert::false( Helpers::matchMask('a/b',   ['c']      ) );
+Assert::false( Helpers::matchMask('a/b',   ['c'], TRUE) );
+Assert::false( Helpers::matchMask('a',     ['*', '!a']      ) );
+Assert::false( Helpers::matchMask('a',     ['*', '!a'], TRUE) );
+Assert::true(  Helpers::matchMask('a/b',   ['*', '!a']      ) );
+Assert::true(  Helpers::matchMask('a/b',   ['*', '!a'], TRUE) );
+Assert::false( Helpers::matchMask('a/b',   ['*', '!b']      ) );
+Assert::false( Helpers::matchMask('a/b',   ['*', '!b'], TRUE) );
+Assert::true(  Helpers::matchMask('a/b',   ['*', '!c']      ) );
+Assert::true(  Helpers::matchMask('a/b',   ['*', '!c'], TRUE) );
+
+Assert::true(  Helpers::matchMask('a',     ['/a']      ) );
+Assert::true(  Helpers::matchMask('a',     ['/a'], TRUE) );
+Assert::true(  Helpers::matchMask('a/b',   ['/a']      ) );
+Assert::true(  Helpers::matchMask('a/b',   ['/a'], TRUE) );
+Assert::true(  Helpers::matchMask('a/b/b', ['/a']      ) );
+Assert::true(  Helpers::matchMask('a/b/b', ['/a'], TRUE) );
+Assert::false( Helpers::matchMask('a',     ['*', '!/a']      ) );
+Assert::false( Helpers::matchMask('a',     ['*', '!/a'], TRUE) );
+Assert::false( Helpers::matchMask('a/b',   ['*', '!/a']      ) );
+Assert::false( Helpers::matchMask('a/b',   ['*', '!/a'], TRUE) );
+Assert::false( Helpers::matchMask('a/b/b', ['*', '!/a']      ) );
+Assert::false( Helpers::matchMask('a/b/b', ['*', '!/a'], TRUE) );
+Assert::false( Helpers::matchMask('a',     ['a/']      ) );
+Assert::true(  Helpers::matchMask('a',     ['a/'], TRUE) );
+Assert::true(  Helpers::matchMask('a/b',   ['a/']      ) );
+Assert::true(  Helpers::matchMask('a/b',   ['a/'], TRUE) );
+Assert::true(  Helpers::matchMask('a/b/b', ['a/']      ) );
+Assert::true(  Helpers::matchMask('a/b/b', ['a/'], TRUE) );
+Assert::true(  Helpers::matchMask('a',     ['*', '!a/']      ) );
+Assert::false( Helpers::matchMask('a',     ['*', '!a/'], TRUE) );
+Assert::false( Helpers::matchMask('a/b',   ['*', '!a/']      ) );
+Assert::false( Helpers::matchMask('a/b',   ['*', '!a/'], TRUE) );
+Assert::false( Helpers::matchMask('a/b/b', ['*', '!a/']      ) );
+Assert::false( Helpers::matchMask('a/b/b', ['*', '!a/'], TRUE) );
+Assert::false( Helpers::matchMask('a',     ['a/*']      ) );
+Assert::false( Helpers::matchMask('a',     ['a/*'], TRUE) );
+Assert::true(  Helpers::matchMask('a/b',   ['a/*']      ) );
+Assert::true(  Helpers::matchMask('a/b',   ['a/*'], TRUE) );
+Assert::true(  Helpers::matchMask('a/b/b', ['a/*']      ) );
+Assert::true(  Helpers::matchMask('a/b/b', ['a/*'], TRUE) );
+Assert::true(  Helpers::matchMask('a',     ['*', '!a/*']      ) );
+Assert::false( Helpers::matchMask('a',     ['*', '!a/*'], TRUE) );
+Assert::false( Helpers::matchMask('a/b',   ['*', '!a/*']      ) );
+Assert::false( Helpers::matchMask('a/b',   ['*', '!a/*'], TRUE) );
+Assert::false( Helpers::matchMask('a/b/b', ['*', '!a/*']      ) );
+Assert::false( Helpers::matchMask('a/b/b', ['*', '!a/*'], TRUE) );
+Assert::false( Helpers::matchMask('a',     ['a/*/']      ) );
+Assert::false( Helpers::matchMask('a',     ['a/*/'], TRUE) );
+Assert::false( Helpers::matchMask('a/b',   ['a/*/']      ) );
+Assert::true(  Helpers::matchMask('a/b',   ['a/*/'], TRUE) );
+Assert::true(  Helpers::matchMask('a/b/b', ['a/*/']      ) );
+Assert::true(  Helpers::matchMask('a/b/b', ['a/*/'], TRUE) );
+Assert::true(  Helpers::matchMask('a',     ['*', '!a/*/']      ) );
+Assert::false( Helpers::matchMask('a',     ['*', '!a/*/'], TRUE) );
+Assert::true(  Helpers::matchMask('a/b',   ['*', '!a/*/']      ) );
+Assert::false( Helpers::matchMask('a/b',   ['*', '!a/*/'], TRUE) );
+Assert::false( Helpers::matchMask('a/b/b', ['*', '!a/*/']      ) );
+Assert::false( Helpers::matchMask('a/b/b', ['*', '!a/*/'], TRUE) );
+Assert::false( Helpers::matchMask('a',     ['a/*/b']      ) );
+Assert::false( Helpers::matchMask('a',     ['a/*/b'], TRUE) );
+Assert::false( Helpers::matchMask('a/b',   ['a/*/b']      ) );
+Assert::false( Helpers::matchMask('a/b',   ['a/*/b'], TRUE) );
+Assert::true(  Helpers::matchMask('a/b/b', ['a/*/b']      ) );
+Assert::true(  Helpers::matchMask('a/b/b', ['a/*/b'], TRUE) );
+Assert::false( Helpers::matchMask('a/b/c', ['a/*/b']      ) );
+Assert::false( Helpers::matchMask('a/b/c', ['a/*/b'], TRUE) );
+Assert::true(  Helpers::matchMask('a',     ['*', '!a/*/b']      ) );
+Assert::false( Helpers::matchMask('a',     ['*', '!a/*/b'], TRUE) );
+Assert::true(  Helpers::matchMask('a/b',   ['*', '!a/*/b']      ) );
+Assert::false( Helpers::matchMask('a/b',   ['*', '!a/*/b'], TRUE) );
+Assert::false( Helpers::matchMask('a/b/b', ['*', '!a/*/b']      ) );
+Assert::false( Helpers::matchMask('a/b/b', ['*', '!a/*/b'], TRUE) );
+Assert::true(  Helpers::matchMask('a/b/c', ['*', '!a/*/b']      ) );
+Assert::true(  Helpers::matchMask('a/b/c', ['*', '!a/*/b'], TRUE) );
+Assert::false( Helpers::matchMask('a',     ['a/*/b/']      ) );
+Assert::false( Helpers::matchMask('a',     ['a/*/b/'], TRUE) );
+Assert::false( Helpers::matchMask('a/b',   ['a/*/b/']      ) );
+Assert::false( Helpers::matchMask('a/b',   ['a/*/b/'], TRUE) );
+Assert::false( Helpers::matchMask('a/b/b', ['a/*/b/']      ) );
+Assert::true(  Helpers::matchMask('a/b/b', ['a/*/b/'], TRUE) );
+Assert::false( Helpers::matchMask('a/b/c', ['a/*/b/']      ) );
+Assert::false( Helpers::matchMask('a/b/c', ['a/*/b/'], TRUE) );
+Assert::true(  Helpers::matchMask('a',     ['*', '!a/*/b/']      ) );
+Assert::false( Helpers::matchMask('a',     ['*', '!a/*/b/'], TRUE) );
+Assert::true(  Helpers::matchMask('a/b',   ['*', '!a/*/b/']      ) );
+Assert::false( Helpers::matchMask('a/b',   ['*', '!a/*/b/'], TRUE) );
+Assert::true(  Helpers::matchMask('a/b/b', ['*', '!a/*/b/']      ) );
+Assert::false( Helpers::matchMask('a/b/b', ['*', '!a/*/b/'], TRUE) );
+Assert::true(  Helpers::matchMask('a/b/c', ['*', '!a/*/b/']      ) );
+Assert::true(  Helpers::matchMask('a/b/c', ['*', '!a/*/b/'], TRUE) );
