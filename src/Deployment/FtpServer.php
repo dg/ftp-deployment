@@ -11,8 +11,6 @@ namespace Deployment;
 
 /**
  * FTP server.
- *
- * @author     David Grudl
  */
 class FtpServer implements Server
 {

@@ -11,8 +11,6 @@ namespace Deployment;
 
 /**
  * SSH server.
- *
- * @author     David Grudl
  */
 class SshServer implements Server
 {

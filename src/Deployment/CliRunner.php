@@ -11,8 +11,6 @@ namespace Deployment;
 
 /**
  * Run Forrest run!
- *
- * @author     David Grudl
  */
 class CliRunner
 {

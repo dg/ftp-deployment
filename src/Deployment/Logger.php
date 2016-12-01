@@ -11,8 +11,6 @@ namespace Deployment;
 
 /**
  * File logger.
- *
- * @author     David Grudl
  */
 class Logger
 {

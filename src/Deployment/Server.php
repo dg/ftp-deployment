@@ -11,8 +11,6 @@ namespace Deployment;
 
 /**
  * Server.
- *
- * @author     David Grudl
  */
 interface Server
 {

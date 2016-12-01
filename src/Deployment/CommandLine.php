@@ -11,8 +11,6 @@ namespace Deployment;
 
 /**
  * Stupid command line arguments parser.
- *
- * @author     David Grudl
  */
 class CommandLine
 {

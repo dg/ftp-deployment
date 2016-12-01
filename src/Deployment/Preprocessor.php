@@ -11,8 +11,6 @@ namespace Deployment;
 
 /**
  * CSS and JS preprocessors. It requires Java, Google Closure Compiler and YUI Compressor.
- *
- * @author     David Grudl
  */
 class Preprocessor
 {

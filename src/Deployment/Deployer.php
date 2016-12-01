@@ -11,8 +11,6 @@ namespace Deployment;
 
 /**
  * Synchronizes local and remote.
- *
- * @author     David Grudl
  */
 class Deployer
 {
