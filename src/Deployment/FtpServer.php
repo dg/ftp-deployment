@@ -109,6 +109,16 @@ class FtpServer implements Server
 		}
 	}
 
+	/**
+	 * @param string $remote
+	 * @param $perms permissions
+	 * @return void
+	 */
+	public function chmod($remote, $perms)
+	{
+		$mode = octdec(str_pad((int)$perms, 4, '0', STR_PAD_LEFT));
+		$this->ftp('chmod', $mode, $remote);
+	}
 
 	/**
 	 * Removes file from FTP server if exists.
