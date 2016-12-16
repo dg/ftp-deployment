@@ -61,7 +61,14 @@ class Deployer
 	/** @var Server */
 	private $server;
 
+	/** @var string */
+	public $filePerms = '';
 
+	/** @var string */
+	public $dirPerms = '';
+
+	/** @var array */
+	public $toChmod;
 
 	/**
 	 * @param  Server
@@ -159,6 +166,12 @@ class Deployer
 			$this->deletePaths($toDelete);
 		}
 
+		foreach ((array) $this->toChmod as $chmod) {
+			list($path, $perms) = explode(':', $chmod);
+			$this->logger->log("\nChmod $path $perms");
+			$this->server->chmod($this->remoteDir . '/' . $path, $perms);
+		}
+
 		foreach ((array) $this->toPurge as $path) {
 			$this->logger->log("\nCleaning $path");
 			$this->server->purge($this->remoteDir . '/' . $path, function ($path) {
@@ -248,6 +261,9 @@ class Deployer
 			if ($remoteDir !== $prevDir) {
 				$prevDir = $remoteDir;
 				$this->server->createDir($remoteDir);
+				if ($this->dirPerms !== '') {
+					$this->server->chmod($remoteDir, $this->dirPerms);
+				}
 			}
 
 			if ($isDir) {
@@ -263,6 +279,9 @@ class Deployer
 			$this->server->writeFile($localFile, $remotePath . self::TEMPORARY_SUFFIX, function ($percent) use ($num, $paths, $path) {
 				$this->writeProgress($num + 1, count($paths), $path, $percent, 'green');
 			});
+			if ($this->filePerms !== '') {
+				$this->server->chmod($remotePath . self::TEMPORARY_SUFFIX, $this->filePerms);
+			}
 			$this->writeProgress($num + 1, count($paths), $path, NULL, 'green');
 		}
 	}
