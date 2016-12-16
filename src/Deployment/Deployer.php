@@ -260,9 +260,13 @@ class Deployer
 				$path .= ' (filters applied)';
 			}
 
-			$this->server->writeFile($localFile, $remotePath . self::TEMPORARY_SUFFIX, function ($percent) use ($num, $paths, $path) {
-				$this->writeProgress($num + 1, count($paths), $path, $percent, 'green');
-			});
+			$this->server->writeFile(
+				$localFile,
+				$remotePath . self::TEMPORARY_SUFFIX,
+				function ($percent) use ($num, $paths, $path) {
+					$this->writeProgress($num + 1, count($paths), $path, $percent, 'green');
+				}
+			);
 			$this->writeProgress($num + 1, count($paths), $path, NULL, 'green');
 		}
 	}

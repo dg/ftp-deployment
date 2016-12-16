@@ -17,6 +17,12 @@ class SshServer implements Server
 	/** @var resource */
 	private $connection;
 
+	/** @var int */
+	public $filePermissions;
+
+	/** @var int */
+	public $dirPermissions;
+
 	/** @var resource */
 	private $sftp;
 
@@ -86,6 +92,9 @@ class SshServer implements Server
 				}
 			}
 		});
+		if ($this->filePermissions) {
+			$this->protect('ssh2_sftp_chmod', [$this->sftp, $remote, $this->filePermissions]);
+		}
 	}
 
 
@@ -125,7 +134,7 @@ class SshServer implements Server
 	public function createDir($dir)
 	{
 		if (trim($dir, '/') !== '' && !file_exists("ssh2.sftp://$this->sftp$dir")) {
-			$this->protect('ssh2_sftp_mkdir', [$this->sftp, $dir, 0777, TRUE]);
+			$this->protect('ssh2_sftp_mkdir', [$this->sftp, $dir, $this->dirPermissions ?: 0777, TRUE]);
 		}
 	}
 

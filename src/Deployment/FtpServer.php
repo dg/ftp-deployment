@@ -17,6 +17,12 @@ class FtpServer implements Server
 	const RETRIES = 10;
 	const BLOCK_SIZE = 400000;
 
+	/** @var int */
+	public $filePermissions;
+
+	/** @var int */
+	public $dirPermissions;
+
 	/** @var resource */
 	private $connection;
 
@@ -104,6 +110,9 @@ class FtpServer implements Server
 			$blocks++;
 		} while ($ret === FTP_MOREDATA);
 
+		if ($this->filePermissions) {
+			$this->ftp('chmod', $this->filePermissions, $remote);
+		}
 		if ($progress) {
 			$progress(100);
 		}
@@ -154,6 +163,9 @@ class FtpServer implements Server
 			try {
 				if ($path !== '') {
 					$this->ftp('mkdir', $path);
+					if ($this->dirPermissions) {
+						$this->ftp('chmod', $this->dirPermissions, $path);
+					}
 				}
 			} catch (FtpException $e) {
 				if (!$this->isDir($path)) {

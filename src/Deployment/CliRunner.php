@@ -141,6 +141,9 @@ class CliRunner
 		$deployment->runAfter = self::toArray($config['after'], TRUE);
 		$deployment->testMode = !empty($config['test']) || $this->mode === 'test';
 
+		$server->filePermissions = empty($config['filepermissions']) ? NULL : octdec($config['filepermissions']);
+		$server->dirPermissions = empty($config['dirpermissions']) ? NULL : octdec($config['dirpermissions']);
+
 		return $deployment;
 	}
 
