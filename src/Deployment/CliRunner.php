@@ -170,7 +170,7 @@ class CliRunner
 FTP deployment v2.6
 -------------------
 Usage:
-	deployment.php <config_file> [-t | --test]
+	deployment <config_file> [-t | --test]
 
 Options:
 	-t | --test      Run in test-mode.
