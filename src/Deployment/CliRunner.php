@@ -140,6 +140,10 @@ class CliRunner
 		$deployment->runAfterUpload = self::toArray($config['afterupload'], TRUE);
 		$deployment->runAfter = self::toArray($config['after'], TRUE);
 		$deployment->testMode = !empty($config['test']) || $this->mode === 'test';
+		$deployment->filePerms =  empty($config['filePerms']) ? '' : $config['fileperms'];
+		$deployment->dirPerms = empty($config['dirPerms']) ? '' : $config['dirperms'];
+		$deployment->toChmod = empty($config['chmod']) ? [] : self::toArray($config['chmod'], TRUE);
+		$deployment->alwaysUpload = empty($config['alwaysUpload']) ? [] : self::toArray($config['alwaysUpload'], TRUE);
 
 		return $deployment;
 	}

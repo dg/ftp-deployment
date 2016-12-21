@@ -61,7 +61,17 @@ class Deployer
 	/** @var Server */
 	private $server;
 
+	/** @var string */
+	public $filePerms = '';
 
+	/** @var string */
+	public $dirPerms = '';
+
+	/** @var array */
+	public $toChmod;
+
+	/** @var array */
+	public $alwaysUpload;
 
 	/**
 	 * @param  Server
@@ -109,6 +119,13 @@ class Deployer
 
 		$this->logger->log("Scanning files in $this->localDir");
 		$localPaths = $this->collectPaths();
+		foreach ($this->alwaysUpload as $folder) {
+			foreach ($remotePaths as $key => $value) {
+				if (strpos($key, '/' . $folder) === 0) {
+					unset($remotePaths[$key]);
+				}
+			}
+		}
 
 		unset($localPaths["/$this->deploymentFile"], $remotePaths["/$this->deploymentFile"]);
 		$toDelete = $this->allowDelete ? array_keys(array_diff_key($remotePaths, $localPaths)) : [];
@@ -157,6 +174,12 @@ class Deployer
 		if ($toDelete) {
 			$this->logger->log("\nDeleting:");
 			$this->deletePaths($toDelete);
+		}
+
+		foreach ((array) $this->toChmod as $chmod) {
+			list($path, $perms) = explode(':', $chmod);
+			$this->logger->log("\nChmod $path $perms");
+			$this->server->chmod($this->remoteDir . '/' . $path, $perms);
 		}
 
 		foreach ((array) $this->toPurge as $path) {
@@ -248,6 +271,9 @@ class Deployer
 			if ($remoteDir !== $prevDir) {
 				$prevDir = $remoteDir;
 				$this->server->createDir($remoteDir);
+				if ($this->dirPerms !== '') {
+					$this->server->chmod($remoteDir, $this->dirPerms);
+				}
 			}
 
 			if ($isDir) {
@@ -263,6 +289,9 @@ class Deployer
 			$this->server->writeFile($localFile, $remotePath . self::TEMPORARY_SUFFIX, function ($percent) use ($num, $paths, $path) {
 				$this->writeProgress($num + 1, count($paths), $path, $percent, 'green');
 			});
+			if ($this->filePerms !== '') {
+				$this->server->chmod($remotePath . self::TEMPORARY_SUFFIX, $this->filePerms);
+			}
 			$this->writeProgress($num + 1, count($paths), $path, NULL, 'green');
 		}
 	}

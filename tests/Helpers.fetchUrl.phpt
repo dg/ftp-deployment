@@ -16,4 +16,4 @@ if (extension_loaded('curl')) {
 } else {
 	Assert::same('', $output);
 }
-Assert::contains('404', $error);
+Assert::contains('500', $error);
