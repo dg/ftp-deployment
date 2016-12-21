@@ -29,16 +29,16 @@ class Deployer
 	public $allowDelete = FALSE;
 
 	/** @var string[] relative paths */
-	public $toPurge;
+	public $toPurge = [];
 
 	/** @var array of string|callable */
-	public $runBefore;
+	public $runBefore = [];
 
 	/** @var array of string|callable */
-	public $runAfterUpload;
+	public $runAfterUpload = [];
 
 	/** @var array of string|callable */
-	public $runAfter;
+	public $runAfter = [];
 
 	/** @var string */
 	public $tempDir = '';
@@ -56,7 +56,7 @@ class Deployer
 	public $preprocessMasks = [];
 
 	/** @var array */
-	private $filters;
+	private $filters = [];
 
 	/** @var Server */
 	private $server;
@@ -159,7 +159,7 @@ class Deployer
 			$this->deletePaths($toDelete);
 		}
 
-		foreach ((array) $this->toPurge as $path) {
+		foreach ($this->toPurge as $path) {
 			$this->logger->log("\nCleaning $path");
 			$this->server->purge($this->remoteDir . '/' . $path, function ($path) {
 				static $counter;

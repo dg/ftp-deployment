@@ -40,7 +40,7 @@ class CliRunner
 	private $mode;
 
 	/** @var array[] */
-	private $batches;
+	private $batches = [];
 
 
 	/** @return int|NULL */
