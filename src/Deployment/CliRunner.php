@@ -42,6 +42,9 @@ class CliRunner
 	/** @var array[] */
 	private $batches = [];
 
+	/** @var resource */
+	private $lock;
+
 
 	/** @return int|NULL */
 	public function run()
@@ -190,6 +193,10 @@ XX
 		$options = $cmd->parse();
 		$this->mode = $options['--generate'] ? 'generate' : ($options['--test'] ? 'test' : NULL);
 		$this->configFile = $options['config'];
+
+		if (!flock($this->lock = fopen($options['config'], 'r'), LOCK_EX | LOCK_NB)) {
+			throw new \Exception('It seems that you are in the middle of another deployment.');
+		}
 
 		$config = $this->loadConfigFile($options['config']);
 		if (!$config) {
