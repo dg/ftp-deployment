@@ -70,6 +70,9 @@ class Deployer
 	/** @var array */
 	public $toChmod;
 
+	/** @var array */
+	public $alwaysUpload;
+
 	/**
 	 * @param  Server
 	 * @param  string  local directory
@@ -116,6 +119,13 @@ class Deployer
 
 		$this->logger->log("Scanning files in $this->localDir");
 		$localPaths = $this->collectPaths();
+		foreach ($this->alwaysUpload as $folder) {
+			foreach ($remotePaths as $key => $value) {
+				if (strpos($key, '/' . $folder) === 0) {
+					unset($remotePaths[$key]);
+				}
+			}
+		}
 
 		unset($localPaths["/$this->deploymentFile"], $remotePaths["/$this->deploymentFile"]);
 		$toDelete = $this->allowDelete ? array_keys(array_diff_key($remotePaths, $localPaths)) : [];
