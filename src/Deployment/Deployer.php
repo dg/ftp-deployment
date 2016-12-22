@@ -387,7 +387,7 @@ class Deployer
 	private function runJobs(array $jobs)
 	{
 		foreach ($jobs as $job) {
-			if (is_string($job) && preg_match('#^(https?|local|remote):\s*(.+)#', $job, $m)) {
+			if (is_string($job) && preg_match('#^(https?|local|remote|upload):\s*(.+)#', $job, $m)) {
 				$this->logger->log($job);
 				$out = $err = NULL;
 				if ($m[1] === 'local') {
@@ -398,6 +398,15 @@ class Deployer
 				} elseif ($m[1] === 'remote') {
 					$out = $this->server->execute($m[2]);
 
+				} elseif ($m[1] === 'upload') {
+					list($localFile, $remotePath) = explode(' ', $m[2]);
+					$localFile = $this->localDir . '/' . $localFile;
+					if (!is_file($localFile)) {
+						throw new \RuntimeException("File $localFile doesn't exist.");
+					}
+					$remotePath = $this->remoteDir . '/' . $remotePath;
+					$this->server->createDir(str_replace('\\', '/', dirname($remotePath)));
+					$this->server->writeFile($localFile, $remotePath);
 				} else {
 					$out = Helpers::fetchUrl($job, $err);
 				}
