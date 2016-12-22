@@ -388,20 +388,23 @@ class Deployer
 	{
 		foreach ($jobs as $job) {
 			if (is_string($job) && preg_match('#^(https?|local|remote):\s*(.+)#', $job, $m)) {
+				$this->logger->log($job);
 				$out = $err = NULL;
 				if ($m[1] === 'local') {
-					$out = @system($m[2], $code);
+					@exec($m[2], $out, $code);
+					$out = trim(implode("\n", $out));
 					$err = $code !== 0 ? "exit code $code" : NULL;
+
 				} elseif ($m[1] === 'remote') {
-					try {
-						$out = $this->server->execute($m[2]);
-					} catch (ServerException $e) {
-						$err = $e->getMessage() ?: 'unknown error';
-					}
+					$out = $this->server->execute($m[2]);
+
 				} else {
 					$out = Helpers::fetchUrl($job, $err);
 				}
-				$this->logger->log($job . ($out == NULL ? '' : ": $out")); // intentionally ==
+
+				if ($out != NULL) { // intentionally ==
+					$this->logger->log("-> $out", 'gray');
+				}
 				if ($err) {
 					throw new \RuntimeException('Job failed, ' . $err);
 				}
