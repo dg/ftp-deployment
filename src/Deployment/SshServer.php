@@ -234,5 +234,4 @@ class SshServer implements Server
 		}
 		return $res;
 	}
-
 }

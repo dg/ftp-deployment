@@ -74,5 +74,4 @@ interface Server
 	 * @return string
 	 */
 	function execute($command);
-
 }

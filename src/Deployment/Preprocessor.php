@@ -21,7 +21,6 @@ class Preprocessor
 	private $logger;
 
 
-
 	public function __construct(Logger $logger)
 	{
 		$this->logger = $logger;
@@ -134,5 +133,4 @@ class Preprocessor
 			return $m[0];
 		}, $content);
 	}
-
 }

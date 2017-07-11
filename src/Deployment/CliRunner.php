@@ -243,5 +243,4 @@ XX
 			? array_filter($val)
 			: preg_split($lines ? '#\s*\n\s*#' : '#\s+#', $val, -1, PREG_SPLIT_NO_EMPTY);
 	}
-
 }

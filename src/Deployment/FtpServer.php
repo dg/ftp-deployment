@@ -311,5 +311,4 @@ class FtpServer implements Server
 		}
 		return $res;
 	}
-
 }

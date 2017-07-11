@@ -62,7 +62,6 @@ class Deployer
 	private $server;
 
 
-
 	/**
 	 * @param  Server
 	 * @param  string  local directory
@@ -440,5 +439,4 @@ class Deployer
 			$this->logger->progress($s . ' [' . round($percent) . "%]");
 		}
 	}
-
 }

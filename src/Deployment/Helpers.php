@@ -114,5 +114,4 @@ class Helpers
 		}
 		return (string) $output;
 	}
-
 }

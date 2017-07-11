@@ -78,5 +78,4 @@ class Logger
 			echo $message, "\x0D";
 		}
 	}
-
 }
