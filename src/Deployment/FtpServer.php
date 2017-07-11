@@ -30,14 +30,14 @@ class FtpServer implements Server
 	private $url;
 
 	/** @var bool */
-	private $passiveMode = TRUE;
+	private $passiveMode = true;
 
 
 	/**
 	 * @param  string|array  URL ftp://...
 	 * @param  bool
 	 */
-	public function __construct($url, $passiveMode = TRUE)
+	public function __construct($url, $passiveMode = true)
 	{
 		if (!extension_loaded('ftp')) {
 			throw new \Exception('PHP extension FTP is not loaded.');
@@ -60,7 +60,7 @@ class FtpServer implements Server
 	{
 		$this->connection = $this->protect(
 			$this->url['scheme'] === 'ftp' ? 'ftp_connect' : 'ftp_ssl_connect',
-			[$this->url['host'], empty($this->url['port']) ? NULL : (int) $this->url['port']]
+			[$this->url['host'], empty($this->url['port']) ? null : (int) $this->url['port']]
 		);
 		$this->ftp('login', urldecode($this->url['user']), urldecode($this->url['pass']));
 		$this->ftp('pasv', $this->passiveMode);
@@ -84,7 +84,7 @@ class FtpServer implements Server
 	 * Uploads file to FTP server.
 	 * @return void
 	 */
-	public function writeFile($local, $remote, callable $progress = NULL)
+	public function writeFile($local, $remote, callable $progress = null)
 	{
 		$size = max(filesize($local), 1);
 		$retry = self::RETRIES;
@@ -215,13 +215,13 @@ class FtpServer implements Server
 	 * @param  string
 	 * @return void
 	 */
-	public function purge($dir, callable $progress = NULL)
+	public function purge($dir, callable $progress = null)
 	{
 		$dirs = [];
 		foreach ((array) $this->ftp('nlist', $dir) as $entry) {
-			if ($entry == NULL || $entry === $dir || preg_match('#(^|/)\\.+$#', $entry)) { // intentionally ==
+			if ($entry == null || $entry === $dir || preg_match('#(^|/)\\.+$#', $entry)) { // intentionally ==
 				continue;
-			} elseif (strpos($entry, '/') === FALSE) {
+			} elseif (strpos($entry, '/') === false) {
 				$entry = "$dir/$entry";
 			}
 

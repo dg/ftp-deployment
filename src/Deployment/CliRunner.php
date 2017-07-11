@@ -17,14 +17,14 @@ class CliRunner
 	/** @var array */
 	public $defaults = [
 		'local' => '',
-		'passivemode' => TRUE,
+		'passivemode' => true,
 		'ignore' => '',
-		'allowdelete' => TRUE,
+		'allowdelete' => true,
 		'purge' => '',
 		'before' => '',
 		'afterupload' => '',
 		'after' => '',
-		'preprocess' => TRUE,
+		'preprocess' => true,
 	];
 
 	/** @var string[] */
@@ -36,7 +36,7 @@ class CliRunner
 	/** @var string */
 	private $configFile;
 
-	/** @var string  test|generate|NULL */
+	/** @var string  test|generate|null */
 	private $mode;
 
 	/** @var array[] */
@@ -46,7 +46,7 @@ class CliRunner
 	private $lock;
 
 
-	/** @return int|NULL */
+	/** @return int|null */
 	public function run()
 	{
 		$this->logger = new Logger('php://memory');
@@ -63,7 +63,7 @@ class CliRunner
 
 		if (!is_dir($tempDir = $config['tempdir'])) {
 			$this->logger->log("Creating temporary directory $tempDir");
-			mkdir($tempDir, 0777, TRUE);
+			mkdir($tempDir, 0777, true);
 		}
 
 		$time = time();
@@ -126,23 +126,23 @@ class CliRunner
 			$deployment->preprocessMasks = $config['preprocess'] == 1 ? ['*.js', '*.css'] : self::toArray($config['preprocess']); // intentionally ==
 			$preprocessor = new Preprocessor($this->logger);
 			$deployment->addFilter('js', [$preprocessor, 'expandApacheImports']);
-			$deployment->addFilter('js', [$preprocessor, 'compressJs'], TRUE);
+			$deployment->addFilter('js', [$preprocessor, 'compressJs'], true);
 			$deployment->addFilter('css', [$preprocessor, 'expandApacheImports']);
 			$deployment->addFilter('css', [$preprocessor, 'expandCssImports']);
-			$deployment->addFilter('css', [$preprocessor, 'compressCss'], TRUE);
+			$deployment->addFilter('css', [$preprocessor, 'compressCss'], true);
 		}
 
 		$deployment->ignoreMasks = array_merge($this->ignoreMasks, self::toArray($config['ignore']));
 		$deployment->deploymentFile = empty($config['deploymentfile']) ? $deployment->deploymentFile : $config['deploymentfile'];
 		$deployment->allowDelete = $config['allowdelete'];
-		$deployment->toPurge = self::toArray($config['purge'], TRUE);
-		$deployment->runBefore = self::toArray($config['before'], TRUE);
-		$deployment->runAfterUpload = self::toArray($config['afterupload'], TRUE);
-		$deployment->runAfter = self::toArray($config['after'], TRUE);
+		$deployment->toPurge = self::toArray($config['purge'], true);
+		$deployment->runBefore = self::toArray($config['before'], true);
+		$deployment->runAfterUpload = self::toArray($config['afterupload'], true);
+		$deployment->runAfter = self::toArray($config['after'], true);
 		$deployment->testMode = !empty($config['test']) || $this->mode === 'test';
 
-		$server->filePermissions = empty($config['filepermissions']) ? NULL : octdec($config['filepermissions']);
-		$server->dirPermissions = empty($config['dirpermissions']) ? NULL : octdec($config['dirpermissions']);
+		$server->filePermissions = empty($config['filepermissions']) ? null : octdec($config['filepermissions']);
+		$server->dirPermissions = empty($config['dirpermissions']) ? null : octdec($config['dirpermissions']);
 
 		return $deployment;
 	}
@@ -159,7 +159,7 @@ class CliRunner
 				$this->logger->log("Error: $message in $file on $line", 'red');
 				exit(1);
 			}
-			return FALSE;
+			return false;
 		});
 		set_exception_handler(function ($e) {
 			$this->logger->log("Error: {$e->getMessage()}\n\n$e", 'red');
@@ -185,7 +185,7 @@ Options:
 
 XX
 		, [
-			'config' => [CommandLine::REALPATH => TRUE],
+			'config' => [CommandLine::REALPATH => true],
 		]);
 
 		if ($cmd->isEmpty()) {
@@ -194,7 +194,7 @@ XX
 		}
 
 		$options = $cmd->parse();
-		$this->mode = $options['--generate'] ? 'generate' : ($options['--test'] ? 'test' : NULL);
+		$this->mode = $options['--generate'] ? 'generate' : ($options['--test'] ? 'test' : null);
 		$this->configFile = $options['config'];
 
 		if (!flock($this->lock = fopen($options['config'], 'r'), LOCK_EX | LOCK_NB)) {
@@ -217,11 +217,11 @@ XX
 		$config = array_change_key_case($config, CASE_LOWER) + [
 			'log' => preg_replace('#\.\w+$#', '.log', $this->configFile),
 			'tempdir' => sys_get_temp_dir() . '/deployment',
-			'progress' => TRUE,
+			'progress' => true,
 			'colors' => (PHP_SAPI === 'cli' && ((function_exists('posix_isatty') && posix_isatty(STDOUT))
-				|| getenv('ConEmuANSI') === 'ON' || getenv('ANSICON') !== FALSE)),
+				|| getenv('ConEmuANSI') === 'ON' || getenv('ANSICON') !== false)),
 		];
-		$config['progress'] = $options['--no-progress'] ? FALSE : $config['progress'];
+		$config['progress'] = $options['--no-progress'] ? false : $config['progress'];
 		return $config;
 	}
 
@@ -231,13 +231,13 @@ XX
 		if (pathinfo($file, PATHINFO_EXTENSION) == 'php') {
 			return include $file;
 		} else {
-			return parse_ini_file($file, TRUE);
+			return parse_ini_file($file, true);
 		}
 	}
 
 
 	/** @return array */
-	public static function toArray($val, $lines = FALSE)
+	public static function toArray($val, $lines = false)
 	{
 		return is_array($val)
 			? array_filter($val)

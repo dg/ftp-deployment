@@ -31,7 +31,7 @@ interface Server
 	 * Uploads file to server. Paths are absolute.
 	 * @return void
 	 */
-	function writeFile($local, $remote, callable $progress = NULL);
+	function writeFile($local, $remote, callable $progress = null);
 
 	/**
 	 * Removes file from server if exists. Path is absolute.
@@ -61,7 +61,7 @@ interface Server
 	 * Recursive deletes content of directory or file. Path is absolute.
 	 * @return void
 	 */
-	function purge($path, callable $progress = NULL);
+	function purge($path, callable $progress = null);
 
 	/**
 	 * Returns current directory.

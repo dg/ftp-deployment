@@ -15,7 +15,7 @@ namespace Deployment;
 class Preprocessor
 {
 	/** @var bool  compress only file when contains /**! */
-	public $requireCompressMark = TRUE;
+	public $requireCompressMark = true;
 
 	/** @var Logger */
 	private $logger;
@@ -67,10 +67,10 @@ class Preprocessor
 			'code' => $content,
 			'type' => 'css',
 			'options' => [
-				'advanced' => TRUE,
-				'aggressiveMerging' => TRUE,
-				'rebase' => FALSE,
-				'processImport' => FALSE,
+				'advanced' => true,
+				'aggressiveMerging' => true,
+				'rebase' => false,
+				'processImport' => false,
 				'compatibility' => 'ie8',
 				'keepSpecialComments' => '1',
 			],
@@ -80,7 +80,7 @@ class Preprocessor
 			$this->logger->log("Unable to minfy: $error\n");
 			return $content;
 		}
-		$json = @json_decode($output, TRUE);
+		$json = @json_decode($output, true);
 		if (!isset($json['code'])) {
 			$this->logger->log("Unable to minfy. Server response: $output\n");
 			return $content;
@@ -109,7 +109,7 @@ class Preprocessor
 				$tmp = $dir . '/';
 				if (substr($newDir, 0, strlen($tmp)) === $tmp) {
 					$s = preg_replace('#\burl\(["\']?(?=[.\w])(?!\w+:)#', '$0' . substr($newDir, strlen($tmp)) . '/', $s);
-				} elseif (strpos($s, 'url(') !== FALSE) {
+				} elseif (strpos($s, 'url(') !== false) {
 					return $m[0];
 				}
 			}

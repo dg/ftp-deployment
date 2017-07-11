@@ -23,10 +23,10 @@ class Deployer
 	public $ignoreMasks = [];
 
 	/** @var bool */
-	public $testMode = FALSE;
+	public $testMode = false;
 
 	/** @var bool */
-	public $allowDelete = FALSE;
+	public $allowDelete = false;
 
 	/** @var string[] relative paths */
 	public $toPurge = [];
@@ -87,7 +87,7 @@ class Deployer
 		$this->server->connect();
 		$this->remoteDir = $this->server->getDir();
 
-		$runBefore = [NULL, NULL];
+		$runBefore = [null, null];
 		foreach ($this->runBefore as $job) {
 			$runBefore[is_string($job) && preg_match('#^local:#', $job)][] = $job;
 		}
@@ -123,8 +123,8 @@ class Deployer
 			return;
 
 		} elseif ($this->testMode) {
-			$this->logger->log("\nUploading:\n" . implode("\n", $toUpload), 'green', FALSE);
-			$this->logger->log("\nDeleting:\n" . implode("\n", $toDelete), 'maroon', FALSE);
+			$this->logger->log("\nUploading:\n" . implode("\n", $toUpload), 'green', false);
+			$this->logger->log("\nDeleting:\n" . implode("\n", $toDelete), 'maroon', false);
 			if (isset($deploymentFile)) {
 				unlink($deploymentFile);
 			}
@@ -185,7 +185,7 @@ class Deployer
 	 * @param  callable
 	 * @return void
 	 */
-	public function addFilter($extension, $filter, $cached = FALSE)
+	public function addFilter($extension, $filter, $cached = false)
 	{
 		$this->filters[$extension][] = ['filter' => $filter, 'cached' => $cached];
 		return $this;
@@ -194,7 +194,7 @@ class Deployer
 
 	/**
 	 * Downloads and decodes .htdeployment from the server.
-	 * @return string[]|NULL  relative paths, starts with /
+	 * @return string[]|null  relative paths, starts with /
 	 */
 	private function loadDeploymentFile()
 	{
@@ -208,7 +208,7 @@ class Deployer
 		$res = [];
 		foreach (explode("\n", $content) as $item) {
 			if (count($item = explode('=', $item, 2)) === 2) {
-				$res[$item[1]] = $item[0] === '1' ? TRUE : $item[0];
+				$res[$item[1]] = $item[0] === '1' ? true : $item[0];
 			}
 		}
 		return $res;
@@ -226,7 +226,7 @@ class Deployer
 			$s .= "$v=$k\n";
 		}
 		$file = $this->localDir . '/' . $this->deploymentFile;
-		@mkdir(dirname($file), 0777, TRUE); // @ dir may exists
+		@mkdir(dirname($file), 0777, true); // @ dir may exists
 		file_put_contents($file, gzdeflate($s, 9));
 		return $file;
 	}
@@ -239,7 +239,7 @@ class Deployer
 	 */
 	private function uploadPaths(array $paths)
 	{
-		$prevDir = NULL;
+		$prevDir = null;
 		foreach ($paths as $num => $path) {
 			$remotePath = $this->remoteDir . $path;
 			$isDir = substr($remotePath, -1) === '/';
@@ -250,7 +250,7 @@ class Deployer
 			}
 
 			if ($isDir) {
-				$this->writeProgress($num + 1, count($paths), $path, NULL, 'green');
+				$this->writeProgress($num + 1, count($paths), $path, null, 'green');
 				continue;
 			}
 
@@ -266,7 +266,7 @@ class Deployer
 					$this->writeProgress($num + 1, count($paths), $path, $percent, 'green');
 				}
 			);
-			$this->writeProgress($num + 1, count($paths), $path, NULL, 'green');
+			$this->writeProgress($num + 1, count($paths), $path, null, 'green');
 		}
 	}
 
@@ -280,7 +280,7 @@ class Deployer
 	{
 		$files = array_values(array_filter($paths, function ($path) { return substr($path, -1) !== '/'; }));
 		foreach ($files as $num => $file) {
-			$this->writeProgress($num + 1, count($files), "Renaming $file", NULL, 'olive');
+			$this->writeProgress($num + 1, count($files), "Renaming $file", null, 'olive');
 			$remoteFile = $this->remoteDir . $file;
 			$this->server->renameFile($remoteFile . self::TEMPORARY_SUFFIX, $remoteFile);
 		}
@@ -297,7 +297,7 @@ class Deployer
 		rsort($paths);
 		foreach ($paths as $num => $path) {
 			$remotePath = $this->remoteDir . $path;
-			$this->writeProgress($num + 1, count($paths), "Deleting $path", NULL, 'maroon');
+			$this->writeProgress($num + 1, count($paths), "Deleting $path", null, 'maroon');
 			try {
 				if (substr($path, -1) === '/') { // is directory?
 					$this->server->removeDir($remotePath);
@@ -321,7 +321,7 @@ class Deployer
 		$list = [];
 		$iterator = dir($this->localDir . $subdir);
 		$counter = 0;
-		while (FALSE !== ($entry = $iterator->read())) {
+		while (false !== ($entry = $iterator->read())) {
 			$this->logger->progress(str_pad(str_repeat('.', $counter++ % 40), 40));
 
 			$path = "$this->localDir$subdir/$entry";
@@ -334,7 +334,7 @@ class Deployer
 				continue;
 
 			} elseif (is_dir($path)) {
-				$list[$short . '/'] = TRUE;
+				$list[$short . '/'] = true;
 				$list += $this->collectPaths($short);
 
 			} elseif (is_file($path)) {
@@ -388,11 +388,11 @@ class Deployer
 		foreach ($jobs as $job) {
 			if (is_string($job) && preg_match('#^(https?|local|remote|upload):\s*(.+)#', $job, $m)) {
 				$this->logger->log($job);
-				$out = $err = NULL;
+				$out = $err = null;
 				if ($m[1] === 'local') {
 					@exec($m[2], $out, $code);
 					$out = trim(implode("\n", $out));
-					$err = $code !== 0 ? "exit code $code" : NULL;
+					$err = $code !== 0 ? "exit code $code" : null;
 
 				} elseif ($m[1] === 'remote') {
 					$out = $this->server->execute($m[2]);
@@ -410,7 +410,7 @@ class Deployer
 					$out = Helpers::fetchUrl($job, $err);
 				}
 
-				if ($out != NULL) { // intentionally ==
+				if ($out != null) { // intentionally ==
 					$this->logger->log("-> $out", 'gray');
 				}
 				if ($err) {
@@ -418,7 +418,7 @@ class Deployer
 				}
 
 			} elseif (is_callable($job)) {
-				if ($job($this->server, $this->logger, $this) === FALSE) {
+				if ($job($this->server, $this->logger, $this) === false) {
 					throw new \RuntimeException('Job failed');
 				}
 
@@ -429,11 +429,11 @@ class Deployer
 	}
 
 
-	private function writeProgress($count, $total, $path, $percent = NULL, $color = NULL)
+	private function writeProgress($count, $total, $path, $percent = null, $color = null)
 	{
 		$len = strlen((string) $total);
 		$s = sprintf("(% {$len}d of %-{$len}d) %s", $count, $total, $path);
-		if ($percent === NULL) {
+		if ($percent === null) {
 			$this->logger->log($s, $color);
 		} else {
 			$this->logger->progress($s . ' [' . round($percent) . "%]");

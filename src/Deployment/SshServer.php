@@ -76,7 +76,7 @@ class SshServer implements Server
 	 * Uploads file to FTP server.
 	 * @return void
 	 */
-	public function writeFile($local, $remote, callable $progress = NULL)
+	public function writeFile($local, $remote, callable $progress = null)
 	{
 		$this->protect(function () use ($local, $remote, $progress) {
 			$size = max(filesize($local), 1);
@@ -134,7 +134,7 @@ class SshServer implements Server
 	public function createDir($dir)
 	{
 		if (trim($dir, '/') !== '' && !file_exists("ssh2.sftp://$this->sftp$dir")) {
-			$this->protect('ssh2_sftp_mkdir', [$this->sftp, $dir, $this->dirPermissions ?: 0777, TRUE]);
+			$this->protect('ssh2_sftp_mkdir', [$this->sftp, $dir, $this->dirPermissions ?: 0777, true]);
 		}
 	}
 
@@ -156,12 +156,12 @@ class SshServer implements Server
 	 * @param  string
 	 * @return void
 	 */
-	public function purge($dir, callable $progress = NULL)
+	public function purge($dir, callable $progress = null)
 	{
 		$dirs = $entries = [];
 
 		$iterator = dir($path = "ssh2.sftp://$this->sftp$dir");
-		while (FALSE !== ($entry = $iterator->read())) {
+		while (false !== ($entry = $iterator->read())) {
 			if ($entry !== '.' && $entry !== '..') {
 				$entries[] = $entry;
 			}
@@ -204,7 +204,7 @@ class SshServer implements Server
 	public function execute($command)
 	{
 		$stream = $this->protect('ssh2_exec', [$this->connection, $command]);
-		stream_set_blocking($stream, TRUE);
+		stream_set_blocking($stream, true);
 		$out = stream_get_contents($stream);
 		fclose($stream);
 		return $out;
@@ -229,8 +229,8 @@ class SshServer implements Server
 			restore_error_handler();
 			throw $e;
 		}
-		if ($res === FALSE) {
-			throw new SshException(is_string($func) ? "$func failures." : NULL);
+		if ($res === false) {
+			throw new SshException(is_string($func) ? "$func failures." : null);
 		}
 		return $res;
 	}

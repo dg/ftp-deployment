@@ -40,9 +40,9 @@ class Helpers
 	 * @param  string[] patterns
 	 * @return bool
 	 */
-	public static function matchMask($path, array $patterns, $isDir = FALSE)
+	public static function matchMask($path, array $patterns, $isDir = false)
 	{
-		$res = FALSE;
+		$res = false;
 		$path = explode('/', ltrim($path, '/'));
 		foreach ($patterns as $pattern) {
 			$pattern = strtr($pattern, '\\', '/');
@@ -50,7 +50,7 @@ class Helpers
 				$pattern = substr($pattern, 1);
 			}
 
-			if (strpos($pattern, '/') === FALSE) { // no slash means base name
+			if (strpos($pattern, '/') === false) { // no slash means base name
 				if (fnmatch($pattern, end($path), FNM_CASEFOLD)) {
 					$res = !$neg;
 				}
@@ -80,7 +80,7 @@ class Helpers
 	 * Processes HTTP request.
 	 * @return string
 	 */
-	public static function fetchUrl($url, & $error, array $postData = NULL)
+	public static function fetchUrl($url, & $error, array $postData = null)
 	{
 		if (extension_loaded('curl')) {
 			$ch = curl_init($url);
@@ -88,9 +88,9 @@ class Helpers
 				CURLOPT_RETURNTRANSFER => 1,
 				CURLOPT_FOLLOWLOCATION => 1,
 			];
-			if ($postData !== NULL) {
-				$options[CURLOPT_POST] = TRUE;
-				$options[CURLOPT_POSTFIELDS] = http_build_query($postData, NULL, '&');
+			if ($postData !== null) {
+				$options[CURLOPT_POST] = true;
+				$options[CURLOPT_POSTFIELDS] = http_build_query($postData, null, '&');
 			}
 			curl_setopt_array($ch, $options);
 			$output = curl_exec($ch);
@@ -101,16 +101,16 @@ class Helpers
 			}
 
 		} else {
-			$output = @file_get_contents($url, FALSE, stream_context_create([
-				'http' => $postData === NULL ? [] : [
+			$output = @file_get_contents($url, false, stream_context_create([
+				'http' => $postData === null ? [] : [
 					'method' => 'POST',
 					'header' => 'Content-type: application/x-www-form-urlencoded',
-					'content' => http_build_query($postData, NULL, '&'),
+					'content' => http_build_query($postData, null, '&'),
 				]
 			]));
-			$error = $output === FALSE
+			$error = $output === false
 				? preg_replace("#^file_get_contents\(.*?\): #", '', error_get_last()['message'])
-				: NULL;
+				: null;
 		}
 		return (string) $output;
 	}

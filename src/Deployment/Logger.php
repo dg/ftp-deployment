@@ -21,7 +21,7 @@ class Logger
 	public $useColors;
 
 	/** @var bool */
-	public $showProgress = TRUE;
+	public $showProgress = true;
 
 	/** @var array */
 	private $colors = [
@@ -50,7 +50,7 @@ class Logger
 	}
 
 
-	public function log($s, $color = NULL, $shorten = TRUE)
+	public function log($s, $color = null, $shorten = true)
 	{
 		fwrite($this->file, $s . "\n");
 

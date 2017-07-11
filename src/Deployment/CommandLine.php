@@ -52,7 +52,7 @@ class CommandLine
 				self::ARGUMENT => (bool) end($m[2]),
 				self::OPTIONAL => isset($line[2]) || (substr(end($m[2]), 0, 1) === '[') || isset($opts[self::VALUE]),
 				self::REPEATABLE => (bool) end($m[3]),
-				self::VALUE => isset($line[2]) ? $line[2] : NULL,
+				self::VALUE => isset($line[2]) ? $line[2] : null,
 			];
 			if ($name !== $m[1][0]) {
 				$this->aliases[$m[1][0]] = $name;
@@ -67,9 +67,9 @@ class CommandLine
 	}
 
 
-	public function parse(array $args = NULL)
+	public function parse(array $args = null)
 	{
-		if ($args === NULL) {
+		if ($args === null) {
 			$args = isset($_SERVER['argv']) ? array_slice($_SERVER['argv'], 1) : [];
 		}
 		$params = [];
@@ -92,7 +92,7 @@ class CommandLine
 				continue;
 			}
 
-			list($name, $arg) = strpos($arg, '=') ? explode('=', $arg, 2) : [$arg, TRUE];
+			list($name, $arg) = strpos($arg, '=') ? explode('=', $arg, 2) : [$arg, true];
 
 			if (isset($this->aliases[$name])) {
 				$name = $this->aliases[$name];
@@ -103,10 +103,10 @@ class CommandLine
 
 			$opt = $this->options[$name];
 
-			if ($arg !== TRUE && empty($opt[self::ARGUMENT])) {
+			if ($arg !== true && empty($opt[self::ARGUMENT])) {
 				throw new \Exception("Option $name has not argument.");
 
-			} elseif ($arg === TRUE && !empty($opt[self::ARGUMENT])) {
+			} elseif ($arg === true && !empty($opt[self::ARGUMENT])) {
 				if (isset($args[$i]) && $args[$i][0] !== '-') {
 					$arg = $args[$i++];
 				} elseif (empty($opt[self::OPTIONAL])) {
@@ -130,7 +130,7 @@ class CommandLine
 			} elseif ($name[0] !== '-' && empty($opt[self::OPTIONAL])) {
 				throw new \Exception("Missing required argument <$name>.");
 			} else {
-				$params[$name] = NULL;
+				$params[$name] = null;
 			}
 			if (!empty($opt[self::REPEATABLE])) {
 				$params[$name] = (array) $params[$name];
@@ -150,7 +150,7 @@ class CommandLine
 	{
 		if (!empty($opt[self::REALPATH])) {
 			$path = realpath($arg);
-			if ($path === FALSE) {
+			if ($path === false) {
 				throw new \Exception("File path '$arg' not found.");
 			}
 			$arg = $path;

@@ -4,7 +4,7 @@ return [
 	'my site' => [
 		'remote' => 'ftp://user:secretpassword@ftp.example.com/directory',
 		'local' => '.',
-		'test' => FALSE,
+		'test' => false,
 		'ignore' => '
 			.git*
 			project.pp[jx]
@@ -13,7 +13,7 @@ return [
 			temp/*
 			!temp/.htaccess
 		',
-		'allowDelete' => TRUE,
+		'allowDelete' => true,
 		'before' => [
 			function (Deployment\Server $server, Deployment\Logger $logger, Deployment\Deployer $deployer) {
 				$logger->log('Hello!');
@@ -28,9 +28,9 @@ return [
 		'purge' => [
 			'temp/cache',
 		],
-		'preprocess' => FALSE,
+		'preprocess' => false,
 	],
 
 	'tempDir' => __DIR__ . '/temp',
-	'colors' => TRUE,
+	'colors' => true,
 ];
