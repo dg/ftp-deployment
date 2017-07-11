@@ -43,6 +43,9 @@ class Deployer
 	/** @var string */
 	public $tempDir = '';
 
+	/** @var string[] */
+	public $preprocessMasks = [];
+
 	/** @var string */
 	private $localDir;
 
@@ -51,9 +54,6 @@ class Deployer
 
 	/** @var Logger */
 	private $logger;
-
-	/** @var string[] */
-	public $preprocessMasks = [];
 
 	/** @var array */
 	private $filters = [];
@@ -83,7 +83,7 @@ class Deployer
 	 */
 	public function deploy()
 	{
-		$this->logger->log("Connecting to server");
+		$this->logger->log('Connecting to server');
 		$this->server->connect();
 		$this->remoteDir = $this->server->getDir();
 
@@ -321,7 +321,7 @@ class Deployer
 		$list = [];
 		$iterator = dir($this->localDir . $subdir);
 		$counter = 0;
-		while (false !== ($entry = $iterator->read())) {
+		while (($entry = $iterator->read()) !== false) {
 			$this->logger->progress(str_pad(str_repeat('.', $counter++ % 40), 40));
 
 			$path = "$this->localDir$subdir/$entry";
@@ -436,7 +436,7 @@ class Deployer
 		if ($percent === null) {
 			$this->logger->log($s, $color);
 		} else {
-			$this->logger->progress($s . ' [' . round($percent) . "%]");
+			$this->logger->progress($s . ' [' . round($percent) . '%]');
 		}
 	}
 }

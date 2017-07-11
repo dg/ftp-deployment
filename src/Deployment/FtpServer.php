@@ -44,7 +44,7 @@ class FtpServer implements Server
 		}
 		$this->url = $url = is_array($url) ? $url : parse_url($url);
 		if (!isset($url['scheme'], $url['user'], $url['pass']) || ($url['scheme'] !== 'ftp' && $url['scheme'] !== 'ftps')) {
-			throw new \InvalidArgumentException("Invalid URL or missing username or password");
+			throw new \InvalidArgumentException('Invalid URL or missing username or password');
 		} elseif ($url['scheme'] === 'ftps' && !function_exists('ftp_ssl_connect')) {
 			throw new \Exception('PHP extension OpenSSL is not built statically in PHP.');
 		}
@@ -128,7 +128,7 @@ class FtpServer implements Server
 		try {
 			$this->ftp('delete', $file);
 		} catch (FtpException $e) {
-			if (in_array($file, (array) $this->ftp('nlist', $file . '*'))) {
+			if (in_array($file, (array) $this->ftp('nlist', $file . '*'), true)) {
 				throw $e;
 			}
 		}
@@ -203,7 +203,7 @@ class FtpServer implements Server
 		try {
 			$this->ftp('rmDir', $dir);
 		} catch (FtpException $e) {
-			if (in_array($dir, (array) $this->ftp('nlist', $dir . '*'))) {
+			if (in_array($dir, (array) $this->ftp('nlist', $dir . '*'), true)) {
 				throw $e;
 			}
 		}

@@ -14,14 +14,14 @@ namespace Deployment;
  */
 class Logger
 {
-	/** @var resource */
-	private $file;
-
 	/** @var bool */
 	public $useColors;
 
 	/** @var bool */
 	public $showProgress = true;
+
+	/** @var resource */
+	private $file;
 
 	/** @var array */
 	private $colors = [

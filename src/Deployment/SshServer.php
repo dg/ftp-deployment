@@ -14,14 +14,14 @@ namespace Deployment;
  */
 class SshServer implements Server
 {
-	/** @var resource */
-	private $connection;
-
 	/** @var int */
 	public $filePermissions;
 
 	/** @var int */
 	public $dirPermissions;
+
+	/** @var resource */
+	private $connection;
 
 	/** @var resource */
 	private $sftp;
@@ -41,7 +41,7 @@ class SshServer implements Server
 		}
 		$this->url = is_array($url) ? $url : parse_url($url);
 		if (!isset($this->url['scheme'], $this->url['user']) || $this->url['scheme'] !== 'sftp') {
-			throw new \InvalidArgumentException("Invalid URL or missing username");
+			throw new \InvalidArgumentException('Invalid URL or missing username');
 		}
 	}
 
@@ -161,7 +161,7 @@ class SshServer implements Server
 		$dirs = $entries = [];
 
 		$iterator = dir($path = "ssh2.sftp://$this->sftp$dir");
-		while (false !== ($entry = $iterator->read())) {
+		while (($entry = $iterator->read()) !== false) {
 			if ($entry !== '.' && $entry !== '..') {
 				$entries[] = $entry;
 			}

@@ -80,7 +80,7 @@ class Helpers
 	 * Processes HTTP request.
 	 * @return string
 	 */
-	public static function fetchUrl($url, & $error, array $postData = null)
+	public static function fetchUrl($url, &$error, array $postData = null)
 	{
 		if (extension_loaded('curl')) {
 			$ch = curl_init($url);
@@ -106,7 +106,7 @@ class Helpers
 					'method' => 'POST',
 					'header' => 'Content-type: application/x-www-form-urlencoded',
 					'content' => http_build_query($postData, null, '&'),
-				]
+				],
 			]));
 			$error = $output === false
 				? preg_replace("#^file_get_contents\(.*?\): #", '', error_get_last()['message'])

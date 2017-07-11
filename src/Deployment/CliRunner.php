@@ -28,7 +28,7 @@ class CliRunner
 	];
 
 	/** @var string[] */
-	public $ignoreMasks = ['*.bak', '.svn' , '.git*', 'Thumbs.db', '.DS_Store', '.idea'];
+	public $ignoreMasks = ['*.bak', '.svn', '.git*', 'Thumbs.db', '.DS_Store', '.idea'];
 
 	/** @var Logger */
 	private $logger;
@@ -67,7 +67,7 @@ class CliRunner
 		}
 
 		$time = time();
-		$this->logger->log("Started at " . date('[Y/m/d H:i]'));
+		$this->logger->log('Started at ' . date('[Y/m/d H:i]'));
 		$this->logger->log("Config file is $this->configFile");
 
 		foreach ($this->batches as $name => $batch) {
@@ -79,7 +79,7 @@ class CliRunner
 			if ($this->mode === 'generate') {
 				$this->logger->log('Scanning files');
 				$localPaths = $deployment->collectPaths();
-				$this->logger->log("Saved " . $deployment->writeDeploymentFile($localPaths));
+				$this->logger->log('Saved ' . $deployment->writeDeploymentFile($localPaths));
 				continue;
 			}
 
@@ -171,7 +171,7 @@ class CliRunner
 	/** @return array */
 	private function loadConfig()
 	{
-		$cmd = new CommandLine(<<<XX
+		$cmd = new CommandLine(<<<'XX'
 
 FTP deployment v2.7
 -------------------
@@ -210,7 +210,7 @@ XX
 			? ['' => $config]
 			: array_filter($config, 'is_array');
 
-		foreach ($this->batches as & $batch) {
+		foreach ($this->batches as &$batch) {
 			$batch = array_change_key_case($batch, CASE_LOWER) + $this->defaults;
 		}
 

@@ -146,7 +146,7 @@ class CommandLine
 	}
 
 
-	public function checkArg(array $opt, & $arg)
+	public function checkArg(array $opt, &$arg)
 	{
 		if (!empty($opt[self::REALPATH])) {
 			$path = realpath($arg);
