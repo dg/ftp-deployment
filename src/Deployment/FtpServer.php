@@ -15,6 +15,7 @@ namespace Deployment;
 class FtpServer implements Server
 {
 	const RETRIES = 10;
+
 	const BLOCK_SIZE = 400000;
 
 	/** @var int */

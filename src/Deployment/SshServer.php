@@ -68,7 +68,7 @@ class SshServer implements Server
 	 */
 	public function readFile($remote, $local)
 	{
-		$this->protect('copy', ["ssh2.sftp://" . intval($this->sftp) . "$remote", $local]);
+		$this->protect('copy', ['ssh2.sftp://' . (int) $this->sftp . $remote, $local]);
 	}
 
 
@@ -82,7 +82,7 @@ class SshServer implements Server
 			$size = max(filesize($local), 1);
 			$len = 0;
 			$i = fopen($local, 'rb');
-			$o = fopen("ssh2.sftp://" . intval($this->sftp) . "$remote", 'wb');
+			$o = fopen('ssh2.sftp://' . (int) $this->sftp . $remote, 'wb');
 			while (!feof($i)) {
 				$s = fread($i, 10000);
 				fwrite($o, $s, strlen($s));
@@ -104,7 +104,7 @@ class SshServer implements Server
 	 */
 	public function removeFile($file)
 	{
-		if (file_exists($path = "ssh2.sftp://" . intval($this->sftp) . "$file")) {
+		if (file_exists($path = 'ssh2.sftp://' . (int) $this->sftp . $file)) {
 			$this->protect('unlink', [$path]);
 		}
 	}
@@ -116,7 +116,7 @@ class SshServer implements Server
 	 */
 	public function renameFile($old, $new)
 	{
-		if (file_exists($path = "ssh2.sftp://" . intval($this->sftp) . "$new")) {
+		if (file_exists($path = 'ssh2.sftp://' . (int) $this->sftp . $new)) {
 			$perms = fileperms($path);
 			$this->removeFile($new);
 		}
@@ -145,7 +145,7 @@ class SshServer implements Server
 	 */
 	public function removeDir($dir)
 	{
-		if (file_exists($path = "ssh2.sftp://" . intval($this->sftp) . "$dir")) {
+		if (file_exists($path = 'ssh2.sftp://' . (int) $this->sftp . $dir)) {
 			$this->protect('rmdir', [$path]);
 		}
 	}
@@ -160,7 +160,7 @@ class SshServer implements Server
 	{
 		$dirs = $entries = [];
 
-		$iterator = dir($path = "ssh2.sftp://" . intval($this->sftp) . "$dir");
+		$iterator = dir($path = 'ssh2.sftp://' . (int) $this->sftp . $dir);
 		while (($entry = $iterator->read()) !== false) {
 			if ($entry !== '.' && $entry !== '..') {
 				$entries[] = $entry;
