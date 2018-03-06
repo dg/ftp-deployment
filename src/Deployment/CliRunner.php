@@ -112,6 +112,10 @@ class CliRunner
 			$urlParts['pass'] = urlencode($config['password']);
 		}
 
+		if ($urlParts['scheme'] === 'ftp') {
+			$this->logger->log('Note: connection is not encrypted', 'maroon');
+		}
+
 		$server = $urlParts['scheme'] === 'sftp'
 			? new SshServer($urlParts)
 			: new FtpServer($urlParts, (bool) $config['passivemode']);
