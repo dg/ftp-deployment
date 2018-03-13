@@ -183,9 +183,10 @@ Usage:
 	deployment <config_file> [-t | --test]
 
 Options:
-	-t | --test      Run in test-mode.
-	--generate       Only generates deployment file.
-	--no-progress    Hide the progress indicators.
+	-t | --test       Run in test-mode.
+	--section <name>  Only deploys the named section.
+	--generate        Only generates deployment file.
+	--no-progress     Hide the progress indicators.
 
 XX
 		, [
@@ -213,6 +214,16 @@ XX
 		$this->batches = isset($config['remote']) && is_string($config['remote'])
 			? ['' => $config]
 			: array_filter($config, 'is_array');
+
+		if (isset($options['--section'])) {
+			$section = $options['--section'];
+			if ($section === '') {
+				throw new \Exception('Missing section name.');
+			} elseif (!isset($this->batches[$section])) {
+				throw new \Exception("Unknown section '$section'.");
+			}
+			$this->batches = [$section => $this->batches[$section]];
+		}
 
 		foreach ($this->batches as &$batch) {
 			$batch = array_change_key_case($batch, CASE_LOWER) + $this->defaults;
