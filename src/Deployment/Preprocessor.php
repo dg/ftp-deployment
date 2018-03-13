@@ -14,6 +14,9 @@ namespace Deployment;
  */
 class Preprocessor
 {
+	/** @var string  path to java binary */
+	public $javaBinary = 'java';
+
 	/** @var bool  compress only file when contains /**! */
 	public $requireCompressMark = true;
 
@@ -40,10 +43,12 @@ class Preprocessor
 		}
 		$this->logger->log("Compressing $origFile");
 
-		$data = ['output_info' => 'compiled_code', 'js_code' => $content];
-		$output = Helpers::fetchUrl('https://closure-compiler.appspot.com/compile', $error, $data);
-		if ($error) {
-			$this->logger->log("Unable to minfy: $error\n");
+		$dir = dirname(__DIR__) . '/vendor';
+		$cmd = escapeshellarg($this->javaBinary) . ' -jar ' . escapeshellarg($dir . '/Google-Closure-Compiler/compiler.jar') . ' --warning_level QUIET';
+		list($ok, $output) = $this->execute($cmd, $content);
+		if (!$ok) {
+			$this->logger->log("Error while executing $cmd");
+			$this->logger->log($output);
 			return $content;
 		}
 		return $output;
@@ -132,5 +137,36 @@ class Preprocessor
 			}
 			return $m[0];
 		}, $content);
+	}
+
+
+	/**
+	 * Executes command.
+	 * @return array  [success, output]
+	 * @throws \Exception
+	 */
+	private function execute($command, $input)
+	{
+		$process = proc_open(
+			$command,
+			[['pipe', 'r'], ['pipe', 'w'], ['pipe', 'w']],
+			$pipes,
+			null, null, ['bypass_shell' => true]
+		);
+		if (!is_resource($process)) {
+			throw new \Exception("Unable start process $command.");
+		}
+
+		fwrite($pipes[0], $input);
+		fclose($pipes[0]);
+		$output = stream_get_contents($pipes[1]);
+		if (!$output) {
+			$output = stream_get_contents($pipes[2]);
+		}
+
+		return [
+			proc_close($process) === 0,
+			$output,
+		];
 	}
 }
