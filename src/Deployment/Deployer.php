@@ -20,6 +20,9 @@ class Deployer
 	public $deploymentFile = '.htdeployment';
 
 	/** @var string[] */
+	public $includeMasks;
+
+	/** @var string[] */
 	public $ignoreMasks = [];
 
 	/** @var bool */
@@ -323,7 +326,6 @@ class Deployer
 		$counter = 0;
 		while (($entry = $iterator->read()) !== false) {
 			$this->logger->progress(str_pad(str_repeat('.', $counter++ % 40), 40));
-
 			$path = "$this->localDir$subdir/$entry";
 			$short = "$subdir/$entry";
 			if ($entry == '.' || $entry == '..') {
@@ -332,6 +334,10 @@ class Deployer
 			} elseif (Helpers::matchMask($short, $this->ignoreMasks, is_dir($path))) {
 				$this->logger->log(str_pad("Ignoring .$short", 40), 'gray');
 				continue;
+
+			} elseif (is_array($this->includeMasks) && ! Helpers::matchMask($short, $this->includeMasks, is_dir($path))) {
+			    $this->logger->log(str_pad("Not into Includes .$short", 40), 'gray');
+			    continue;
 
 			} elseif (is_dir($path)) {
 				$list[$short . '/'] = true;

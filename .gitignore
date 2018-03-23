@@ -2,3 +2,7 @@
 /composer.lock
 /tests/tmp
 /tests/output
+
+temp/*
+deployment_test.ini
+deployment_test.log
