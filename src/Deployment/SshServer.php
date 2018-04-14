@@ -32,6 +32,7 @@ class SshServer implements Server
 
 	/**
 	 * @param  string|array  URL sftp://...
+	 * @throws \Exception
 	 */
 	public function __construct($url)
 	{
@@ -48,6 +49,7 @@ class SshServer implements Server
 	/**
 	 * Connects to FTP server.
 	 * @return void
+	 * @throws ServerException
 	 */
 	public function connect()
 	{
@@ -64,6 +66,7 @@ class SshServer implements Server
 	/**
 	 * Reads remote file from FTP server.
 	 * @return void
+	 * @throws ServerException
 	 */
 	public function readFile($remote, $local)
 	{
@@ -74,6 +77,7 @@ class SshServer implements Server
 	/**
 	 * Uploads file to FTP server.
 	 * @return void
+	 * @throws ServerException
 	 */
 	public function writeFile($local, $remote, callable $progress = null)
 	{
@@ -100,6 +104,7 @@ class SshServer implements Server
 	/**
 	 * Removes file from FTP server if exists.
 	 * @return void
+	 * @throws ServerException
 	 */
 	public function removeFile($file)
 	{
@@ -112,6 +117,7 @@ class SshServer implements Server
 	/**
 	 * Renames and rewrites file on FTP server.
 	 * @return void
+	 * @throws ServerException
 	 */
 	public function renameFile($old, $new)
 	{
@@ -129,6 +135,7 @@ class SshServer implements Server
 	/**
 	 * Creates directories on FTP server.
 	 * @return void
+	 * @throws ServerException
 	 */
 	public function createDir($dir)
 	{
@@ -141,6 +148,7 @@ class SshServer implements Server
 	/**
 	 * Removes directory from FTP server if exists.
 	 * @return void
+	 * @throws ServerException
 	 */
 	public function removeDir($dir)
 	{
@@ -154,6 +162,7 @@ class SshServer implements Server
 	 * Recursive deletes content of directory or file.
 	 * @param  string
 	 * @return void
+	 * @throws ServerException
 	 */
 	public function purge($dir, callable $progress = null)
 	{
@@ -199,6 +208,7 @@ class SshServer implements Server
 	/**
 	 * Executes a command on a remote server.
 	 * @return string
+	 * @throws ServerException
 	 */
 	public function execute($command)
 	{
