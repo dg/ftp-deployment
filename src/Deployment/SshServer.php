@@ -31,8 +31,7 @@ class SshServer implements Server
 
 
 	/**
-	 * @param  string|array  URL ftp://...
-	 * @param  bool
+	 * @param  string|array  URL sftp://...
 	 */
 	public function __construct($url)
 	{

@@ -219,7 +219,7 @@ class Deployer
 	 * Prepares .htdeployment for upload.
 	 * @return string
 	 */
-	public function writeDeploymentFile($localPaths)
+	public function writeDeploymentFile(array $localPaths)
 	{
 		$s = '';
 		foreach ($localPaths as $k => $v) {

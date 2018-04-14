@@ -36,7 +36,7 @@ class CliRunner
 	/** @var string */
 	private $configFile;
 
-	/** @var string  test|generate|null */
+	/** @var string|null  test|generate|null */
 	private $mode;
 
 	/** @var array[] */
@@ -100,7 +100,7 @@ class CliRunner
 
 
 	/** @return Deployer */
-	private function createDeployer($config)
+	private function createDeployer(array $config)
 	{
 		if (empty($config['remote']) || !($urlParts = parse_url($config['remote'])) || !isset($urlParts['scheme'], $urlParts['host'])) {
 			throw new \Exception("Missing or invalid 'remote' URL in config.");
@@ -172,7 +172,7 @@ class CliRunner
 	}
 
 
-	/** @return array */
+	/** @return array|null */
 	private function loadConfig()
 	{
 		$cmd = new CommandLine(<<<'XX'
