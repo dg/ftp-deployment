@@ -116,9 +116,13 @@ class CliRunner
 			$this->logger->log('Note: connection is not encrypted', 'maroon');
 		}
 
-		$server = $urlParts['scheme'] === 'sftp'
-			? new SshServer($urlParts)
-			: new FtpServer($urlParts, (bool) $config['passivemode']);
+		if ($urlParts['scheme'] === 'sftp') {
+			$server = new SshServer($urlParts);
+		} elseif ($urlParts['scheme'] === 'file') {
+			$server = new FileServer($config['remote']);
+		} else {
+			$server = new FtpServer($urlParts, (bool) $config['passivemode']);
+		}
 
 		if (!preg_match('#/|\\\\|[a-z]:#iA', $config['local'])) {
 			$config['local'] = dirname($this->configFile) . '/' . $config['local'];

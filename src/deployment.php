@@ -10,6 +10,7 @@ if (PHP_VERSION_ID < 50400) {
 require __DIR__ . '/Deployment/Server.php';
 require __DIR__ . '/Deployment/FtpServer.php';
 require __DIR__ . '/Deployment/SshServer.php';
+require __DIR__ . '/Deployment/FileServer.php';
 require __DIR__ . '/Deployment/Helpers.php';
 require __DIR__ . '/Deployment/Logger.php';
 require __DIR__ . '/Deployment/Deployer.php';
