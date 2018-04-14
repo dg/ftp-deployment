@@ -159,12 +159,26 @@ class CliRunner
 		date_default_timezone_set('Europe/Prague');
 
 		set_error_handler(function ($severity, $message, $file, $line) {
-			if (($severity & error_reporting()) === $severity) {
-				$this->logger->log("Error: $message in $file on $line", 'red');
-				exit(1);
+			if (($severity & error_reporting()) !== $severity) {
+				return false;
 			}
-			return false;
+
+			if (ini_get('html_errors')) {
+				$message = html_entity_decode(strip_tags($message));
+			}
+
+			$trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);
+			if (isset($trace[2]['class']) && is_a($trace[2]['class'], 'Deployment\Server', true)) {
+				if (preg_match('#^\w+\(\):\s*(.+)#', $message, $m)) {
+					$message = $m[1];
+				}
+				throw new ServerException($message);
+			}
+
+			$this->logger->log("Error: $message in $file on $line", 'red');
+			exit(1);
 		});
+
 		set_exception_handler(function ($e) {
 			$this->logger->log("Error: {$e->getMessage()}\n\n$e", 'red');
 			exit(1);

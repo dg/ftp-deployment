@@ -11,6 +11,8 @@ namespace Deployment;
 
 /**
  * FTP server.
+ *
+ * It has a dependency on the error handler that converts PHP errors to ServerException.
  */
 class FtpServer implements Server
 {
@@ -61,14 +63,15 @@ class FtpServer implements Server
 	 */
 	public function connect()
 	{
-		$this->connection = $this->protect(
-			$this->url['scheme'] === 'ftp' ? 'ftp_connect' : 'ftp_ssl_connect',
-			[$this->url['host'], empty($this->url['port']) ? null : (int) $this->url['port']]
-		);
-		$this->ftp('login', urldecode($this->url['user']), urldecode($this->url['pass']));
-		$this->ftp('pasv', $this->passiveMode);
+		$port = empty($this->url['port']) ? null : (int) $this->url['port'];
+		$this->connection = $this->url['scheme'] === 'ftp'
+			? ftp_connect($this->url['host'], $port)
+			: ftp_ssl_connect($this->url['host'], $port);
+
+		ftp_login($this->connection, urldecode($this->url['user']), urldecode($this->url['pass']));
+		ftp_pasv($this->connection, $this->passiveMode);
 		if (isset($this->url['path'])) {
-			$this->ftp('chdir', $this->url['path']);
+			ftp_chdir($this->connection, $this->url['path']);
 		}
 	}
 
@@ -80,7 +83,7 @@ class FtpServer implements Server
 	 */
 	public function readFile($remote, $local)
 	{
-		$this->ftp('get', $local, $remote, FTP_BINARY);
+		ftp_get($this->connection, $local, $remote, FTP_BINARY);
 	}
 
 
@@ -101,8 +104,8 @@ class FtpServer implements Server
 			}
 			try {
 				$ret = $blocks === 0
-					? $this->ftp('nb_put', $remote, $local, FTP_BINARY)
-					: $this->ftp('nb_continue');
+					? ftp_nb_put($this->connection, $remote, $local, FTP_BINARY)
+					: ftp_nb_continue($this->connection);
 
 			} catch (ServerException $e) {
 				@ftp_close($this->connection); // intentionally @
@@ -116,7 +119,7 @@ class FtpServer implements Server
 		} while ($ret === FTP_MOREDATA);
 
 		if ($this->filePermissions) {
-			$this->ftp('chmod', $this->filePermissions, $remote);
+			ftp_chmod($this->connection, $this->filePermissions, $remote);
 		}
 		if ($progress) {
 			$progress(100);
@@ -132,9 +135,9 @@ class FtpServer implements Server
 	public function removeFile($file)
 	{
 		try {
-			$this->ftp('delete', $file);
+			ftp_delete($this->connection, $file);
 		} catch (ServerException $e) {
-			if (in_array($file, (array) $this->ftp('nlist', $file . '*'), true)) {
+			if (in_array($file, (array) ftp_nlist($this->connection, $file . '*'), true)) {
 				throw $e;
 			}
 		}
@@ -149,7 +152,7 @@ class FtpServer implements Server
 	public function renameFile($old, $new)
 	{
 		$this->removeFile($new);
-		$this->ftp('rename', $old, $new); // TODO: zachovat permissions
+		ftp_rename($this->connection, $old, $new); // TODO: zachovat permissions
 	}
 
 
@@ -170,9 +173,9 @@ class FtpServer implements Server
 			$path .= array_shift($parts);
 			try {
 				if ($path !== '') {
-					$this->ftp('mkdir', $path);
+					ftp_mkdir($this->connection, $path);
 					if ($this->dirPermissions) {
-						$this->ftp('chmod', $this->dirPermissions, $path);
+						ftp_chmod($this->connection, $this->dirPermissions, $path);
 					}
 				}
 			} catch (ServerException $e) {
@@ -194,12 +197,9 @@ class FtpServer implements Server
 	private function isDir($dir)
 	{
 		$current = $this->getDir();
-		try {
-			$this->ftp('chdir', $dir);
-		} catch (ServerException $e) {
-		}
-		$this->ftp('chdir', $current ?: '/');
-		return empty($e);
+		$res = @ftp_chdir($this->connection, $dir); // intentionally @
+		ftp_chdir($this->connection, $current ?: '/');
+		return $res;
 	}
 
 
@@ -211,9 +211,9 @@ class FtpServer implements Server
 	public function removeDir($dir)
 	{
 		try {
-			$this->ftp('rmDir', $dir);
+			ftp_rmdir($this->connection, $dir);
 		} catch (ServerException $e) {
-			if (in_array($dir, (array) $this->ftp('nlist', $dir . '*'), true)) {
+			if (in_array($dir, (array) ftp_nlist($this->connection, $dir . '*'), true)) {
 				throw $e;
 			}
 		}
@@ -229,7 +229,7 @@ class FtpServer implements Server
 	public function purge($dir, callable $progress = null)
 	{
 		$dirs = [];
-		foreach ((array) $this->ftp('nlist', $dir) as $entry) {
+		foreach ((array) ftp_nlist($this->connection, $dir) as $entry) {
 			if ($entry == null || $entry === $dir || preg_match('#(^|/)\\.+$#', $entry)) { // intentionally ==
 				continue;
 			} elseif (strpos($entry, '/') === false) {
@@ -238,9 +238,9 @@ class FtpServer implements Server
 
 			if ($this->isDir($entry)) {
 				$dirs[] = $tmp = "$dir/.delete" . uniqid() . count($dirs);
-				$this->ftp('rename', $entry, $tmp);
+				ftp_rename($this->connection, $entry, $tmp);
 			} else {
-				$this->ftp('delete', $entry);
+				ftp_delete($this->connection, $entry);
 			}
 
 			if ($progress) {
@@ -250,7 +250,7 @@ class FtpServer implements Server
 
 		foreach ($dirs as $subdir) {
 			$this->purge($subdir, $progress);
-			$this->ftp('rmDir', $subdir);
+			ftp_rmdir($this->connection, $subdir);
 		}
 	}
 
@@ -262,7 +262,7 @@ class FtpServer implements Server
 	 */
 	public function getDir()
 	{
-		return rtrim($this->ftp('pwd'), '/');
+		return rtrim(ftp_pwd($this->connection), '/');
 	}
 
 
@@ -283,45 +283,10 @@ class FtpServer implements Server
 			} elseif ($m[1] === 'mv') {
 				$this->renameFile($m[2], $m[3]);
 			} elseif ($m[1] === 'chmod') {
-				$this->ftp('chmod', octdec($m[2]), $m[3]);
+				ftp_chmod($this->connection, octdec($m[2]), $m[3]);
 			}
 		} else {
-			return $this->ftp('exec', $command);
+			return ftp_exec($this->connection, $command);
 		}
-	}
-
-
-	/**
-	 * @param  string  method name
-	 * @param  array   arguments
-	 * @return mixed
-	 */
-	private function ftp($cmd)
-	{
-		$args = func_get_args();
-		$args[0] = $this->connection;
-		return $this->protect('ftp_' . $cmd, $args);
-	}
-
-
-	private function protect(callable $func, $args = [])
-	{
-		set_error_handler(function ($severity, $message) {
-			if (ini_get('html_errors')) {
-				$message = html_entity_decode(strip_tags($message));
-			}
-			if (preg_match('#^\w+\(\):\s*(.+)#', $message, $m)) {
-				$message = $m[1];
-			}
-			throw new ServerException($message);
-		});
-		try {
-			$res = call_user_func_array($func, $args);
-			restore_error_handler();
-		} catch (\Exception $e) {
-			restore_error_handler();
-			throw $e;
-		}
-		return $res;
 	}
 }

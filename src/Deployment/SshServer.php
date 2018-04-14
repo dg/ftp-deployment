@@ -11,6 +11,8 @@ namespace Deployment;
 
 /**
  * SSH server.
+ *
+ * It has a dependency on the error handler that converts PHP errors to ServerException.
  */
 class SshServer implements Server
 {
@@ -53,13 +55,13 @@ class SshServer implements Server
 	 */
 	public function connect()
 	{
-		$this->connection = $this->protect('ssh2_connect', [$this->url['host'], empty($this->url['port']) ? 22 : (int) $this->url['port']]);
+		$this->connection = ssh2_connect($this->url['host'], empty($this->url['port']) ? 22 : (int) $this->url['port']);
 		if (isset($this->url['pass'])) {
-			$this->protect('ssh2_auth_password', [$this->connection, urldecode($this->url['user']), urldecode($this->url['pass'])]);
+			ssh2_auth_password($this->connection, urldecode($this->url['user']), urldecode($this->url['pass']));
 		} else {
-			$this->protect('ssh2_auth_agent', [$this->connection, urldecode($this->url['user'])]);
+			ssh2_auth_agent($this->connection, urldecode($this->url['user']));
 		}
-		$this->sftp = $this->protect('ssh2_sftp', [$this->connection]);
+		$this->sftp = ssh2_sftp($this->connection);
 	}
 
 
@@ -70,7 +72,7 @@ class SshServer implements Server
 	 */
 	public function readFile($remote, $local)
 	{
-		$this->protect('copy', ['ssh2.sftp://' . (int) $this->sftp . $remote, $local]);
+		copy('ssh2.sftp://' . (int) $this->sftp . $remote, $local);
 	}
 
 
@@ -81,22 +83,20 @@ class SshServer implements Server
 	 */
 	public function writeFile($local, $remote, callable $progress = null)
 	{
-		$this->protect(function () use ($local, $remote, $progress) {
-			$size = max(filesize($local), 1);
-			$len = 0;
-			$i = fopen($local, 'rb');
-			$o = fopen('ssh2.sftp://' . (int) $this->sftp . $remote, 'wb');
-			while (!feof($i)) {
-				$s = fread($i, 10000);
-				fwrite($o, $s, strlen($s));
-				$len += strlen($s);
-				if ($progress) {
-					$progress($len * 100 / $size);
-				}
+		$size = max(filesize($local), 1);
+		$len = 0;
+		$i = fopen($local, 'rb');
+		$o = fopen('ssh2.sftp://' . (int) $this->sftp . $remote, 'wb');
+		while (!feof($i)) {
+			$s = fread($i, 10000);
+			fwrite($o, $s, strlen($s));
+			$len += strlen($s);
+			if ($progress) {
+				$progress($len * 100 / $size);
 			}
-		});
+		}
 		if ($this->filePermissions) {
-			$this->protect('ssh2_sftp_chmod', [$this->sftp, $remote, $this->filePermissions]);
+			ssh2_sftp_chmod($this->sftp, $remote, $this->filePermissions);
 		}
 	}
 
@@ -109,7 +109,7 @@ class SshServer implements Server
 	public function removeFile($file)
 	{
 		if (file_exists($path = 'ssh2.sftp://' . (int) $this->sftp . $file)) {
-			$this->protect('unlink', [$path]);
+			unlink($path);
 		}
 	}
 
@@ -125,9 +125,9 @@ class SshServer implements Server
 			$perms = fileperms($path);
 			$this->removeFile($new);
 		}
-		$this->protect('ssh2_sftp_rename', [$this->sftp, $old, $new]);
+		ssh2_sftp_rename($this->sftp, $old, $new);
 		if (!empty($perms)) {
-			$this->protect('ssh2_sftp_chmod', [$this->sftp, $new, $perms]);
+			ssh2_sftp_chmod($this->sftp, $new, $perms);
 		}
 	}
 
@@ -140,7 +140,7 @@ class SshServer implements Server
 	public function createDir($dir)
 	{
 		if (trim($dir, '/') !== '' && !file_exists('ssh2.sftp://' . (int) $this->sftp . $dir)) {
-			$this->protect('ssh2_sftp_mkdir', [$this->sftp, $dir, $this->dirPermissions ?: 0777, true]);
+			ssh2_sftp_mkdir($this->sftp, $dir, $this->dirPermissions ?: 0777, true);
 		}
 	}
 
@@ -153,7 +153,7 @@ class SshServer implements Server
 	public function removeDir($dir)
 	{
 		if (file_exists($path = 'ssh2.sftp://' . (int) $this->sftp . $dir)) {
-			$this->protect('rmdir', [$path]);
+			rmdir($path);
 		}
 	}
 
@@ -178,9 +178,9 @@ class SshServer implements Server
 		foreach ($entries as $entry) {
 			if (is_dir("$path/$entry")) {
 				$dirs[] = $tmp = '.delete' . uniqid() . count($dirs);
-				$this->protect('rename', ["$path/$entry", "$path/$tmp"]);
+				rename("$path/$entry", "$path/$tmp");
 			} else {
-				$this->protect('unlink', ["$path/$entry"]);
+				unlink("$path/$entry");
 			}
 
 			if ($progress) {
@@ -190,7 +190,7 @@ class SshServer implements Server
 
 		foreach ($dirs as $subdir) {
 			$this->purge("$dir/$subdir", $progress);
-			$this->protect('rmdir', ["$path/$subdir"]);
+			rmdir("$path/$subdir");
 		}
 	}
 
@@ -212,35 +212,10 @@ class SshServer implements Server
 	 */
 	public function execute($command)
 	{
-		$stream = $this->protect('ssh2_exec', [$this->connection, $command]);
+		$stream = ssh2_exec($this->connection, $command);
 		stream_set_blocking($stream, true);
 		$out = stream_get_contents($stream);
 		fclose($stream);
 		return $out;
-	}
-
-
-	private function protect(callable $func, $args = [])
-	{
-		set_error_handler(function ($severity, $message) {
-			if (ini_get('html_errors')) {
-				$message = html_entity_decode(strip_tags($message));
-			}
-			if (preg_match('#^\w+\(\):\s*(.+)#', $message, $m)) {
-				$message = $m[1];
-			}
-			throw new ServerException($message);
-		});
-		try {
-			$res = call_user_func_array($func, $args);
-			restore_error_handler();
-		} catch (\Exception $e) {
-			restore_error_handler();
-			throw $e;
-		}
-		if ($res === false) {
-			throw new ServerException(is_string($func) ? "$func failures." : null);
-		}
-		return $res;
 	}
 }
