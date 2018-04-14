@@ -16,7 +16,7 @@ require __DIR__ . '/Deployment/Deployer.php';
 require __DIR__ . '/Deployment/Preprocessor.php';
 require __DIR__ . '/Deployment/CommandLine.php';
 require __DIR__ . '/Deployment/CliRunner.php';
-require __DIR__ . '/Deployment/exceptions.php';
+require __DIR__ . '/Deployment/ServerException.php';
 
 
 $runner = new CliRunner;

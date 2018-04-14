@@ -12,13 +12,3 @@ namespace Deployment;
 class ServerException extends \Exception
 {
 }
-
-
-class FtpException extends ServerException
-{
-}
-
-
-class SshException extends ServerException
-{
-}

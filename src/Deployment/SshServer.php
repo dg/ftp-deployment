@@ -219,7 +219,7 @@ class SshServer implements Server
 			if (preg_match('#^\w+\(\):\s*(.+)#', $message, $m)) {
 				$message = $m[1];
 			}
-			throw new SshException($message);
+			throw new ServerException($message);
 		});
 		try {
 			$res = call_user_func_array($func, $args);
@@ -229,7 +229,7 @@ class SshServer implements Server
 			throw $e;
 		}
 		if ($res === false) {
-			throw new SshException(is_string($func) ? "$func failures." : null);
+			throw new ServerException(is_string($func) ? "$func failures." : null);
 		}
 		return $res;
 	}

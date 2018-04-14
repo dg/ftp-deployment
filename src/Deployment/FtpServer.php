@@ -100,13 +100,13 @@ class FtpServer implements Server
 					? $this->ftp('nb_put', $remote, $local, FTP_BINARY)
 					: $this->ftp('nb_continue');
 
-			} catch (FtpException $e) {
+			} catch (ServerException $e) {
 				@ftp_close($this->connection); // intentionally @
 				$this->connect();
 				if (--$retry) {
 					goto upload;
 				}
-				throw new FtpException("Cannot upload file $local, number of retries exceeded. Error: {$e->getMessage()}");
+				throw new ServerException("Cannot upload file $local, number of retries exceeded. Error: {$e->getMessage()}");
 			}
 			$blocks++;
 		} while ($ret === FTP_MOREDATA);
@@ -128,7 +128,7 @@ class FtpServer implements Server
 	{
 		try {
 			$this->ftp('delete', $file);
-		} catch (FtpException $e) {
+		} catch (ServerException $e) {
 			if (in_array($file, (array) $this->ftp('nlist', $file . '*'), true)) {
 				throw $e;
 			}
@@ -168,9 +168,9 @@ class FtpServer implements Server
 						$this->ftp('chmod', $this->dirPermissions, $path);
 					}
 				}
-			} catch (FtpException $e) {
+			} catch (ServerException $e) {
 				if (!$this->isDir($path)) {
-					throw new FtpException("Cannot create directory '$path'.");
+					throw new ServerException("Cannot create directory '$path'.");
 				}
 			}
 			$path .= '/';
@@ -188,7 +188,7 @@ class FtpServer implements Server
 		$current = $this->getDir();
 		try {
 			$this->ftp('chdir', $dir);
-		} catch (FtpException $e) {
+		} catch (ServerException $e) {
 		}
 		$this->ftp('chdir', $current ?: '/');
 		return empty($e);
@@ -203,7 +203,7 @@ class FtpServer implements Server
 	{
 		try {
 			$this->ftp('rmDir', $dir);
-		} catch (FtpException $e) {
+		} catch (ServerException $e) {
 			if (in_array($dir, (array) $this->ftp('nlist', $dir . '*'), true)) {
 				throw $e;
 			}
@@ -301,7 +301,7 @@ class FtpServer implements Server
 			if (preg_match('#^\w+\(\):\s*(.+)#', $message, $m)) {
 				$message = $m[1];
 			}
-			throw new FtpException($message);
+			throw new ServerException($message);
 		});
 		try {
 			$res = call_user_func_array($func, $args);
