@@ -173,14 +173,6 @@ class CliRunner
 				$message = html_entity_decode(strip_tags($message));
 			}
 
-			$trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);
-			if (isset($trace[2]['class']) && is_a($trace[2]['class'], 'Deployment\Server', true)) {
-				if (preg_match('#^\w+\(\):\s*(.+)#', $message, $m)) {
-					$message = $m[1];
-				}
-				throw new ServerException($message);
-			}
-
 			throw new \ErrorException($message, 0, $severity, $file, $line);
 		});
 
