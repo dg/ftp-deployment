@@ -35,7 +35,7 @@ class SshServer implements Server
 
 
 	/**
-	 * @param  string  URL sftp://...
+	 * @param  string  $url  sftp://...
 	 * @throws \Exception
 	 */
 	public function __construct(string $url)

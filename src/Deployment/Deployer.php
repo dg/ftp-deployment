@@ -229,7 +229,7 @@ class Deployer
 
 	/**
 	 * Uploades files and creates directories.
-	 * @param  string[]  relative paths, starts with /
+	 * @param  string[]  $paths  relative paths, starts with /
 	 */
 	private function uploadPaths(array $paths): void
 	{
@@ -267,7 +267,7 @@ class Deployer
 
 	/**
 	 * Renames uploaded files.
-	 * @param  string[]  relative paths, starts with /
+	 * @param  string[]  $paths  relative paths, starts with /
 	 */
 	private function renamePaths(array $paths): void
 	{
@@ -282,7 +282,7 @@ class Deployer
 
 	/**
 	 * Deletes files and directories.
-	 * @param  string[]  relative paths, starts with /
+	 * @param  string[]  $paths  relative paths, starts with /
 	 */
 	private function deletePaths(array $paths): void
 	{
@@ -305,7 +305,7 @@ class Deployer
 
 	/**
 	 * Scans directory.
-	 * @param  string   relative subdir, starts with /
+	 * @param  string   $subdir  relative subdir, starts with /
 	 * @return string[] relative paths, starts with /
 	 */
 	public function collectPaths(string $subdir = ''): array
@@ -344,7 +344,7 @@ class Deployer
 
 	/**
 	 * Calls preprocessors on file.
-	 * @param  string  relative path, starts with /
+	 * @param  string  $file  relative path, starts with /
 	 * @return string  full path
 	 */
 	private function preprocess(string $file): string
@@ -376,7 +376,7 @@ class Deployer
 
 
 	/**
-	 * @param  array of string|callable
+	 * @param  array  $jobs  string|callable
 	 */
 	private function runJobs(array $jobs): void
 	{

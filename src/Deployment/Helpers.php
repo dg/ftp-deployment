@@ -36,8 +36,8 @@ class Helpers
 
 	/**
 	 * Matches filename against patterns.
-	 * @param  string   relative path
-	 * @param  string[]
+	 * @param  string   $path  relative path
+	 * @param  string[]  $patterns
 	 */
 	public static function matchMask(string $path, array $patterns, bool $isDir = false): bool
 	{

@@ -39,7 +39,7 @@ class FtpServer implements Server
 
 
 	/**
-	 * @param  string  URL ftp://... or ftps://...
+	 * @param  string  $url  ftp://... or ftps://...
 	 * @throws \Exception
 	 */
 	public function __construct(string $url, bool $passiveMode = true)

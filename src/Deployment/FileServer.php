@@ -23,7 +23,7 @@ class FileServer implements Server
 
 
 	/**
-	 * @param  string  URL file://...
+	 * @param  string  $url  file://...
 	 */
 	public function __construct(string $url)
 	{
