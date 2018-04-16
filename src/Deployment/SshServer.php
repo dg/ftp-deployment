@@ -33,7 +33,7 @@ class SshServer implements Server
 
 
 	/**
-	 * @param  string|array  URL sftp://...
+	 * @param  string  URL sftp://...
 	 * @throws \Exception
 	 */
 	public function __construct($url)
@@ -41,7 +41,7 @@ class SshServer implements Server
 		if (!extension_loaded('ssh2')) {
 			throw new \Exception('PHP extension SSH2 is not loaded.');
 		}
-		$this->url = is_array($url) ? $url : parse_url($url);
+		$this->url = parse_url($url);
 		if (!isset($this->url['scheme'], $this->url['user']) || $this->url['scheme'] !== 'sftp') {
 			throw new \InvalidArgumentException('Invalid URL or missing username');
 		}

@@ -37,7 +37,7 @@ class FtpServer implements Server
 
 
 	/**
-	 * @param  string|array  URL ftp://... or ftps://...
+	 * @param  string  URL ftp://... or ftps://...
 	 * @param  bool
 	 * @throws \Exception
 	 */
@@ -46,7 +46,7 @@ class FtpServer implements Server
 		if (!extension_loaded('ftp')) {
 			throw new \Exception('PHP extension FTP is not loaded.');
 		}
-		$this->url = $url = is_array($url) ? $url : parse_url($url);
+		$this->url = $url = parse_url($url);
 		if (!isset($url['scheme'], $url['user'], $url['pass']) || ($url['scheme'] !== 'ftp' && $url['scheme'] !== 'ftps')) {
 			throw new \InvalidArgumentException('Invalid URL or missing username or password');
 		} elseif ($url['scheme'] === 'ftps' && !function_exists('ftp_ssl_connect')) {

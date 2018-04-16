@@ -117,11 +117,11 @@ class CliRunner
 		}
 
 		if ($urlParts['scheme'] === 'sftp') {
-			$server = new SshServer($urlParts);
+			$server = new SshServer(Helpers::buildUrl($urlParts));
 		} elseif ($urlParts['scheme'] === 'file') {
 			$server = new FileServer($config['remote']);
 		} else {
-			$server = new FtpServer($urlParts, (bool) $config['passivemode']);
+			$server = new FtpServer(Helpers::buildUrl($urlParts), (bool) $config['passivemode']);
 		}
 
 		if (!preg_match('#/|\\\\|[a-z]:#iA', $config['local'])) {
