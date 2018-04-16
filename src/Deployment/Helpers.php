@@ -90,7 +90,7 @@ class Helpers
 			];
 			if ($postData !== null) {
 				$options[CURLOPT_POST] = true;
-				$options[CURLOPT_POSTFIELDS] = http_build_query($postData, null, '&');
+				$options[CURLOPT_POSTFIELDS] = http_build_query($postData, '', '&');
 			}
 			curl_setopt_array($ch, $options);
 			$output = curl_exec($ch);
@@ -105,7 +105,7 @@ class Helpers
 				'http' => $postData === null ? [] : [
 					'method' => 'POST',
 					'header' => 'Content-type: application/x-www-form-urlencoded',
-					'content' => http_build_query($postData, null, '&'),
+					'content' => http_build_query($postData, '', '&'),
 				],
 			]));
 			$error = $output === false

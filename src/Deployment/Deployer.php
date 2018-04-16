@@ -165,7 +165,7 @@ class Deployer
 			$this->logger->log("\nCleaning $path");
 			$this->server->purge($this->remoteDir . '/' . $path, function ($path) {
 				static $counter;
-				$path = substr($path, strlen($this->remoteDir));
+				$path = (string) substr($path, strlen($this->remoteDir));
 				$path = preg_match('#/(.{1,60})$#', $path, $m) ? $m[1] : substr(basename($path), 0, 60);
 				$this->logger->progress(str_pad($path . ' ' . str_repeat('.', $counter++ % 30 + 60 - strlen($path)), 90));
 			});
@@ -191,7 +191,6 @@ class Deployer
 	public function addFilter($extension, $filter, $cached = false)
 	{
 		$this->filters[$extension][] = ['filter' => $filter, 'cached' => $cached];
-		return $this;
 	}
 
 
@@ -205,7 +204,7 @@ class Deployer
 		try {
 			$this->server->readFile($this->remoteDir . '/' . $this->deploymentFile, $tempFile);
 		} catch (ServerException $e) {
-			return;
+			return null;
 		}
 		$content = gzinflate(file_get_contents($tempFile));
 		$res = [];

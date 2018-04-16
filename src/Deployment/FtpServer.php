@@ -63,7 +63,7 @@ class FtpServer implements Server
 	 */
 	public function connect()
 	{
-		$port = empty($this->url['port']) ? null : (int) $this->url['port'];
+		$port = empty($this->url['port']) ? 21 : (int) $this->url['port'];
 		$this->connection = $this->url['scheme'] === 'ftp'
 			? ftp_connect($this->url['host'], $port)
 			: ftp_ssl_connect($this->url['host'], $port);
@@ -291,7 +291,8 @@ class FtpServer implements Server
 				ftp_chmod($this->connection, octdec($m[2]), $m[3]);
 			}
 		} else {
-			return ftp_exec($this->connection, $command);
+			ftp_exec($this->connection, $command);
 		}
+		return '';
 	}
 }

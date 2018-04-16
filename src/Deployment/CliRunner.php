@@ -97,6 +97,7 @@ class CliRunner
 
 		$time = time() - $time;
 		$this->logger->log("\nFinished at " . date('[Y/m/d H:i]') . " (in $time seconds)", 'lime');
+		return 0;
 	}
 
 
@@ -214,7 +215,7 @@ XX
 
 		if ($cmd->isEmpty()) {
 			$cmd->help();
-			return;
+			return null;
 		}
 
 		$options = $cmd->parse();
