@@ -55,7 +55,7 @@ class SshServer implements Server
 	 */
 	public function connect()
 	{
-		$this->connection = ssh2_connect($this->url['host'], empty($this->url['port']) ? 22 : (int) $this->url['port']);
+		$this->connection = ssh2_connect($this->url['host'], $this->url['port'] ?? 22);
 		if (isset($this->url['pass'])) {
 			ssh2_auth_password($this->connection, urldecode($this->url['user']), urldecode($this->url['pass']));
 		} else {

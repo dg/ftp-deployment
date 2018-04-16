@@ -14,7 +14,7 @@ namespace Deployment;
  */
 class Deployer
 {
-	const TEMPORARY_SUFFIX = '.deploytmp';
+	private const TEMPORARY_SUFFIX = '.deploytmp';
 
 	/** @var string */
 	public $deploymentFile = '.htdeployment';
@@ -370,7 +370,7 @@ class Deployer
 			if ($info['cached'] && is_file($tempFile = $this->tempDir . '/' . md5($content))) {
 				$content = file_get_contents($tempFile);
 			} else {
-				$content = call_user_func($info['filter'], $content, $full);
+				$content = $info['filter']($content, $full);
 				if ($info['cached']) {
 					file_put_contents($tempFile, $content);
 				}
@@ -404,7 +404,7 @@ class Deployer
 					$out = $this->server->execute($m[2]);
 
 				} elseif ($m[1] === 'upload') {
-					list($localFile, $remotePath) = explode(' ', $m[2]);
+					[$localFile, $remotePath] = explode(' ', $m[2]);
 					$localFile = $this->localDir . '/' . $localFile;
 					if (!is_file($localFile)) {
 						throw new \RuntimeException("File $localFile doesn't exist.");

@@ -16,9 +16,9 @@ namespace Deployment;
  */
 class FtpServer implements Server
 {
-	const RETRIES = 10;
+	private const RETRIES = 10;
 
-	const BLOCK_SIZE = 400000;
+	private const BLOCK_SIZE = 400000;
 
 	/** @var int */
 	public $filePermissions;
@@ -63,10 +63,9 @@ class FtpServer implements Server
 	 */
 	public function connect()
 	{
-		$port = empty($this->url['port']) ? 21 : (int) $this->url['port'];
 		$this->connection = $this->url['scheme'] === 'ftp'
-			? ftp_connect($this->url['host'], $port)
-			: ftp_ssl_connect($this->url['host'], $port);
+			? ftp_connect($this->url['host'], $this->url['port'] ?? 21)
+			: ftp_ssl_connect($this->url['host'], $this->url['port'] ?? 21);
 
 		ftp_login($this->connection, urldecode($this->url['user']), urldecode($this->url['pass']));
 

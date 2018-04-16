@@ -14,7 +14,7 @@ namespace Deployment;
  */
 class CommandLine
 {
-	const
+	public const
 		ARGUMENT = 'argument',
 		OPTIONAL = 'optional',
 		REPEATABLE = 'repeatable',
@@ -52,7 +52,7 @@ class CommandLine
 				self::ARGUMENT => (bool) end($m[2]),
 				self::OPTIONAL => isset($line[2]) || (substr(end($m[2]), 0, 1) === '[') || isset($opts[self::VALUE]),
 				self::REPEATABLE => (bool) end($m[3]),
-				self::VALUE => isset($line[2]) ? $line[2] : null,
+				self::VALUE => $line[2] ?? null,
 			];
 			if ($name !== $m[1][0]) {
 				$this->aliases[$m[1][0]] = $name;
@@ -92,7 +92,7 @@ class CommandLine
 				continue;
 			}
 
-			list($name, $arg) = strpos($arg, '=') ? explode('=', $arg, 2) : [$arg, true];
+			[$name, $arg] = strpos($arg, '=') ? explode('=', $arg, 2) : [$arg, true];
 
 			if (isset($this->aliases[$name])) {
 				$name = $this->aliases[$name];

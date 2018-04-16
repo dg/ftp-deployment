@@ -120,11 +120,11 @@ class Helpers
 	public static function buildUrl(array $url)
 	{
 		return (isset($url['scheme']) ? $url['scheme'] . '://' : '')
-			. (isset($url['user']) ? $url['user'] : '')
+			. ($url['user'] ?? '')
 			. (isset($url['pass']) ? ':' . $url['pass'] : '')
 			. (isset($url['user']) || isset($url['pass']) ? '@' : '')
-			. (isset($url['host']) ? $url['host'] : '')
+			. ($url['host'] ?? '')
 			. (isset($url['port']) ? ':' . $url['port'] : '')
-			. (isset($url['path']) ? $url['path'] : '');
+			. ($url['path'] ?? '');
 	}
 }

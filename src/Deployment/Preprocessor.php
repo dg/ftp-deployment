@@ -45,7 +45,7 @@ class Preprocessor
 
 		$dir = dirname(__DIR__) . '/vendor';
 		$cmd = escapeshellarg($this->javaBinary) . ' -jar ' . escapeshellarg($dir . '/Google-Closure-Compiler/compiler.jar') . ' --warning_level QUIET';
-		list($ok, $output) = $this->execute($cmd, $content);
+		[$ok, $output] = $this->execute($cmd, $content);
 		if (!$ok) {
 			$this->logger->log("Error while executing $cmd");
 			$this->logger->log($output);
