@@ -27,5 +27,10 @@
 	"autoload": {
 		"classmap": ["src/"]
 	},
-	"bin": ["deployment"]
+	"bin": ["deployment"],
+	"extra": {
+		"branch-alias": {
+			"dev-master": "3.0-dev"
+		}
+	}
 }
