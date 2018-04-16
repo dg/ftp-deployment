@@ -113,7 +113,7 @@ class CliRunner
 		}
 
 		if ($urlParts['scheme'] === 'ftp') {
-			$this->logger->log('Note: connection is not encrypted', 'maroon');
+			$this->logger->log('Note: connection is not encrypted', 'white/red');
 		}
 
 		if ($urlParts['scheme'] === 'sftp') {
