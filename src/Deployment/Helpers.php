@@ -17,10 +17,8 @@ class Helpers
 
 	/**
 	 * Computes hash.
-	 * @param  string  absolute path
-	 * @return string
 	 */
-	public static function hashFile($file)
+	public static function hashFile(string $file): string
 	{
 		if (filesize($file) > 5e6) {
 			return md5_file($file);
@@ -37,10 +35,9 @@ class Helpers
 	/**
 	 * Matches filename against patterns.
 	 * @param  string   relative path
-	 * @param  string[] patterns
-	 * @return bool
+	 * @param  string[]
 	 */
-	public static function matchMask($path, array $patterns, $isDir = false)
+	public static function matchMask(string $path, array $patterns, bool $isDir = false): bool
 	{
 		$res = false;
 		$path = explode('/', ltrim($path, '/'));
@@ -78,9 +75,8 @@ class Helpers
 
 	/**
 	 * Processes HTTP request.
-	 * @return string
 	 */
-	public static function fetchUrl($url, &$error, array $postData = null)
+	public static function fetchUrl(string $url, ?string &$error, array $postData = null): string
 	{
 		if (extension_loaded('curl')) {
 			$ch = curl_init($url);
@@ -116,8 +112,7 @@ class Helpers
 	}
 
 
-	/** @return string */
-	public static function buildUrl(array $url)
+	public static function buildUrl(array $url): string
 	{
 		return (isset($url['scheme']) ? $url['scheme'] . '://' : '')
 			. ($url['user'] ?? '')

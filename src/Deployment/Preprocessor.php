@@ -32,11 +32,8 @@ class Preprocessor
 
 	/**
 	 * Compress JS file.
-	 * @param  string  source code
-	 * @param  string  original file name
-	 * @return string  compressed source
 	 */
-	public function compressJs($content, $origFile)
+	public function compressJs(string $content, string $origFile): string
 	{
 		if ($this->requireCompressMark && !preg_match('#/\*+!#', $content)) { // must contain /**!
 			return $content;
@@ -57,11 +54,8 @@ class Preprocessor
 
 	/**
 	 * Compress CSS file.
-	 * @param  string  source code
-	 * @param  string  original file name
-	 * @return string  compressed source
 	 */
-	public function compressCss($content, $origFile)
+	public function compressCss(string $content, string $origFile): string
 	{
 		if ($this->requireCompressMark && !preg_match('#/\*+!#', $content)) { // must contain /**!
 			return $content;
@@ -96,9 +90,8 @@ class Preprocessor
 
 	/**
 	 * Expands @import(file) in CSS.
-	 * @return string
 	 */
-	public function expandCssImports($content, $origFile)
+	public function expandCssImports(string $content, string $origFile): string
 	{
 		$dir = dirname($origFile);
 		return preg_replace_callback('#@import\s+(?:url)?[(\'"]+(.+)[)\'"]+;#U', function ($m) use ($dir) {
@@ -125,9 +118,8 @@ class Preprocessor
 
 	/**
 	 * Expands Apache includes <!--#include file="..." -->
-	 * @return string
 	 */
-	public function expandApacheImports($content, $origFile)
+	public function expandApacheImports(string $content, string $origFile): string
 	{
 		$dir = dirname($origFile);
 		return preg_replace_callback('~<!--#include\s+file="(.+)"\s+-->~U', function ($m) use ($dir) {
@@ -145,7 +137,7 @@ class Preprocessor
 	 * @return array  [success, output]
 	 * @throws \Exception
 	 */
-	private function execute($command, $input)
+	private function execute(string $command, string $input): array
 	{
 		$process = proc_open(
 			$command,

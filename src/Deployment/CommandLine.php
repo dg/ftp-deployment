@@ -34,7 +34,7 @@ class CommandLine
 	private $help;
 
 
-	public function __construct($help, array $defaults = [])
+	public function __construct(string $help, array $defaults = [])
 	{
 		$this->help = $help;
 		$this->options = $defaults;
@@ -67,7 +67,7 @@ class CommandLine
 	}
 
 
-	public function parse(array $args = null)
+	public function parse(array $args = null): array
 	{
 		if ($args === null) {
 			$args = isset($_SERVER['argv']) ? array_slice($_SERVER['argv'], 1) : [];
@@ -140,13 +140,13 @@ class CommandLine
 	}
 
 
-	public function help()
+	public function help(): void
 	{
 		echo $this->help;
 	}
 
 
-	public function checkArg(array $opt, &$arg)
+	public function checkArg(array $opt, &$arg): void
 	{
 		if (!empty($opt[self::REALPATH])) {
 			$path = realpath($arg);
@@ -158,7 +158,7 @@ class CommandLine
 	}
 
 
-	public function isEmpty()
+	public function isEmpty(): bool
 	{
 		return !isset($_SERVER['argv']) || count($_SERVER['argv']) < 2;
 	}

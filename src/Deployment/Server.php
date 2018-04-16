@@ -17,70 +17,60 @@ interface Server
 
 	/**
 	 * Connects to server.
-	 * @return void
 	 * @throws ServerException
 	 */
-	function connect();
+	function connect(): void;
 
 	/**
 	 * Reads file from server. Paths are absolute.
-	 * @return void
 	 * @throws ServerException
 	 */
-	function readFile($remote, $local);
+	function readFile(string $remote, string $local): void;
 
 	/**
 	 * Uploads file to server. Paths are absolute.
-	 * @return void
 	 * @throws ServerException
 	 */
-	function writeFile($local, $remote, callable $progress = null);
+	function writeFile(string $local, string $remote, callable $progress = null): void;
 
 	/**
 	 * Removes file from server if exists. Path is absolute.
-	 * @return void
 	 * @throws ServerException
 	 */
-	function removeFile($file);
+	function removeFile(string $file): void;
 
 	/**
 	 * Renames and rewrites file on server. Paths are absolute.
-	 * @return void
 	 * @throws ServerException
 	 */
-	function renameFile($old, $new);
+	function renameFile(string $old, string $new): void;
 
 	/**
 	 * Creates directories on server. Path is absolute.
-	 * @return void
 	 * @throws ServerException
 	 */
-	function createDir($dir);
+	function createDir(string $dir): void;
 
 	/**
 	 * Removes directory from server if exists. Path is absolute.
-	 * @return void
 	 * @throws ServerException
 	 */
-	function removeDir($dir);
+	function removeDir(string $dir): void;
 
 	/**
 	 * Recursive deletes content of directory or file. Path is absolute.
-	 * @return void
 	 * @throws ServerException
 	 */
-	function purge($path, callable $progress = null);
+	function purge(string $path, callable $progress = null): void;
 
 	/**
 	 * Returns current directory.
-	 * @return string
 	 */
-	function getDir();
+	function getDir(): string;
 
 	/**
 	 * Executes a command on a remote server.
-	 * @return string
 	 * @throws ServerException
 	 */
-	function execute($command);
+	function execute(string $command): string;
 }

@@ -65,11 +65,7 @@ class Deployer
 	private $server;
 
 
-	/**
-	 * @param  Server
-	 * @param  string  local directory
-	 */
-	public function __construct(Server $server, $localDir, Logger $logger)
+	public function __construct(Server $server, string $localDir, Logger $logger)
 	{
 		$this->localDir = realpath($localDir);
 		if (!$this->localDir) {
@@ -82,9 +78,8 @@ class Deployer
 
 	/**
 	 * Synchronize remote and local.
-	 * @return void
 	 */
-	public function deploy()
+	public function deploy(): void
 	{
 		$this->logger->log('Connecting to server');
 		$this->server->connect();
@@ -184,11 +179,8 @@ class Deployer
 
 	/**
 	 * Appends preprocessor for files.
-	 * @param  string  file extension
-	 * @param  callable
-	 * @return void
 	 */
-	public function addFilter($extension, $filter, $cached = false)
+	public function addFilter(string $extension, callable $filter, bool $cached = false): void
 	{
 		$this->filters[$extension][] = ['filter' => $filter, 'cached' => $cached];
 	}
@@ -198,7 +190,7 @@ class Deployer
 	 * Downloads and decodes .htdeployment from the server.
 	 * @return string[]|null  relative paths, starts with /
 	 */
-	private function loadDeploymentFile()
+	private function loadDeploymentFile(): ?array
 	{
 		$tempFile = tempnam($this->tempDir, 'deploy');
 		try {
@@ -219,9 +211,8 @@ class Deployer
 
 	/**
 	 * Prepares .htdeployment for upload.
-	 * @return string
 	 */
-	public function writeDeploymentFile(array $localPaths)
+	public function writeDeploymentFile(array $localPaths): string
 	{
 		$s = '';
 		foreach ($localPaths as $k => $v) {
@@ -237,9 +228,8 @@ class Deployer
 	/**
 	 * Uploades files and creates directories.
 	 * @param  string[]  relative paths, starts with /
-	 * @return void
 	 */
-	private function uploadPaths(array $paths)
+	private function uploadPaths(array $paths): void
 	{
 		$prevDir = null;
 		foreach ($paths as $num => $path) {
@@ -276,9 +266,8 @@ class Deployer
 	/**
 	 * Renames uploaded files.
 	 * @param  string[]  relative paths, starts with /
-	 * @return void
 	 */
-	private function renamePaths(array $paths)
+	private function renamePaths(array $paths): void
 	{
 		$files = array_values(array_filter($paths, function ($path) { return substr($path, -1) !== '/'; }));
 		foreach ($files as $num => $file) {
@@ -292,9 +281,8 @@ class Deployer
 	/**
 	 * Deletes files and directories.
 	 * @param  string[]  relative paths, starts with /
-	 * @return void
 	 */
-	private function deletePaths(array $paths)
+	private function deletePaths(array $paths): void
 	{
 		rsort($paths);
 		foreach ($paths as $num => $path) {
@@ -318,7 +306,7 @@ class Deployer
 	 * @param  string   relative subdir, starts with /
 	 * @return string[] relative paths, starts with /
 	 */
-	public function collectPaths($subdir = '')
+	public function collectPaths(string $subdir = ''): array
 	{
 		$list = [];
 		$iterator = dir($this->localDir . $subdir);
@@ -357,7 +345,7 @@ class Deployer
 	 * @param  string  relative path, starts with /
 	 * @return string  full path
 	 */
-	private function preprocess($file)
+	private function preprocess(string $file): string
 	{
 		$ext = pathinfo($file, PATHINFO_EXTENSION);
 		if (!isset($this->filters[$ext]) || !Helpers::matchMask($file, $this->preprocessMasks)) {
@@ -387,9 +375,8 @@ class Deployer
 
 	/**
 	 * @param  array of string|callable
-	 * @return void
 	 */
-	private function runJobs(array $jobs)
+	private function runJobs(array $jobs): void
 	{
 		foreach ($jobs as $job) {
 			if (is_string($job) && preg_match('#^(https?|local|remote|upload):\s*(.+)#', $job, $m)) {
@@ -435,7 +422,7 @@ class Deployer
 	}
 
 
-	private function writeProgress($count, $total, $path, $percent = null, $color = null)
+	private function writeProgress(int $count, int $total, string $path, float $percent = null, string $color = null): void
 	{
 		$len = strlen((string) $total);
 		$s = sprintf("(% {$len}d of %-{$len}d) %s", $count, $total, $path);

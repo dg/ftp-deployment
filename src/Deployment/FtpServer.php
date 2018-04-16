@@ -38,10 +38,9 @@ class FtpServer implements Server
 
 	/**
 	 * @param  string  URL ftp://... or ftps://...
-	 * @param  bool
 	 * @throws \Exception
 	 */
-	public function __construct($url, $passiveMode = true)
+	public function __construct(string $url, bool $passiveMode = true)
 	{
 		if (!extension_loaded('ftp')) {
 			throw new \Exception('PHP extension FTP is not loaded.');
@@ -52,16 +51,15 @@ class FtpServer implements Server
 		} elseif ($url['scheme'] === 'ftps' && !function_exists('ftp_ssl_connect')) {
 			throw new \Exception('PHP extension OpenSSL is not built statically in PHP.');
 		}
-		$this->passiveMode = (bool) $passiveMode;
+		$this->passiveMode = $passiveMode;
 	}
 
 
 	/**
 	 * Connects to FTP server.
-	 * @return void
 	 * @throws ServerException
 	 */
-	public function connect()
+	public function connect(): void
 	{
 		$this->connection = $this->url['scheme'] === 'ftp'
 			? ftp_connect($this->url['host'], $this->url['port'] ?? 21)
@@ -82,10 +80,9 @@ class FtpServer implements Server
 
 	/**
 	 * Reads remote file from FTP server.
-	 * @return void
 	 * @throws ServerException
 	 */
-	public function readFile($remote, $local)
+	public function readFile(string $remote, string $local): void
 	{
 		ftp_get($this->connection, $local, $remote, FTP_BINARY);
 	}
@@ -93,10 +90,9 @@ class FtpServer implements Server
 
 	/**
 	 * Uploads file to FTP server.
-	 * @return void
 	 * @throws ServerException
 	 */
-	public function writeFile($local, $remote, callable $progress = null)
+	public function writeFile(string $local, string $remote, callable $progress = null): void
 	{
 		$size = max(filesize($local), 1);
 		$retry = self::RETRIES;
@@ -133,10 +129,9 @@ class FtpServer implements Server
 
 	/**
 	 * Removes file from FTP server if exists.
-	 * @return void
 	 * @throws ServerException
 	 */
-	public function removeFile($file)
+	public function removeFile(string $file): void
 	{
 		try {
 			ftp_delete($this->connection, $file);
@@ -150,10 +145,9 @@ class FtpServer implements Server
 
 	/**
 	 * Renames and rewrites file on FTP server.
-	 * @return void
 	 * @throws ServerException
 	 */
-	public function renameFile($old, $new)
+	public function renameFile(string $old, string $new): void
 	{
 		$this->removeFile($new);
 		ftp_rename($this->connection, $old, $new); // TODO: zachovat permissions
@@ -162,10 +156,9 @@ class FtpServer implements Server
 
 	/**
 	 * Creates directories on FTP server.
-	 * @return void
 	 * @throws ServerException
 	 */
-	public function createDir($dir)
+	public function createDir(string $dir): void
 	{
 		if (trim($dir, '/') === '' || $this->isDir($dir)) {
 			return;
@@ -194,11 +187,9 @@ class FtpServer implements Server
 
 	/**
 	 * Checks if directory exists.
-	 * @param  string
-	 * @return bool
 	 * @throws ServerException
 	 */
-	private function isDir($dir)
+	private function isDir(string $dir): bool
 	{
 		$current = $this->getDir();
 		$res = @ftp_chdir($this->connection, $dir); // intentionally @
@@ -209,10 +200,9 @@ class FtpServer implements Server
 
 	/**
 	 * Removes directory from FTP server if exists.
-	 * @return void
 	 * @throws ServerException
 	 */
-	public function removeDir($dir)
+	public function removeDir(string $dir): void
 	{
 		try {
 			ftp_rmdir($this->connection, $dir);
@@ -226,11 +216,9 @@ class FtpServer implements Server
 
 	/**
 	 * Recursive deletes content of directory or file.
-	 * @param  string
-	 * @return void
 	 * @throws ServerException
 	 */
-	public function purge($dir, callable $progress = null)
+	public function purge(string $dir, callable $progress = null): void
 	{
 		$dirs = [];
 		foreach ((array) ftp_nlist($this->connection, $dir) as $entry) {
@@ -261,10 +249,9 @@ class FtpServer implements Server
 
 	/**
 	 * Returns current directory.
-	 * @return string
 	 * @throws ServerException
 	 */
-	public function getDir()
+	public function getDir(): string
 	{
 		return rtrim(ftp_pwd($this->connection), '/');
 	}
@@ -272,10 +259,9 @@ class FtpServer implements Server
 
 	/**
 	 * Executes a command on a remote server.
-	 * @return string
 	 * @throws ServerException
 	 */
-	public function execute($command)
+	public function execute(string $command): string
 	{
 		if (preg_match('#^(mkdir|rmdir|unlink|mv|chmod)\s+(\S+)(?:\s+(\S+))?$#', $command, $m)) {
 			if ($m[1] === 'mkdir') {

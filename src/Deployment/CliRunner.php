@@ -47,8 +47,7 @@ class CliRunner
 	private $lock;
 
 
-	/** @return int|null */
-	public function run()
+	public function run(): ?int
 	{
 		$this->logger = new Logger('php://memory');
 		$this->setupPhp();
@@ -101,8 +100,7 @@ class CliRunner
 	}
 
 
-	/** @return Deployer */
-	private function createDeployer(array $config)
+	private function createDeployer(array $config): Deployer
 	{
 		if (empty($config['remote']) || !($urlParts = parse_url($config['remote'])) || !isset($urlParts['scheme'], $urlParts['host'])) {
 			throw new \Exception("Missing or invalid 'remote' URL in config.");
@@ -159,8 +157,7 @@ class CliRunner
 	}
 
 
-	/** @return void */
-	private function setupPhp()
+	private function setupPhp(): void
 	{
 		set_time_limit(0);
 		date_default_timezone_set('Europe/Prague');
@@ -192,8 +189,7 @@ class CliRunner
 	}
 
 
-	/** @return array|null */
-	private function loadConfig()
+	private function loadConfig(): ?array
 	{
 		$cmd = new CommandLine(<<<'XX'
 
@@ -261,7 +257,7 @@ XX
 	}
 
 
-	protected function loadConfigFile($file)
+	protected function loadConfigFile(string $file): array
 	{
 		if (pathinfo($file, PATHINFO_EXTENSION) == 'php') {
 			return include $file;
@@ -271,8 +267,7 @@ XX
 	}
 
 
-	/** @return array */
-	public static function toArray($val, $lines = false)
+	public static function toArray($val, bool $lines = false): array
 	{
 		return is_array($val)
 			? array_filter($val)

@@ -36,7 +36,7 @@ class SshServer implements Server
 	 * @param  string  URL sftp://...
 	 * @throws \Exception
 	 */
-	public function __construct($url)
+	public function __construct(string $url)
 	{
 		if (!extension_loaded('ssh2')) {
 			throw new \Exception('PHP extension SSH2 is not loaded.');
@@ -50,10 +50,9 @@ class SshServer implements Server
 
 	/**
 	 * Connects to FTP server.
-	 * @return void
 	 * @throws ServerException
 	 */
-	public function connect()
+	public function connect(): void
 	{
 		$this->connection = ssh2_connect($this->url['host'], $this->url['port'] ?? 22);
 		if (isset($this->url['pass'])) {
@@ -67,10 +66,9 @@ class SshServer implements Server
 
 	/**
 	 * Reads remote file from FTP server.
-	 * @return void
 	 * @throws ServerException
 	 */
-	public function readFile($remote, $local)
+	public function readFile(string $remote, string $local): void
 	{
 		copy('ssh2.sftp://' . (int) $this->sftp . $remote, $local);
 	}
@@ -78,10 +76,9 @@ class SshServer implements Server
 
 	/**
 	 * Uploads file to FTP server.
-	 * @return void
 	 * @throws ServerException
 	 */
-	public function writeFile($local, $remote, callable $progress = null)
+	public function writeFile(string $local, string $remote, callable $progress = null): void
 	{
 		$size = max(filesize($local), 1);
 		$len = 0;
@@ -103,10 +100,9 @@ class SshServer implements Server
 
 	/**
 	 * Removes file from FTP server if exists.
-	 * @return void
 	 * @throws ServerException
 	 */
-	public function removeFile($file)
+	public function removeFile(string $file): void
 	{
 		if (file_exists($path = 'ssh2.sftp://' . (int) $this->sftp . $file)) {
 			unlink($path);
@@ -116,10 +112,9 @@ class SshServer implements Server
 
 	/**
 	 * Renames and rewrites file on FTP server.
-	 * @return void
 	 * @throws ServerException
 	 */
-	public function renameFile($old, $new)
+	public function renameFile(string $old, string $new): void
 	{
 		if (file_exists($path = 'ssh2.sftp://' . (int) $this->sftp . $new)) {
 			$perms = fileperms($path);
@@ -134,10 +129,9 @@ class SshServer implements Server
 
 	/**
 	 * Creates directories on FTP server.
-	 * @return void
 	 * @throws ServerException
 	 */
-	public function createDir($dir)
+	public function createDir(string $dir): void
 	{
 		if (trim($dir, '/') !== '' && !file_exists('ssh2.sftp://' . (int) $this->sftp . $dir)) {
 			ssh2_sftp_mkdir($this->sftp, $dir, $this->dirPermissions ?: 0777, true);
@@ -147,10 +141,9 @@ class SshServer implements Server
 
 	/**
 	 * Removes directory from FTP server if exists.
-	 * @return void
 	 * @throws ServerException
 	 */
-	public function removeDir($dir)
+	public function removeDir(string $dir): void
 	{
 		if (file_exists($path = 'ssh2.sftp://' . (int) $this->sftp . $dir)) {
 			rmdir($path);
@@ -160,11 +153,9 @@ class SshServer implements Server
 
 	/**
 	 * Recursive deletes content of directory or file.
-	 * @param  string
-	 * @return void
 	 * @throws ServerException
 	 */
-	public function purge($dir, callable $progress = null)
+	public function purge(string $dir, callable $progress = null): void
 	{
 		$dirs = $entries = [];
 
@@ -197,9 +188,8 @@ class SshServer implements Server
 
 	/**
 	 * Returns current directory.
-	 * @return string
 	 */
-	public function getDir()
+	public function getDir(): string
 	{
 		return isset($this->url['path']) ? rtrim($this->url['path'], '/') : '';
 	}
@@ -207,10 +197,9 @@ class SshServer implements Server
 
 	/**
 	 * Executes a command on a remote server.
-	 * @return string
 	 * @throws ServerException
 	 */
-	public function execute($command)
+	public function execute(string $command): string
 	{
 		$stream = ssh2_exec($this->connection, $command);
 		stream_set_blocking($stream, true);

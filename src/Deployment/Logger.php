@@ -44,13 +44,13 @@ class Logger
 	];
 
 
-	public function __construct($file)
+	public function __construct(string $file)
 	{
 		$this->file = fopen($file, 'w');
 	}
 
 
-	public function log($s, $color = null, $shorten = true)
+	public function log(string $s, string $color = null, bool $shorten = true): void
 	{
 		fwrite($this->file, $s . "\n");
 
@@ -69,10 +69,8 @@ class Logger
 
 	/**
 	 * Echos a progress message.
-	 * @param  string
-	 * @return void
 	 */
-	public function progress($message)
+	public function progress(string $message): void
 	{
 		if ($this->showProgress) {
 			echo $message, "\x0D";

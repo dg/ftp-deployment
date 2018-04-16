@@ -23,7 +23,7 @@ class FileServer implements Server
 	/**
 	 * @param  string  URL file://...
 	 */
-	public function __construct($url)
+	public function __construct(string $url)
 	{
 		if (substr($url, 0, 7) !== 'file://') {
 			throw new \InvalidArgumentException('Invalid URL');
@@ -33,10 +33,9 @@ class FileServer implements Server
 
 
 	/**
-	 * @return void
 	 * @throws ServerException
 	 */
-	public function connect()
+	public function connect(): void
 	{
 		if (!is_dir($this->root)) {
 			throw new ServerException('Directory does not exist');
@@ -46,10 +45,9 @@ class FileServer implements Server
 
 	/**
 	 * Reads remote file.
-	 * @return void
 	 * @throws ServerException
 	 */
-	public function readFile($remote, $local)
+	public function readFile(string $remote, string $local): void
 	{
 		copy($this->root . $remote, $local);
 	}
@@ -57,10 +55,9 @@ class FileServer implements Server
 
 	/**
 	 * Uploads file.
-	 * @return void
 	 * @throws ServerException
 	 */
-	public function writeFile($local, $remote, callable $progress = null)
+	public function writeFile(string $local, string $remote, callable $progress = null): void
 	{
 		copy($local, $this->root . $remote);
 	}
@@ -68,10 +65,9 @@ class FileServer implements Server
 
 	/**
 	 * Removes file if exists.
-	 * @return void
 	 * @throws ServerException
 	 */
-	public function removeFile($file)
+	public function removeFile(string $file): void
 	{
 		if (file_exists($path = $this->root . $file)) {
 			unlink($path);
@@ -81,10 +77,9 @@ class FileServer implements Server
 
 	/**
 	 * Renames and rewrites file.
-	 * @return void
 	 * @throws ServerException
 	 */
-	public function renameFile($old, $new)
+	public function renameFile(string $old, string $new): void
 	{
 		rename($this->root . $old, $this->root . $new);
 	}
@@ -92,10 +87,9 @@ class FileServer implements Server
 
 	/**
 	 * Creates directories.
-	 * @return void
 	 * @throws ServerException
 	 */
-	public function createDir($dir)
+	public function createDir(string $dir): void
 	{
 		if (trim($dir, '/') !== '' && !file_exists($path = $this->root . $dir)) {
 			mkdir($path, 0777, true);
@@ -105,10 +99,9 @@ class FileServer implements Server
 
 	/**
 	 * Removes directory if exists.
-	 * @return void
 	 * @throws ServerException
 	 */
-	public function removeDir($dir)
+	public function removeDir(string $dir): void
 	{
 		if (file_exists($path = $this->root . $dir)) {
 			rmdir($path);
@@ -118,11 +111,9 @@ class FileServer implements Server
 
 	/**
 	 * Recursive deletes content of directory or file.
-	 * @param  string
-	 * @return void
 	 * @throws ServerException
 	 */
-	public function purge($dir, callable $progress = null)
+	public function purge(string $dir, callable $progress = null): void
 	{
 		$iterator = dir($path = $this->root . $dir);
 		while (($entry = $iterator->read()) !== false) {
@@ -142,9 +133,8 @@ class FileServer implements Server
 
 	/**
 	 * Returns current directory.
-	 * @return string
 	 */
-	public function getDir()
+	public function getDir(): string
 	{
 		return '';
 	}
@@ -152,10 +142,9 @@ class FileServer implements Server
 
 	/**
 	 * Executes a command on a remote server.
-	 * @return string
 	 * @throws ServerException
 	 */
-	public function execute($command)
+	public function execute(string $command): string
 	{
 		exec($command, $out);
 		return implode("\n", $out);
