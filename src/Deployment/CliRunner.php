@@ -184,7 +184,7 @@ class CliRunner
 		});
 
 		set_exception_handler(function ($e) {
-			$this->logger->log("Error: {$e->getMessage()}\n\n$e", 'red');
+			$this->logger->log("Error: {$e->getMessage()} in {$e->getFile()}:{$e->getLine()}\n\n$e", 'red');
 			exit(1);
 		});
 	}
