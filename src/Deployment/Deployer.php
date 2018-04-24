@@ -20,6 +20,9 @@ class Deployer
 	public $deploymentFile = '.htdeployment';
 
 	/** @var string[] */
+	public $includeMasks = [];
+
+	/** @var string[] */
 	public $ignoreMasks = [];
 
 	/** @var bool */
@@ -331,6 +334,10 @@ class Deployer
 
 			} elseif (Helpers::matchMask($short, $this->ignoreMasks, is_dir($path))) {
 				$this->logger->log(str_pad("Ignoring .$short", 40), 'gray');
+				continue;
+
+			} elseif ($this->includeMasks && !Helpers::matchMask($short, $this->includeMasks, is_dir($path))) {
+				$this->logger->log(str_pad("Not included .$short", 40), 'gray');
 				continue;
 
 			} elseif (is_dir($path)) {

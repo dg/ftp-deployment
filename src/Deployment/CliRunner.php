@@ -18,6 +18,7 @@ class CliRunner
 	public $defaults = [
 		'local' => '',
 		'passivemode' => true,
+		'include' => '',
 		'ignore' => '',
 		'allowdelete' => true,
 		'purge' => '',
@@ -140,6 +141,7 @@ class CliRunner
 			$deployment->addFilter('css', [$preprocessor, 'compressCss'], true);
 		}
 
+		$deployment->includeMasks = self::toArray($config['include'], true);
 		$deployment->ignoreMasks = array_merge($this->ignoreMasks, self::toArray($config['ignore']));
 		$deployment->deploymentFile = empty($config['deploymentfile']) ? $deployment->deploymentFile : $config['deploymentfile'];
 		$deployment->allowDelete = $config['allowdelete'];

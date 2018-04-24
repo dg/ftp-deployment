@@ -64,6 +64,14 @@ ignore = "
 	temp/*
 	!temp/.htaccess
 "
+
+; explicit list of files and directories to include (by default includes all files and directories)
+include = "
+	/app
+	/app/*
+	/index.php
+"
+
 ; is allowed to delete remote files? (defaults to yes)
 allowDelete = yes
 

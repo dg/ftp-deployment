@@ -6,13 +6,19 @@ return [
 		'local' => '.',
 		'test' => false,
 		'ignore' => '
-			.git*
-			project.pp[jx]
 			/deployment.*
 			/log
 			temp/*
 			!temp/.htaccess
+			*/tests
 		',
+
+		'include' => '
+        	/app
+        	/app/*
+        	/index.php
+        ',
+
 		'allowDelete' => true,
 		'before' => [
 			function (Deployment\Server $server, Deployment\Logger $logger, Deployment\Deployer $deployer) {
