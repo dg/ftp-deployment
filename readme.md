@@ -83,8 +83,8 @@ after[] = remote: chmod 0777 temp/cache  ; change permissions
 after[] = upload: config.server.neon app/config.local.neon
 after[] = http://example.com/deployment.php?after
 
-; files to preprocess (defaults to *.js *.css)
-preprocess = no
+; files to preprocess (defaults to none)
+preprocess = *.js *.css
 
 ; file which contains hashes of all uploaded files (defaults to .htdeployment)
 deploymentFile = .deployment

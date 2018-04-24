@@ -28,7 +28,7 @@ return [
 		'purge' => [
 			'temp/cache',
 		],
-		'preprocess' => false,
+		'preprocess' => ['combined.js', 'combined.css'],
 	],
 
 	'tempDir' => __DIR__ . '/temp',

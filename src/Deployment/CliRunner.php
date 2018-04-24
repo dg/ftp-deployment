@@ -24,7 +24,7 @@ class CliRunner
 		'before' => '',
 		'afterupload' => '',
 		'after' => '',
-		'preprocess' => true,
+		'preprocess' => false,
 	];
 
 	/** @var string[] */
