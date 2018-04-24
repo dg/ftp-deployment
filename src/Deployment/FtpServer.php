@@ -69,7 +69,12 @@ class FtpServer implements Server
 			: ftp_ssl_connect($this->url['host'], $port);
 
 		ftp_login($this->connection, urldecode($this->url['user']), urldecode($this->url['pass']));
-		ftp_pasv($this->connection, $this->passiveMode);
+
+		if ($this->passiveMode) {
+			ftp_set_option($this->connection, FTP_USEPASVADDRESS, false);
+			ftp_pasv($this->connection, $this->passiveMode);
+		}
+
 		if (isset($this->url['path'])) {
 			ftp_chdir($this->connection, $this->url['path']);
 		}
