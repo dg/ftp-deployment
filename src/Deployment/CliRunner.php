@@ -181,8 +181,7 @@ class CliRunner
 				throw new ServerException($message);
 			}
 
-			$this->logger->log("Error: $message in $file on $line", 'red');
-			exit(1);
+			throw new \ErrorException($message, 0, $severity, $file, $line);
 		});
 
 		set_exception_handler(function ($e) {
