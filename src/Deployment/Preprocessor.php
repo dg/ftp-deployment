@@ -42,8 +42,16 @@ class Preprocessor
 		}
 		$this->logger->log("Compressing $origFile");
 
-		$dir = dirname(__DIR__) . '/vendor';
-		$cmd = escapeshellarg($this->javaBinary) . ' -jar ' . escapeshellarg($dir . '/Google-Closure-Compiler/compiler.jar') . ' --warning_level QUIET';
+		$compilerPath = \Phar::running()
+			? dirname(\Phar::running(false)) . '/compiler.jar'
+			: dirname(__DIR__) . '/vendor/Google-Closure-Compiler/compiler.jar';
+
+		if (!is_file($compilerPath)) {
+			$this->logger->log("Unable to minify, Google Closure Compiler not found at $compilerPath", 'red');
+			return $content;
+		}
+
+		$cmd = escapeshellarg($this->javaBinary) . ' -jar ' . escapeshellarg($compilerPath) . ' --warning_level QUIET';
 		[$ok, $output] = $this->execute($cmd, $content);
 		if (!$ok) {
 			$this->logger->log("Error while executing $cmd", 'red');
