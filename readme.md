@@ -126,7 +126,7 @@ is used for synchronization. So the next time you run `deployment`, only modifie
 and deleted files are deleted on server (if it is not forbidden by the `allowDelete` directive).
 
 Uploaded files can be processed by a preprocessor. These rules are predefined: `.css` files
-are compressed using the Clean-CSS and `.js` minified by Google Closure Compiler via online services.
+are compressed using the Clean-CSS (via online service) and `.js` are minified by Google Closure Compiler (via Java utility).
 
 There is also a rule for expanding [mod_include](http://httpd.apache.org/docs/current/mod/mod_include.html) Apache directives.
 For example, you can create a file `combined.js`:
@@ -148,7 +148,7 @@ Installing FTP Deployment
 
 FTP Deployment 3.x requires PHP 7.1 or later (version 2.x requires PHP 5.4 or newer). It also requires openssl extensions for ftps:// and SSH2 extension for sftp:// connections.
 
-The easiest way to obtain FTP Deployment is to download [a single PHAR file](https://github.com/dg/ftp-deployment/releases).
+The easiest way to obtain FTP Deployment is to download [a single PHAR file](https://github.com/dg/ftp-deployment/releases). If you want to use JavaScript minification, download `compiler.jar` in the same folder.
 
 Or you can install it using Composer:
 
