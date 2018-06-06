@@ -46,7 +46,7 @@ class Preprocessor
 		$cmd = escapeshellarg($this->javaBinary) . ' -jar ' . escapeshellarg($dir . '/Google-Closure-Compiler/compiler.jar') . ' --warning_level QUIET';
 		[$ok, $output] = $this->execute($cmd, $content);
 		if (!$ok) {
-			$this->logger->log("Error while executing $cmd");
+			$this->logger->log("Error while executing $cmd", 'red');
 			$this->logger->log($output);
 			return $content;
 		}
@@ -78,12 +78,12 @@ class Preprocessor
 		];
 		$output = Helpers::fetchUrl('https://refresh-sf.herokuapp.com/css/', $error, $data);
 		if ($error) {
-			$this->logger->log("Unable to minfy: $error\n");
+			$this->logger->log("Unable to minify: $error\n", 'red');
 			return $content;
 		}
 		$json = @json_decode($output, true);
 		if (!isset($json['code'])) {
-			$this->logger->log("Unable to minfy. Server response: $output\n");
+			$this->logger->log("Unable to minify. Server response: $output\n", 'red');
 			return $content;
 		}
 		return $json['code'];
