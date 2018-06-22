@@ -1,4 +1,4 @@
-FTP Deployment: smart upload [![Buy me a coffee](https://files.nette.org/images/coffee1s.png)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=EVVM5U5T47AA2)
+FTP Deployment: smart upload [![Buy me a coffee](https://files.nette.org/images/coffee1s.png)](https://nette.org/make-donation?to=deployment)
 ====================================
 
 [![Downloads this Month](https://img.shields.io/packagist/dm/dg/ftp-deployment.svg)](https://packagist.org/packages/dg/ftp-deployment)
@@ -155,3 +155,5 @@ Or you can install it using Composer:
 ```
 composer create-project dg/ftp-deployment
 ```
+
+If you like it, **[please make a donation now](https://nette.org/make-donation?to=deployment)**. Thank you!
