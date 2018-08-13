@@ -122,6 +122,7 @@ class FileServer implements Server
 			if (is_dir("$path/$entry")) {
 				if ($entry !== '.' && $entry !== '..') {
 					$this->purge("$dir/$entry");
+					rmdir("$path/$entry");
 				}
 			} else {
 				unlink("$path/$entry");
