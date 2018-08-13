@@ -117,18 +117,19 @@ class FileServer implements Server
 	 */
 	public function purge(string $dir, callable $progress = null): void
 	{
-		$iterator = dir($path = $this->root . $dir);
-		while (($entry = $iterator->read()) !== false) {
-			if (is_dir("$path/$entry")) {
-				if ($entry !== '.' && $entry !== '..') {
-					$this->purge("$dir/$entry");
-					rmdir("$path/$entry");
-				}
-			} else {
-				unlink("$path/$entry");
-			}
+		$dir = $this->root . $dir;
+		if (!file_exists($dir)) {
+			return;
+		}
+
+		$iterator = new \RecursiveIteratorIterator(
+			new \RecursiveDirectoryIterator($dir, \FilesystemIterator::SKIP_DOTS),
+			\RecursiveIteratorIterator::CHILD_FIRST
+		);
+		foreach ($iterator as $name => $file) {
+			$file->isDir() ? rmdir($name) : unlink($name);
 			if ($progress) {
-				$progress($entry);
+				$progress($name);
 			}
 		}
 	}
