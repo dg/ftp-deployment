@@ -26,6 +26,9 @@ class Logger
 	private $file;
 
 	/** @var array */
+	public $fullCliLog = [];
+
+	/** @var array */
 	private $colors = [
 		'black' => '0;30',
 		'gray' => '1;30',
@@ -52,11 +55,11 @@ class Logger
 	}
 
 
-	public function log(string $s, string $color = null, bool $shorten = true): void
+	public function log(string $s, string $color = null, bool $shorten = null): void
 	{
 		fwrite($this->file, $s . "\n");
 
-		if ($shorten && preg_match('#^\n?.*#', $s, $m)) {
+		if (($shorten ?? $this->shortenFor("*")) && preg_match('#^\n?.*#', $s, $m)) {
 			$s = $m[0];
 		}
 		$s .= "        \n";
@@ -77,5 +80,26 @@ class Logger
 		if ($this->showProgress) {
 			echo $message, "\x0D";
 		}
+	}
+
+	/**
+	 * Check if given action should be shortened
+	 *
+	 * @param  string $action
+	 * @return bool
+	 */
+	public function shortenFor(string $action)
+	{
+		$aliases = [
+			"https" => "http"
+		];
+		if (in_array("*", $this->fullCliLog)) {
+			return false;
+		}
+		if (isset($aliases[$action])) {
+			$action = $aliases[$action];
+		}
+		// If action is present in list, return false to disable shortening
+		return in_array($action, $this->fullCliLog) ? false : true;
 	}
 }

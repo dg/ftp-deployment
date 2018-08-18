@@ -406,7 +406,7 @@ class Deployer
 				}
 
 				if ($out != null) { // intentionally ==
-					$this->logger->log("-> $out", 'gray');
+					$this->logger->log("-> $out", 'gray', $this->logger->shortenFor($m[1]));
 				}
 				if ($err) {
 					throw new \RuntimeException('Job failed, ' . $err);

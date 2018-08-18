@@ -62,6 +62,7 @@ class CliRunner
 		$this->logger = new Logger($config['log']);
 		$this->logger->useColors = (bool) $config['colors'];
 		$this->logger->showProgress = (bool) $config['progress'];
+		$this->logger->fullCliLog = $config['fullclilog'];
 
 		if (!is_dir($tempDir = $config['tempdir'])) {
 			$this->logger->log("Creating temporary directory $tempDir");
@@ -185,7 +186,7 @@ class CliRunner
 		});
 
 		set_exception_handler(function ($e) {
-			$this->logger->log("Error: {$e->getMessage()} in {$e->getFile()}:{$e->getLine()}\n\n$e", 'red');
+			$this->logger->log("Error: {$e->getMessage()} in {$e->getFile()}:{$e->getLine()}\n\n$e", 'red', $this->logger->shortenFor("exception"));
 			exit(1);
 		});
 	}
@@ -249,12 +250,18 @@ XX
 
 		$config = array_change_key_case($config, CASE_LOWER) + [
 			'log' => preg_replace('#\.\w+$#', '.log', $this->configFile),
+			'fullclilog' => [],
 			'tempdir' => sys_get_temp_dir() . '/deployment',
 			'progress' => true,
 			'colors' => (PHP_SAPI === 'cli' && ((function_exists('posix_isatty') && posix_isatty(STDOUT))
 				|| getenv('ConEmuANSI') === 'ON' || getenv('ANSICON') !== false)),
 		];
 		$config['progress'] = $options['--no-progress'] ? false : $config['progress'];
+		if (is_string($config['fullclilog'])) {
+			$config['fullclilog'] = $config['fullclilog'] === "1"
+				? [ "*" ]
+				: preg_split("/[\s,]+/", $config['fullclilog']);
+		}
 		return $config;
 	}
 

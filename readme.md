@@ -31,6 +31,10 @@ And what does the `deployment.ini` file contain? **Only the `remote` item is req
 ; log file (defaults to config file with .log extension)
 log = ...
 
+; Show full log in command line (Defaults to no)
+; Yes to disable shortening or list any of: http, local, remote, upload, exception
+fullCliLog = http exception
+
 ; directory for temporary files (defaults to system's temporary directory)
 tempDir = /temp/deployment
 
