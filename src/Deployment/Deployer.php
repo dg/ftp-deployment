@@ -418,7 +418,7 @@ class Deployer
 				}
 
 			} else {
-				throw new \InvalidArgumentException("Invalid job $job.");
+				throw new \InvalidArgumentException("Invalid job $job, must start with http:, local:, remote: or upload:");
 			}
 		}
 	}
