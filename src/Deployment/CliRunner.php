@@ -186,7 +186,7 @@ class CliRunner
 		});
 
 		set_exception_handler(function ($e) {
-			$this->logger->log("Error: {$e->getMessage()} in {$e->getFile()}:{$e->getLine()}\n\n$e", 'red', $this->logger->shortenFor("exception"));
+			$this->logger->log("Error: {$e->getMessage()} in {$e->getFile()}:{$e->getLine()}\n\n$e", 'red', $this->logger->shortenFor('exception'));
 			exit(1);
 		});
 	}
@@ -258,9 +258,9 @@ XX
 		];
 		$config['progress'] = $options['--no-progress'] ? false : $config['progress'];
 		if (is_string($config['fullclilog'])) {
-			$config['fullclilog'] = $config['fullclilog'] === "1"
-				? [ "*" ]
-				: preg_split("/[\s,]+/", $config['fullclilog']);
+			$config['fullclilog'] = $config['fullclilog'] === '1'
+				? ['*']
+				: preg_split('/[\s,]+/', $config['fullclilog']);
 		}
 		return $config;
 	}

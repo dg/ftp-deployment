@@ -22,11 +22,11 @@ class Logger
 	/** @var bool */
 	public $showProgress = true;
 
-	/** @var resource */
-	private $file;
-
 	/** @var array */
 	public $fullCliLog = [];
+
+	/** @var resource */
+	private $file;
 
 	/** @var array */
 	private $colors = [
@@ -59,7 +59,7 @@ class Logger
 	{
 		fwrite($this->file, $s . "\n");
 
-		if (($shorten ?? $this->shortenFor("*")) && preg_match('#^\n?.*#', $s, $m)) {
+		if (($shorten ?? $this->shortenFor('*')) && preg_match('#^\n?.*#', $s, $m)) {
 			$s = $m[0];
 		}
 		$s .= "        \n";
@@ -82,6 +82,7 @@ class Logger
 		}
 	}
 
+
 	/**
 	 * Check if given action should be shortened
 	 *
@@ -91,15 +92,15 @@ class Logger
 	public function shortenFor(string $action)
 	{
 		$aliases = [
-			"https" => "http"
+			'https' => 'http',
 		];
-		if (in_array("*", $this->fullCliLog)) {
+		if (in_array('*', $this->fullCliLog, true)) {
 			return false;
 		}
 		if (isset($aliases[$action])) {
 			$action = $aliases[$action];
 		}
 		// If action is present in list, return false to disable shortening
-		return in_array($action, $this->fullCliLog) ? false : true;
+		return in_array($action, $this->fullCliLog, true) ? false : true;
 	}
 }
