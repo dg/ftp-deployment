@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use Deployment\Helpers;
 use Tester\Assert;
 

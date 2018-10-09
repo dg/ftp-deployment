@@ -100,9 +100,18 @@ preprocess = *.js *.css
 
 ; file which contains hashes of all uploaded files (defaults to .htdeployment)
 deploymentFile = .deployment
+
+; default permissions for new files (defaults to none)
+filePermissions = 0644
+
+; default permissions for new directories (defaults to none)
+dirPermissions = 0755
 ```
 
-Configuration can also be stored in a PHP file.
+In the config file you can create multiple sections (like `[my site]`), so you may have separate
+rules for data and for application.
+
+Configuration can also be stored in a [PHP file](deployment.sample.php).
 
 In test mode (with `-t` option) uploading or deleting files is skipped, so you can use it
 to verify your settings.
@@ -120,14 +129,29 @@ project.pp[jx] - ignore files or folders 'project.ppj' and 'project.ppx'
 
 Before the upload starts, after it finishes and after all jobs, you can execute commands or call your scripts on
 the server (see `before`, `afterUpload`, `after`), which can, for example, switch the server to a maintenance mode.
-If you use php-config - you can run lambda function with deployment environment.
+If you use PHP config, you can run lambda function with deployment environment:
+
+```php
+<?php
+
+return [
+	'remote' => 'ftp://user:secretpassword@ftp.example.com/directory',
+	'local' => '.',
+	'before' => [
+		function (Deployment\Server $server, Deployment\Logger $logger, Deployment\Deployer $deployer) {
+			... do something
+		},
+	],
+	...
+];
+```
 
 Syncing a large number of files attempts to run in (something like) a transaction: all files are
 uploaded with extension `.deploytmp` and then quickly renamed.
 
 An `.htdeployment` file is uploaded to the server, which contains MD5 hashes of all the files and
 is used for synchronization. So the next time you run `deployment`, only modified files are uploaded
-and deleted files are deleted on server (if it is not forbidden by the `allowDelete` directive).
+and deleted files are deleted from server (if it is not forbidden by the `allowDelete` directive).
 
 Uploaded files can be processed by a preprocessor. These rules are predefined: `.css` files
 are compressed using the Clean-CSS (via online service) and `.js` are minified by Google Closure Compiler (via Java utility).
@@ -143,16 +167,14 @@ For example, you can create a file `combined.js`:
 
 This tool will combine scripts together and minify them with the Closure Compiler to speed-up your website.
 
-In the `deployment.ini`, you can create multiple sections, i.e. you may have separate
-rules for data and for application.
-
 
 Installing FTP Deployment
 -------------------------
 
 FTP Deployment 3.x requires PHP 7.1 or later (version 2.x requires PHP 5.4 or newer). It also requires openssl extensions for ftps:// and SSH2 extension for sftp:// connections.
 
-The easiest way to obtain FTP Deployment is to download [a single PHAR file](https://github.com/dg/ftp-deployment/releases). If you want to use JavaScript minification, download `compiler.jar` in the same folder.
+The easiest way to obtain FTP Deployment is to download [a single PHAR file](https://github.com/dg/ftp-deployment/releases). If you want to use JavaScript minification,
+download [compiler.jar](src/vendor/Google-Closure-Compiler/compiler.jar) to the same folder.
 
 Or you can install it using Composer:
 
