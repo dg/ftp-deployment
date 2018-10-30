@@ -13,6 +13,8 @@ namespace Deployment;
 
 /**
  * CSS and JS preprocessors.
+ *
+ * It has a dependency on the error handler that converts PHP errors to ErrorException.
  */
 class Preprocessor
 {
@@ -145,7 +147,7 @@ class Preprocessor
 	/**
 	 * Executes command.
 	 * @return array  [success, output]
-	 * @throws \Exception
+	 * @throws \ErrorException
 	 */
 	private function execute(string $command, string $input): array
 	{
@@ -155,9 +157,6 @@ class Preprocessor
 			$pipes,
 			null, null, ['bypass_shell' => true]
 		);
-		if (!is_resource($process)) {
-			throw new \Exception("Unable start process $command.");
-		}
 
 		fwrite($pipes[0], $input);
 		fclose($pipes[0]);
