@@ -18,7 +18,7 @@ namespace Deployment;
  */
 class Preprocessor
 {
-	/** @var string  path to java binary */
+	/** @var string|null  path to java binary */
 	public $javaBinary = 'java';
 
 	/** @var bool  compress only file when contains /**! */
@@ -39,7 +39,9 @@ class Preprocessor
 	 */
 	public function compressJs(string $content, string $origFile): string
 	{
-		if ($this->requireCompressMark && !preg_match('#/\*+!#', $content)) { // must contain /**!
+		if (!$this->javaBinary
+			|| ($this->requireCompressMark && !preg_match('#/\*+!#', $content)) // must contain /**!
+		) {
 			return $content;
 		}
 		$this->logger->log("Compressing $origFile");
@@ -50,6 +52,7 @@ class Preprocessor
 
 		if (!is_file($compilerPath)) {
 			$this->logger->log("Unable to minify, Google Closure Compiler not found at $compilerPath", 'red');
+			$this->javaBinary = null;
 			return $content;
 		}
 
