@@ -143,7 +143,7 @@ class CliRunner
 		}
 
 		$deployment->includeMasks = self::toArray($config['include'], true);
-		$deployment->ignoreMasks = array_merge($this->ignoreMasks, self::toArray($config['ignore']));
+		$deployment->ignoreMasks = array_merge(self::toArray($config['ignore']), $this->ignoreMasks);
 		$deployment->deploymentFile = empty($config['deploymentfile']) ? $deployment->deploymentFile : $config['deploymentfile'];
 		$deployment->allowDelete = $config['allowdelete'];
 		$deployment->toPurge = self::toArray($config['purge'], true);
