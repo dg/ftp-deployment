@@ -150,7 +150,7 @@ is used for synchronization. So the next time you run `deployment`, only modifie
 and deleted files are deleted from server (if it is not forbidden by the `allowDelete` directive).
 
 Uploaded files can be processed by a preprocessor. These rules are predefined: `.css` files
-are compressed using the Clean-CSS (via Node.js tool) and `.js` are minified by Google Closure Compiler (via Java tool).
+are compressed using the clean-css and `.js` are minified by UglifyJS or UglifyES (both via Node.js tool).
 
 There is also a rule for expanding [mod_include](http://httpd.apache.org/docs/current/mod/mod_include.html) Apache directives.
 For example, you can create a file `combined.js`:
@@ -169,12 +169,13 @@ Installing FTP Deployment
 
 FTP Deployment 3.x requires PHP 7.1 or later (version 2.x requires PHP 5.4 or newer). It also requires openssl extensions for ftps:// and SSH2 extension for sftp:// connections.
 
-The easiest way to obtain FTP Deployment is to download [a single PHAR file](https://github.com/dg/ftp-deployment/releases). If you want to use JavaScript minification,
-download [compiler.jar](src/vendor/Google-Closure-Compiler/compiler.jar) to the same folder.
+The easiest way to obtain FTP Deployment is to download [a single PHAR file](https://github.com/dg/ftp-deployment/releases).
 
-If you want to use CSS minification, install [Node.js](https://nodejs.org/en/) and [clean-css-cli](https://www.npmjs.com/package/clean-css-cli):
+If you want to use minification, install [Node.js](https://nodejs.org/en/) and [UglifyES](https://www.npmjs.com/package/uglify-es)
+for JavaScript minification and [clean-css](https://www.npmjs.com/package/clean-css-cli) for CSS minification.
 
 ```
+npm install uglify-es -g
 npm install clean-css-cli -g
 ```
 

@@ -18,8 +18,8 @@ namespace Deployment;
  */
 class Preprocessor
 {
-	/** @var string|null  path to java binary */
-	public $javaBinary = 'java';
+	/** @var string|null  path to UglifyJS binary */
+	public $uglifyJsBinary = 'uglifyjs';
 
 	/** @var string|null  path to clean-css binary */
 	public $cleanCssBinary = 'cleancss';
@@ -42,25 +42,23 @@ class Preprocessor
 	 */
 	public function compressJs(string $content, string $origFile): string
 	{
-		if (!$this->javaBinary
+		if (!$this->uglifyJsBinary
 			|| ($this->requireCompressMark && !preg_match('#/\*+!#', $content)) // must contain /**!
 		) {
 			return $content;
 		}
 		$this->logger->log("Compressing $origFile");
 
-		$compilerPath = \Phar::running()
-			? dirname(\Phar::running(false)) . '/compiler.jar'
-			: dirname(__DIR__) . '/vendor/Google-Closure-Compiler/compiler.jar';
-
-		if (!is_file($compilerPath)) {
-			$this->logger->log("Unable to minify, Google Closure Compiler not found at $compilerPath", 'red');
-			$this->javaBinary = null;
+		try {
+			[, $output] = $this->execute(escapeshellarg($this->uglifyJsBinary) . ' --version', '', false);
+		} catch (\ErrorException $e) {
+			$this->logger->log("Error while executing $this->uglifyJsBinary, install Node.js and uglify-es.", 'red');
+			$this->uglifyJsBinary = null;
 			return $content;
 		}
 
-		$cmd = escapeshellarg($this->javaBinary) . ' -jar ' . escapeshellarg($compilerPath) . ' --warning_level QUIET';
-		[$ok, $output] = $this->execute($cmd, $content);
+		$cmd = escapeshellarg($this->uglifyJsBinary) . ' --compress --mangle';
+		[$ok, $output] = $this->execute($cmd, $content, false);
 		if (!$ok) {
 			$this->logger->log("Error while executing $cmd", 'red');
 			$this->logger->log($output);
