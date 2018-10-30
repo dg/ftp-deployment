@@ -186,4 +186,10 @@ Or you can install it using Composer:
 composer create-project dg/ftp-deployment
 ```
 
+Are you looking for php_ssh2.dll?
+- [php_ssh2.dll for PHP 7.1 x86](https://files.nette.org/misc/7.1-x86/php_ssh2.dll)
+- [php_ssh2.dll for PHP 7.1 x64](https://files.nette.org/misc/7.1-x64/php_ssh2.dll)
+- [php_ssh2.dll for PHP 7.2 x86](https://files.nette.org/misc/7.2-x86/php_ssh2.dll) (seems buggy)
+- [php_ssh2.dll for PHP 7.2 x64](https://files.nette.org/misc/7.2-x64/php_ssh2.dll)
+
 If you like it, **[please make a donation now](https://nette.org/make-donation?to=deployment)**. Thank you!
