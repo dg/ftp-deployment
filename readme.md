@@ -150,7 +150,7 @@ is used for synchronization. So the next time you run `deployment`, only modifie
 and deleted files are deleted from server (if it is not forbidden by the `allowDelete` directive).
 
 Uploaded files can be processed by a preprocessor. These rules are predefined: `.css` files
-are compressed using the Clean-CSS (via online service) and `.js` are minified by Google Closure Compiler (via Java utility).
+are compressed using the Clean-CSS (via Node.js tool) and `.js` are minified by Google Closure Compiler (via Java tool).
 
 There is also a rule for expanding [mod_include](http://httpd.apache.org/docs/current/mod/mod_include.html) Apache directives.
 For example, you can create a file `combined.js`:
@@ -171,6 +171,13 @@ FTP Deployment 3.x requires PHP 7.1 or later (version 2.x requires PHP 5.4 or ne
 
 The easiest way to obtain FTP Deployment is to download [a single PHAR file](https://github.com/dg/ftp-deployment/releases). If you want to use JavaScript minification,
 download [compiler.jar](src/vendor/Google-Closure-Compiler/compiler.jar) to the same folder.
+
+If you want to use CSS minification, install [Node.js](https://nodejs.org/en/) and [clean-css-cli](https://www.npmjs.com/package/clean-css-cli):
+
+```
+npm install clean-css-cli -g
+```
+
 
 Or you can install it using Composer:
 
