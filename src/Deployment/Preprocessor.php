@@ -49,18 +49,10 @@ class Preprocessor
 		}
 		$this->logger->log("Compressing $origFile");
 
-		try {
-			[, $output] = $this->execute(escapeshellarg($this->uglifyJsBinary) . ' --version', '', false);
-		} catch (\ErrorException $e) {
-			$this->logger->log("Error while executing $this->uglifyJsBinary, install Node.js and uglify-es.", 'red');
-			$this->uglifyJsBinary = null;
-			return $content;
-		}
-
 		$cmd = escapeshellarg($this->uglifyJsBinary) . ' --compress --mangle';
 		[$ok, $output] = $this->execute($cmd, $content, false);
 		if (!$ok) {
-			$this->logger->log("Error while executing $cmd", 'red');
+			$this->logger->log("Error while executing $this->uglifyJsBinary, install Node.js and uglify-es.", 'red');
 			$this->logger->log($output);
 			return $content;
 		}
@@ -99,12 +91,10 @@ class Preprocessor
 
 	private function checkCssClean(): ?string
 	{
-		try {
-			[, $output] = $this->execute(escapeshellarg($this->cleanCssBinary) . ' --version', '', false);
-		} catch (\ErrorException $e) {
+		[$ok, $output] = $this->execute(escapeshellarg($this->cleanCssBinary) . ' --version', '', false);
+		if (!$ok) {
 			return "Error while executing $this->cleanCssBinary, install Node.js and clean-css-cli.";
-		}
-		if (version_compare($output, '4.2', '<')) {
+		} elseif (version_compare($output, '4.2', '<')) {
 			return 'Update to clean-css-cli 4.2 or newer';
 		}
 		return null;
