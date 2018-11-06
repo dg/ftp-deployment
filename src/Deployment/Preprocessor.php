@@ -175,6 +175,8 @@ class Preprocessor
 		if (!$output) {
 			$output = stream_get_contents($pipes[2]);
 		}
+		$output = str_replace("\r\n", "\n", $output);
+		$output = trim($output);
 
 		return [
 			proc_close($process) === 0,
