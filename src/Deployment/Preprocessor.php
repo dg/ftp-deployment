@@ -143,9 +143,9 @@ class Preprocessor
 				$this->logger->log("Expanding file $file not found!", 'red');
 				return $m[0];
 			}
-            
+
             $this->logger->log("Including $file");
-            return $this->expandApacheImports(file_get_contents($file), dirname($file));			
+            return $this->expandApacheImports(file_get_contents($file), dirname($file));
 		}, $content);
 	}
 
