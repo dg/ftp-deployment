@@ -123,8 +123,8 @@ class Deployer
 			return;
 
 		} elseif ($this->testMode) {
-			$this->logger->log("\nUploading:\n" . implode("\n", $toUpload), 'green', false);
-			$this->logger->log("\nDeleting:\n" . implode("\n", $toDelete), 'maroon', false);
+			$this->logger->log("\nUploading:\n" . implode("\n", $toUpload), 'green', 0);
+			$this->logger->log("\nDeleting:\n" . implode("\n", $toDelete), 'maroon', 0);
 			if (isset($deploymentFile)) {
 				unlink($deploymentFile);
 			}
@@ -406,7 +406,7 @@ class Deployer
 				}
 
 				if ($out != null) { // intentionally ==
-					$this->logger->log("-> $out", 'gray');
+					$this->logger->log("-> $out", 'gray', -3);
 				}
 				if ($err) {
 					throw new \RuntimeException('Job failed, ' . $err);
