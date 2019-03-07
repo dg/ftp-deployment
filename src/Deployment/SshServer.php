@@ -33,12 +33,20 @@ class SshServer implements Server
 	/** @var array  see parse_url() */
 	private $url;
 
+	/** @var string */
+	private $publicKey;
+
+	/** @var string */
+	private $privateKey;
+
+	/** @var string */
+	private $passPhrase;
 
 	/**
 	 * @param  string  $url  sftp://...
 	 * @throws \Exception
 	 */
-	public function __construct(string $url)
+	public function __construct(string $url, array $config)
 	{
 		if (!extension_loaded('ssh2')) {
 			throw new \Exception('PHP extension SSH2 is not loaded.');
@@ -46,6 +54,11 @@ class SshServer implements Server
 		$this->url = parse_url($url);
 		if (!isset($this->url['scheme'], $this->url['user']) || $this->url['scheme'] !== 'sftp') {
 			throw new \InvalidArgumentException('Invalid URL or missing username');
+		}
+		if (isset($config['publickey']) && isset($config['privatekey'])) {
+			$this->publicKey = $config['publickey'];
+			$this->privateKey = $config['privatekey'];
+			$this->passPhrase = isset($config['passphrase']) ? $config['passphrase'] : '';
 		}
 	}
 
@@ -59,6 +72,8 @@ class SshServer implements Server
 		$this->connection = ssh2_connect($this->url['host'], $this->url['port'] ?? 22);
 		if (isset($this->url['pass'])) {
 			ssh2_auth_password($this->connection, urldecode($this->url['user']), urldecode($this->url['pass']));
+		} elseif($this->publicKey && $this->privateKey) {
+			ssh2_auth_pubkey_file($this->connection, urldecode($this->url['user']), $this->publicKey, $this->privateKey, $this->passPhrase);
 		} else {
 			ssh2_auth_agent($this->connection, urldecode($this->url['user']));
 		}

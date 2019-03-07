@@ -119,7 +119,7 @@ class CliRunner
 		}
 
 		if ($urlParts['scheme'] === 'sftp') {
-			$server = new SshServer(Helpers::buildUrl($urlParts));
+			$server = new SshServer(Helpers::buildUrl($urlParts), $config);
 		} elseif ($urlParts['scheme'] === 'file') {
 			$server = new FileServer($config['remote']);
 		} else {
