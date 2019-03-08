@@ -95,26 +95,15 @@ class FtpServer implements Server
 	public function writeFile(string $local, string $remote, callable $progress = null): void
 	{
 		$size = max(filesize($local), 1);
-		$retry = self::RETRIES;
-		upload:
 		$blocks = 0;
 		do {
 			if ($progress) {
 				$progress(min($blocks * self::BLOCK_SIZE / $size, 100));
 			}
-			try {
-				$ret = $blocks === 0
-					? Safe::ftp_nb_put($this->connection, $remote, $local, FTP_BINARY)
-					: Safe::ftp_nb_continue($this->connection);
+			$ret = $blocks === 0
+				? Safe::ftp_nb_put($this->connection, $remote, $local, FTP_BINARY)
+				: Safe::ftp_nb_continue($this->connection);
 
-			} catch (ServerException $e) {
-				@ftp_close($this->connection); // intentionally @
-				$this->connect();
-				if (--$retry) {
-					goto upload;
-				}
-				throw new ServerException("Cannot upload file $local, number of retries exceeded. Error: {$e->getMessage()}");
-			}
 			$blocks++;
 		} while ($ret === FTP_MOREDATA);
 

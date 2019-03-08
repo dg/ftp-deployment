@@ -196,7 +196,11 @@ class Deployer
 	{
 		$tempFile = tempnam($this->tempDir, 'deploy');
 		try {
-			$this->server->readFile($this->remoteDir . '/' . $this->deploymentFile, $tempFile);
+			if ($this->server instanceof RetryServer) {
+				$this->server->noRetry('readFile', $this->remoteDir . '/' . $this->deploymentFile, $tempFile);
+			} else {
+				$this->server->readFile($this->remoteDir . '/' . $this->deploymentFile, $tempFile);
+			}
 		} catch (ServerException $e) {
 			return null;
 		}

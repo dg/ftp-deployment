@@ -125,6 +125,7 @@ class CliRunner
 		} else {
 			$server = new FtpServer(Helpers::buildUrl($urlParts), (bool) $config['passivemode']);
 		}
+		$server = new RetryServer($server, $this->logger);
 
 		if (!preg_match('#/|\\\\|[a-z]:#iA', $config['local'])) {
 			$config['local'] = dirname($this->configFile) . '/' . $config['local'];
