@@ -102,7 +102,9 @@ class SshServer implements Server
 		$o = Safe::fopen('ssh2.sftp://' . (int) $this->sftp . $remote, 'wb');
 		while (!feof($i)) {
 			$s = Safe::fread($i, 10000);
-			Safe::fwrite($o, $s, strlen($s));
+			if (Safe::fwrite($o, $s, strlen($s)) !== strlen($s)) {
+				throw new ServerException('Unable to write to server');
+			}
 			$len += strlen($s);
 			if ($progress) {
 				$progress($len * 100 / $size);
