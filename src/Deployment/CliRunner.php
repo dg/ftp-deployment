@@ -125,6 +125,9 @@ class CliRunner
 		} else {
 			$server = new FtpServer(Helpers::buildUrl($urlParts), (bool) $config['passivemode']);
 		}
+		$server->filePermissions = empty($config['filepermissions']) ? null : octdec($config['filepermissions']);
+		$server->dirPermissions = empty($config['dirpermissions']) ? null : octdec($config['dirpermissions']);
+
 		$server = new RetryServer($server, $this->logger);
 
 		if (!preg_match('#/|\\\\|[a-z]:#iA', $config['local'])) {
@@ -152,9 +155,6 @@ class CliRunner
 		$deployment->runAfterUpload = self::toArray($config['afterupload'], true);
 		$deployment->runAfter = self::toArray($config['after'], true);
 		$deployment->testMode = !empty($config['test']) || $this->mode === 'test';
-
-		$server->filePermissions = empty($config['filepermissions']) ? null : octdec($config['filepermissions']);
-		$server->dirPermissions = empty($config['dirpermissions']) ? null : octdec($config['dirpermissions']);
 
 		return $deployment;
 	}
