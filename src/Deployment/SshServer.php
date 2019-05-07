@@ -175,9 +175,12 @@ class SshServer implements Server
 	 */
 	public function purge(string $dir, callable $progress = null): void
 	{
-		$dirs = $entries = [];
+		if (!file_exists($path = 'ssh2.sftp://' . (int) $this->sftp . $dir)) {
+			return;
+		}
 
-		$iterator = Safe::dir($path = 'ssh2.sftp://' . (int) $this->sftp . $dir);
+		$dirs = $entries = [];
+		$iterator = Safe::dir($path);
 		while (($entry = $iterator->read()) !== false) {
 			if ($entry !== '.' && $entry !== '..') {
 				$entries[] = $entry;

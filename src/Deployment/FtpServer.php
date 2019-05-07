@@ -209,6 +209,10 @@ class FtpServer implements Server
 	 */
 	public function purge(string $dir, callable $progress = null): void
 	{
+		if (!$this->isDir($dir)) {
+			return;
+		}
+
 		$dirs = [];
 		foreach ((array) Safe::ftp_nlist($this->connection, $dir) as $entry) {
 			if ($entry == null || $entry === $dir || preg_match('#(^|/)\\.+$#', $entry)) { // intentionally ==
