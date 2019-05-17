@@ -13,4 +13,12 @@ namespace Deployment;
 
 class ServerException extends \Exception
 {
+	public function __construct(string $message, string $file = null, int $line = null)
+	{
+		parent::__construct($message);
+		if ($file) {
+			$this->file = $file;
+			$this->line = $line;
+		}
+	}
 }
