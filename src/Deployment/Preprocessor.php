@@ -145,7 +145,7 @@ class Preprocessor
 			}
 
 			$this->logger->log("Including $file");
-			return $this->expandApacheImports(file_get_contents($file), $file);
+			return $this->expandApacheImports(file_get_contents($file), dirname($file));
 		}, $content);
 	}
 
