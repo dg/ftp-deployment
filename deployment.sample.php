@@ -1,5 +1,4 @@
 <?php
-declare(strict_types=1);
 
 return [
 	'my site' => [
@@ -27,10 +26,10 @@ return [
 			},
 		],
 		'afterUpload' => [
-			'http://example.com/deployment.php?afterUpload',
+			'http://example.com/deployment.php?afterUpload'
 		],
 		'after' => [
-			'http://example.com/deployment.php?after',
+			'http://example.com/deployment.php?after'
 		],
 		'purge' => [
 			'temp/cache',

@@ -13,6 +13,8 @@ namespace Deployment;
 
 /**
  * Filesystem pseudoserver.
+ *
+ * It has a dependency on the error handler that converts PHP errors to ServerException.
  */
 class FileServer implements Server
 {
@@ -49,7 +51,7 @@ class FileServer implements Server
 	 */
 	public function readFile(string $remote, string $local): void
 	{
-		Safe::copy($this->root . $remote, $local);
+		copy($this->root . $remote, $local);
 	}
 
 
@@ -59,7 +61,7 @@ class FileServer implements Server
 	 */
 	public function writeFile(string $local, string $remote, callable $progress = null): void
 	{
-		Safe::copy($local, $this->root . $remote);
+		copy($local, $this->root . $remote);
 	}
 
 
@@ -70,7 +72,7 @@ class FileServer implements Server
 	public function removeFile(string $file): void
 	{
 		if (file_exists($path = $this->root . $file)) {
-			Safe::unlink($path);
+			unlink($path);
 		}
 	}
 
@@ -81,7 +83,7 @@ class FileServer implements Server
 	 */
 	public function renameFile(string $old, string $new): void
 	{
-		Safe::rename($this->root . $old, $this->root . $new);
+		rename($this->root . $old, $this->root . $new);
 	}
 
 
@@ -92,7 +94,7 @@ class FileServer implements Server
 	public function createDir(string $dir): void
 	{
 		if (trim($dir, '/') !== '' && !file_exists($path = $this->root . $dir)) {
-			Safe::mkdir($path, 0777, true);
+			mkdir($path, 0777, true);
 		}
 	}
 
@@ -104,7 +106,7 @@ class FileServer implements Server
 	public function removeDir(string $dir): void
 	{
 		if (file_exists($path = $this->root . $dir)) {
-			Safe::rmdir($path);
+			rmdir($path);
 		}
 	}
 
@@ -125,7 +127,7 @@ class FileServer implements Server
 			\RecursiveIteratorIterator::CHILD_FIRST
 		);
 		foreach ($iterator as $name => $file) {
-			$file->isDir() ? Safe::rmdir($name) : Safe::unlink($name);
+			$file->isDir() ? rmdir($name) : unlink($name);
 			if ($progress) {
 				$progress($name);
 			}
@@ -148,7 +150,7 @@ class FileServer implements Server
 	 */
 	public function execute(string $command): string
 	{
-		Safe::exec($command, $out);
+		exec($command, $out);
 		return implode("\n", $out);
 	}
 }

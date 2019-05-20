@@ -123,8 +123,8 @@ class Deployer
 			return;
 
 		} elseif ($this->testMode) {
-			$this->logger->log("\nUploading:\n" . implode("\n", $toUpload), 'green', 0);
-			$this->logger->log("\nDeleting:\n" . implode("\n", $toDelete), 'maroon', 0);
+			$this->logger->log("\nUploading:\n" . implode("\n", $toUpload), 'green', false);
+			$this->logger->log("\nDeleting:\n" . implode("\n", $toDelete), 'maroon', false);
 			if (isset($deploymentFile)) {
 				unlink($deploymentFile);
 			}
@@ -196,11 +196,7 @@ class Deployer
 	{
 		$tempFile = tempnam($this->tempDir, 'deploy');
 		try {
-			if ($this->server instanceof RetryServer) {
-				$this->server->noRetry('readFile', $this->remoteDir . '/' . $this->deploymentFile, $tempFile);
-			} else {
-				$this->server->readFile($this->remoteDir . '/' . $this->deploymentFile, $tempFile);
-			}
+			$this->server->readFile($this->remoteDir . '/' . $this->deploymentFile, $tempFile);
 		} catch (ServerException $e) {
 			return null;
 		}
@@ -410,7 +406,7 @@ class Deployer
 				}
 
 				if ($out != null) { // intentionally ==
-					$this->logger->log("-> $out", 'gray', -3);
+					$this->logger->log("-> $out", 'gray');
 				}
 				if ($err) {
 					throw new \RuntimeException('Job failed, ' . $err);
