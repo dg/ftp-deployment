@@ -16,6 +16,18 @@ Once the process is automated, it costs you a fraction of time and minimizes the
 (didn't I forget to upload some files?). There are lots of sophisticated deploying techniques available today,
 but many people are still using FTP. This tool is designed for them.
 
+
+Support Project
+---------------
+
+Do you like FTP Deployment? Are you looking forward to the new features?
+
+[![Donate](https://files.nette.org/icons/donation-1.svg?)](https://nette.org/make-donation?to=deployment)
+
+
+How it Works
+------------
+
 FTP Deployment is a script written in PHP and will automate
 the entire process. Just say which local folder to upload and where. This
 information is stored in a `deployment.ini` text file, which you can associate
@@ -208,5 +220,3 @@ publicKey = '/key/id_rsa.pub'
 privateKey = '/key/id_rsa'
 passPhrase = 'yourpass' #optional - If needed passphrase for privateKey
 ```
-
-If you like it, **[please make a donation now](https://nette.org/make-donation?to=deployment)**. Thank you!
