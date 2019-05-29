@@ -13,8 +13,6 @@ namespace Deployment;
 
 /**
  * FTP server.
- *
- * It has a dependency on the error handler that converts PHP errors to ServerException.
  */
 class FtpServer implements Server
 {
@@ -64,18 +62,18 @@ class FtpServer implements Server
 	public function connect(): void
 	{
 		$this->connection = $this->url['scheme'] === 'ftp'
-			? ftp_connect($this->url['host'], $this->url['port'] ?? 21)
-			: ftp_ssl_connect($this->url['host'], $this->url['port'] ?? 21);
+			? Safe::ftp_connect($this->url['host'], $this->url['port'] ?? 21)
+			: Safe::ftp_ssl_connect($this->url['host'], $this->url['port'] ?? 21);
 
-		ftp_login($this->connection, urldecode($this->url['user']), urldecode($this->url['pass']));
+		Safe::ftp_login($this->connection, urldecode($this->url['user']), urldecode($this->url['pass']));
 
 		if ($this->passiveMode) {
-			ftp_set_option($this->connection, FTP_USEPASVADDRESS, false);
-			ftp_pasv($this->connection, $this->passiveMode);
+			Safe::ftp_set_option($this->connection, FTP_USEPASVADDRESS, false);
+			Safe::ftp_pasv($this->connection, $this->passiveMode);
 		}
 
 		if (isset($this->url['path'])) {
-			ftp_chdir($this->connection, $this->url['path']);
+			Safe::ftp_chdir($this->connection, $this->url['path']);
 		}
 	}
 
@@ -86,7 +84,7 @@ class FtpServer implements Server
 	 */
 	public function readFile(string $remote, string $local): void
 	{
-		ftp_get($this->connection, $local, $remote, FTP_BINARY);
+		Safe::ftp_get($this->connection, $local, $remote, FTP_BINARY);
 	}
 
 
@@ -97,31 +95,20 @@ class FtpServer implements Server
 	public function writeFile(string $local, string $remote, callable $progress = null): void
 	{
 		$size = max(filesize($local), 1);
-		$retry = self::RETRIES;
-		upload:
 		$blocks = 0;
 		do {
 			if ($progress) {
 				$progress(min($blocks * self::BLOCK_SIZE / $size, 100));
 			}
-			try {
-				$ret = $blocks === 0
-					? ftp_nb_put($this->connection, $remote, $local, FTP_BINARY)
-					: ftp_nb_continue($this->connection);
+			$ret = $blocks === 0
+				? Safe::ftp_nb_put($this->connection, $remote, $local, FTP_BINARY)
+				: Safe::ftp_nb_continue($this->connection);
 
-			} catch (ServerException $e) {
-				@ftp_close($this->connection); // intentionally @
-				$this->connect();
-				if (--$retry) {
-					goto upload;
-				}
-				throw new ServerException("Cannot upload file $local, number of retries exceeded. Error: {$e->getMessage()}");
-			}
 			$blocks++;
 		} while ($ret === FTP_MOREDATA);
 
 		if ($this->filePermissions) {
-			ftp_chmod($this->connection, $this->filePermissions, $remote);
+			Safe::ftp_chmod($this->connection, $this->filePermissions, $remote);
 		}
 		if ($progress) {
 			$progress(100);
@@ -136,9 +123,9 @@ class FtpServer implements Server
 	public function removeFile(string $file): void
 	{
 		try {
-			ftp_delete($this->connection, $file);
+			Safe::ftp_delete($this->connection, $file);
 		} catch (ServerException $e) {
-			if (in_array($file, (array) ftp_nlist($this->connection, $file . '*'), true)) {
+			if (in_array($file, (array) Safe::ftp_nlist($this->connection, $file . '*'), true)) {
 				throw $e;
 			}
 		}
@@ -152,7 +139,7 @@ class FtpServer implements Server
 	public function renameFile(string $old, string $new): void
 	{
 		$this->removeFile($new);
-		ftp_rename($this->connection, $old, $new); // TODO: zachovat permissions
+		Safe::ftp_rename($this->connection, $old, $new); // TODO: zachovat permissions
 	}
 
 
@@ -172,9 +159,9 @@ class FtpServer implements Server
 			$path .= array_shift($parts);
 			try {
 				if ($path !== '') {
-					ftp_mkdir($this->connection, $path);
+					Safe::ftp_mkdir($this->connection, $path);
 					if ($this->dirPermissions) {
-						ftp_chmod($this->connection, $this->dirPermissions, $path);
+						Safe::ftp_chmod($this->connection, $this->dirPermissions, $path);
 					}
 				}
 			} catch (ServerException $e) {
@@ -195,7 +182,7 @@ class FtpServer implements Server
 	{
 		$current = $this->getDir();
 		$res = @ftp_chdir($this->connection, $dir); // intentionally @
-		ftp_chdir($this->connection, $current ?: '/');
+		Safe::ftp_chdir($this->connection, $current ?: '/');
 		return $res;
 	}
 
@@ -207,9 +194,9 @@ class FtpServer implements Server
 	public function removeDir(string $dir): void
 	{
 		try {
-			ftp_rmdir($this->connection, $dir);
+			Safe::ftp_rmdir($this->connection, $dir);
 		} catch (ServerException $e) {
-			if (in_array($dir, (array) ftp_nlist($this->connection, $dir . '*'), true)) {
+			if (in_array($dir, (array) Safe::ftp_nlist($this->connection, $dir . '*'), true)) {
 				throw $e;
 			}
 		}
@@ -222,8 +209,12 @@ class FtpServer implements Server
 	 */
 	public function purge(string $dir, callable $progress = null): void
 	{
+		if (!$this->isDir($dir)) {
+			return;
+		}
+
 		$dirs = [];
-		foreach ((array) ftp_nlist($this->connection, $dir) as $entry) {
+		foreach ((array) Safe::ftp_nlist($this->connection, $dir) as $entry) {
 			if ($entry == null || $entry === $dir || preg_match('#(^|/)\\.+$#', $entry)) { // intentionally ==
 				continue;
 			} elseif (strpos($entry, '/') === false) {
@@ -232,9 +223,9 @@ class FtpServer implements Server
 
 			if ($this->isDir($entry)) {
 				$dirs[] = $tmp = "$dir/.delete" . uniqid() . count($dirs);
-				ftp_rename($this->connection, $entry, $tmp);
+				Safe::ftp_rename($this->connection, $entry, $tmp);
 			} else {
-				ftp_delete($this->connection, $entry);
+				Safe::ftp_delete($this->connection, $entry);
 			}
 
 			if ($progress) {
@@ -244,7 +235,7 @@ class FtpServer implements Server
 
 		foreach ($dirs as $subdir) {
 			$this->purge($subdir, $progress);
-			ftp_rmdir($this->connection, $subdir);
+			Safe::ftp_rmdir($this->connection, $subdir);
 		}
 	}
 
@@ -255,7 +246,7 @@ class FtpServer implements Server
 	 */
 	public function getDir(): string
 	{
-		return rtrim(ftp_pwd($this->connection), '/');
+		return rtrim(Safe::ftp_pwd($this->connection), '/');
 	}
 
 
@@ -275,10 +266,10 @@ class FtpServer implements Server
 			} elseif ($m[1] === 'mv') {
 				$this->renameFile($m[2], $m[3]);
 			} elseif ($m[1] === 'chmod') {
-				ftp_chmod($this->connection, octdec($m[2]), $m[3]);
+				Safe::ftp_chmod($this->connection, octdec($m[2]), $m[3]);
 			}
 		} else {
-			ftp_exec($this->connection, $command);
+			Safe::ftp_exec($this->connection, $command);
 		}
 		return '';
 	}
