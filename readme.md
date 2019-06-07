@@ -102,6 +102,9 @@ filePermissions = 0644
 
 ; default permissions for new directories (defaults to none)
 dirPermissions = 0755
+
+; disable cached (paths) files, if use multiple batches (hash is computed from ignored masks and local dir, defaults to yes)
+cacheScan = no
 ```
 
 In the config file you can create multiple sections (like `[my site]`), so you may have separate
