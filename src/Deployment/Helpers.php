@@ -85,6 +85,8 @@ class Helpers
 			$options = [
 				CURLOPT_RETURNTRANSFER => 1,
 				CURLOPT_FOLLOWLOCATION => 1,
+				CURLOPT_SSL_VERIFYPEER => 0,
+				CURLOPT_SSL_VERIFYHOST => 0,
 			];
 			if ($postData !== null) {
 				$options[CURLOPT_POST] = true;
