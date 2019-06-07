@@ -76,12 +76,16 @@ class Deployer
 		$this->server = $server;
 		$this->logger = $logger;
 	}
-
-
+	
+	
 	/**
 	 * Synchronize remote and local.
+	 *
+	 * @param array|null $localPaths
+	 *
+	 * @throws ServerException
 	 */
-	public function deploy(): void
+	public function deploy(array &$localPaths = null): void
 	{
 		$this->logger->log('Connecting to server');
 		$this->server->connect();
@@ -105,9 +109,15 @@ class Deployer
 			$this->logger->log("Remote $this->deploymentFile file not found");
 			$remotePaths = [];
 		}
-
+		
 		$this->logger->log("Scanning files in $this->localDir");
-		$localPaths = $this->collectPaths();
+		
+		if ($localPaths === null) {
+			$localPaths = $this->collectPaths();
+		}
+		else {
+			$this->logger->log("Used cached scanning from $this->localDir");
+		}
 
 		unset($localPaths["/$this->deploymentFile"], $remotePaths["/$this->deploymentFile"]);
 		$toDelete = $this->allowDelete ? array_keys(array_diff_key($remotePaths, $localPaths)) : [];
@@ -438,4 +448,13 @@ class Deployer
 			$this->logger->progress($s . ' [' . round($percent) . '%]');
 		}
 	}
+	
+	/**
+	 * @return string
+	 */
+	public function getLocalDir(): string
+	{
+		return $this->localDir;
+	}
+
 }

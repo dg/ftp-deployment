@@ -40,4 +40,5 @@ return [
 
 	'tempDir' => __DIR__ . '/temp',
 	'colors' => true,
+	'cacheScan' => true
 ];

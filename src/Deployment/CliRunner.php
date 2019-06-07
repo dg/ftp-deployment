@@ -48,7 +48,6 @@ class CliRunner
 	/** @var resource */
 	private $lock;
 
-
 	public function run(): ?int
 	{
 		$this->logger = new Logger('php://memory');
@@ -58,7 +57,8 @@ class CliRunner
 		if (!$config) {
 			return 1;
 		}
-
+		
+		$cacheScan = (bool) $config['cachescan'];
 		$this->logger = new Logger($config['log']);
 		$this->logger->useColors = (bool) $config['colors'];
 		$this->logger->showProgress = (bool) $config['progress'];
@@ -71,7 +71,9 @@ class CliRunner
 		$time = time();
 		$this->logger->log('Started at ' . date('[Y/m/d H:i]'));
 		$this->logger->log("Config file is $this->configFile");
-
+		
+		$cacheLocalPaths = [];
+		
 		foreach ($this->batches as $name => $batch) {
 			$this->logger->log("\nDeploying $name");
 
@@ -93,7 +95,17 @@ class CliRunner
 			if (!$deployment->allowDelete) {
 				$this->logger->log('Deleting disabled');
 			}
-			$deployment->deploy();
+			
+			$batchHash = $localPaths = null;
+			
+			if ($cacheScan) {
+				$batchHash = $deployment->getLocalDir() . md5(serialize($deployment->includeMasks)) . md5(serialize($deployment->ignoreMasks));
+				$localPaths = array_key_exists($batchHash, $cacheLocalPaths) ? $cacheLocalPaths[$batchHash]  : null;
+			}
+			
+			$deployment->deploy($localPaths);
+			
+			$cacheLocalPaths[$batchHash] = $localPaths;
 		}
 
 		$time = time() - $time;
@@ -246,6 +258,7 @@ XX
 			'progress' => true,
 			'colors' => (PHP_SAPI === 'cli' && ((function_exists('posix_isatty') && posix_isatty(STDOUT))
 				|| getenv('ConEmuANSI') === 'ON' || getenv('ANSICON') !== false)),
+			'cachescan' => true,
 		];
 		$config['progress'] = $options['--no-progress'] ? false : $config['progress'];
 		return $config;
