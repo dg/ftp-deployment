@@ -114,8 +114,7 @@ class Deployer
 
 		if ($localPaths === null) {
 			$localPaths = $this->collectPaths();
-		}
-		else {
+		} else {
 			$this->logger->log("Used cached scanning from $this->localDir");
 		}
 
@@ -449,6 +448,7 @@ class Deployer
 		}
 	}
 
+
 	/**
 	 * @return string
 	 */
@@ -456,5 +456,4 @@ class Deployer
 	{
 		return $this->localDir;
 	}
-
 }

@@ -101,7 +101,7 @@ class CliRunner
 
 			if ($cacheScan) {
 				$batchHash = $deployment->getLocalDir() . md5(serialize($deployment->includeMasks)) . md5(serialize($deployment->ignoreMasks));
-				$localPaths = array_key_exists($batchHash, $cacheLocalPaths) ? $cacheLocalPaths[$batchHash]  : null;
+				$localPaths = array_key_exists($batchHash, $cacheLocalPaths) ? $cacheLocalPaths[$batchHash] : null;
 			}
 
 			$deployment->deploy($localPaths);
