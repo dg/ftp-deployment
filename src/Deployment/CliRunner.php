@@ -97,7 +97,7 @@ class CliRunner
 		}
 
 		$time = time() - $time;
-		$this->logger->log("\nFinished at " . date('[Y/m/d H:i]') . " (in $time seconds)", 'lime');
+		$this->logger->log("\nFinished at " . date('[Y/m/d H:i]') . " (in $time seconds)\n----------------------------------------------\n\n", 'lime');
 		return 0;
 	}
 
