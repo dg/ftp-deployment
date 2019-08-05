@@ -59,7 +59,7 @@ class CliRunner
 			return 1;
 		}
 
-		$this->logger = new Logger($config['log']);
+		$this->logger = new Logger($config['log'], $config['appendlog']);
 		$this->logger->useColors = (bool) $config['colors'];
 		$this->logger->showProgress = (bool) $config['progress'];
 
@@ -242,6 +242,7 @@ XX
 
 		$config = array_change_key_case($config, CASE_LOWER) + [
 			'log' => preg_replace('#\.\w+$#', '.log', $this->configFile),
+			'appendlog' => false,
 			'tempdir' => sys_get_temp_dir() . '/deployment',
 			'progress' => true,
 			'colors' => (PHP_SAPI === 'cli' && ((function_exists('posix_isatty') && posix_isatty(STDOUT))

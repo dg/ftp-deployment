@@ -31,6 +31,9 @@ And what does the `deployment.ini` file contain? **Only the `remote` item is req
 ; log file (defaults to config file with .log extension)
 log = ...
 
+; append to log instead of truncating file before every deployment (defaults to "no")
+appendLog = no
+
 ; directory for temporary files (defaults to system's temporary directory)
 tempDir = /temp/deployment
 
