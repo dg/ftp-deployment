@@ -107,7 +107,11 @@ class Deployer
 		}
 
 		$this->logger->log("Scanning files in $this->localDir");
-		$localPaths = $this->collectPaths();
+		static $cache;
+		$localPaths = &$cache[serialize([$this->localDir, $this->ignoreMasks, $this->includeMasks, $this->filters, $this->preprocessMasks])];
+		if ($localPaths === null) {
+			$localPaths = $this->collectPaths();
+		}
 
 		unset($localPaths["/$this->deploymentFile"], $remotePaths["/$this->deploymentFile"]);
 		$toDelete = $this->allowDelete ? array_keys(array_diff_key($remotePaths, $localPaths)) : [];
