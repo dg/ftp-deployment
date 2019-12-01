@@ -97,7 +97,7 @@ class CliRunner
 		}
 
 		$time = time() - $time;
-		$this->logger->log("\nFinished at " . date('[Y/m/d H:i]') . " (in $time seconds)\n----------------------------------------------\n\n", 'lime');
+		$this->logger->log("\nFinished at " . date('[Y/m/d H:i]') . " (in $time seconds)", 'lime');
 		return 0;
 	}
 
@@ -125,8 +125,8 @@ class CliRunner
 		} else {
 			$server = new FtpServer(Helpers::buildUrl($urlParts), (bool) $config['passivemode']);
 		}
-		$server->filePermissions = empty($config['filepermissions']) ? null : octdec($config['filepermissions']);
-		$server->dirPermissions = empty($config['dirpermissions']) ? null : octdec($config['dirpermissions']);
+		$server->filePermissions = empty($config['filepermissions']) ? null : str_pad($config['filepermissions'], 4, '0', \STR_PAD_LEFT);
+		$server->dirPermissions = empty($config['dirpermissions']) ? null : str_pad($config['dirpermissions'], 4, '0', \STR_PAD_LEFT);
 
 		$server = new RetryServer($server, $this->logger);
 
@@ -186,7 +186,8 @@ class CliRunner
 
 	private function loadConfig(): ?array
 	{
-		$cmd = new CommandLine(<<<'XX'
+		$cmd = new CommandLine(
+			<<<'XX'
 
 FTP deployment v3.2
 -------------------
@@ -199,10 +200,11 @@ Options:
 	--generate        Only generates deployment file.
 	--no-progress     Hide the progress indicators.
 
-XX
-		, [
-			'config' => [CommandLine::REALPATH => true],
-		]);
+XX,
+			[
+				'config' => [CommandLine::REALPATH => true],
+			]
+		);
 
 		if ($cmd->isEmpty()) {
 			$cmd->help();
