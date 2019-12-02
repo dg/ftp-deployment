@@ -125,9 +125,9 @@ class FtpServer implements Server
 		try {
 			Safe::ftp_delete($this->connection, $file);
 		} catch (ServerException $e) {
-			// if (in_array($file, (array) Safe::ftp_nlist($this->connection, $file . '*'), true)) {
-			// 	throw $e;
-			// }
+			if (in_array($file, (array) Safe::ftp_nlist($this->connection, $file . '*'), true)) {
+				throw $e;
+			}
 		}
 	}
 

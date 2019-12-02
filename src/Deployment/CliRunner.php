@@ -186,8 +186,7 @@ class CliRunner
 
 	private function loadConfig(): ?array
 	{
-		$cmd = new CommandLine(
-			<<<'XX'
+		$menu = <<<'XX'
 
 FTP deployment v3.2
 -------------------
@@ -199,12 +198,11 @@ Options:
 	--section <name>  Only deploys the named section.
 	--generate        Only generates deployment file.
 	--no-progress     Hide the progress indicators.
+XX;
 
-XX,
-			[
-				'config' => [CommandLine::REALPATH => true],
-			]
-		);
+		$cmd = new CommandLine($menu, [
+			'config' => [CommandLine::REALPATH => true],
+		]);
 
 		if ($cmd->isEmpty()) {
 			$cmd->help();
