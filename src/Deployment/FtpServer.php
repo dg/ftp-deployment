@@ -108,7 +108,7 @@ class FtpServer implements Server
 		} while ($ret === FTP_MOREDATA);
 
 		if ($this->filePermissions) {
-			Safe::ftp_chmod($this->connection, $this->filePermissions, $remote);
+			$this->chmod($remote, $this->filePermissions);
 		}
 		if ($progress) {
 			$progress(100);
@@ -161,7 +161,7 @@ class FtpServer implements Server
 				if ($path !== '') {
 					Safe::ftp_mkdir($this->connection, $path);
 					if ($this->dirPermissions) {
-						Safe::ftp_chmod($this->connection, $this->dirPermissions, $path);
+						$this->chmod($path, $this->dirPermissions);
 					}
 				}
 			} catch (ServerException $e) {
@@ -266,11 +266,25 @@ class FtpServer implements Server
 			} elseif ($m[1] === 'mv') {
 				$this->renameFile($m[2], $m[3]);
 			} elseif ($m[1] === 'chmod') {
-				Safe::ftp_chmod($this->connection, octdec($m[2]), $m[3]);
+				$this->chmod($m[3], octdec($m[2]));
 			}
 		} else {
 			Safe::ftp_exec($this->connection, $command);
 		}
 		return '';
+	}
+
+
+	/**
+	 * @throws ServerException
+	 */
+	private function chmod(string $file, int $perms): void
+	{
+		try {
+			Safe::ftp_chmod($this->connection, $perms, $file);
+		} catch (ServerException $e) {
+			$perms = str_pad(decoct($perms), 4, '0', STR_PAD_LEFT);
+			Safe::ftp_site($this->connection, "CHMOD $perms $file");
+		}
 	}
 }
