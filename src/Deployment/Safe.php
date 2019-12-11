@@ -16,7 +16,6 @@ namespace Deployment;
  *
  * @method static void copy(string $source, string $dest)
  * @method static \Directory dir(string $directory)
- * @method static string exec(string $command, array &$output, int &$return_var)
  * @method static resource fopen(string $filename, string $mode, bool $use_include_path = false)
  * @method static string fread(resource $handle, int $length)
  * @method static void ftp_chdir(resource $ftp_stream, string $directory)
@@ -84,5 +83,12 @@ class Safe
 			throw new ServerException("$func() failures.", $trace[1]['file'], $trace[1]['line']);
 		}
 		return $res;
+	}
+
+
+	/** @throws ServerException */
+	public static function exec(string $command, array &$output = null, int &$return_var = null): string
+	{
+		return self::__callStatic(__FUNCTION__, [$command, &$output, &$return_var]);
 	}
 }
