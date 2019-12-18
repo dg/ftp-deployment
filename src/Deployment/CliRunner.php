@@ -213,13 +213,13 @@ XX
 		$this->mode = $options['--generate'] ? 'generate' : ($options['--test'] ? 'test' : null);
 		$this->configFile = $options['config'];
 
-		if (!flock($this->lock = fopen($options['config'], 'r'), LOCK_EX | LOCK_NB)) {
-			throw new \Exception('It seems that you are in the middle of another deployment.');
-		}
-
 		$config = $this->loadConfigFile($options['config']);
 		if (!$config) {
 			throw new \Exception('Missing config.');
+		}
+
+		if (!flock($this->lock = fopen($options['config'], 'r'), LOCK_EX | LOCK_NB)) {
+			throw new \Exception('It seems that you are in the middle of another deployment.');
 		}
 
 		$this->batches = isset($config['remote']) && is_string($config['remote'])

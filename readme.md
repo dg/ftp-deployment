@@ -193,6 +193,8 @@ Are you looking for php_ssh2.dll?
 - [php_ssh2.dll for PHP 7.2 x64](https://files.nette.org/misc/7.2-x64/php_ssh2.dll)
 - [php_ssh2.dll for PHP 7.3 x86](https://files.nette.org/misc/7.3-x86/php_ssh2.dll)
 - [php_ssh2.dll for PHP 7.3 x64](https://files.nette.org/misc/7.3-x64/php_ssh2.dll)
+- [php_ssh2.dll for PHP 7.4 x86](https://files.nette.org/misc/7.4-x86/php_ssh2.dll)
+- [php_ssh2.dll for PHP 7.4 x64](https://files.nette.org/misc/7.4-x64/php_ssh2.dll)
 
 Need SSH authenticate using a public key?
 
