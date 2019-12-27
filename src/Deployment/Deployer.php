@@ -135,11 +135,6 @@ class Deployer
 			return;
 		}
 
-		$this->logger->log("Creating remote file $this->deploymentFile.running");
-		$runningFile = "$this->remoteDir/$this->deploymentFile.running";
-		$this->server->createDir(str_replace('\\', '/', dirname($runningFile)));
-		$this->server->writeFile(tempnam($this->tempDir, 'deploy'), $runningFile);
-
 		if ($runBefore[0]) {
 			$this->logger->log("\nBefore-jobs:");
 			$this->runJobs($runBefore[0]);
@@ -152,34 +147,45 @@ class Deployer
 				$this->logger->log("\nAfter-upload-jobs:");
 				$this->runJobs($this->runAfterUpload);
 			}
-			$this->logger->log("\nRenaming:");
-			$this->renamePaths($toUpload);
-			unlink($deploymentFile);
 		}
 
-		if ($toDelete) {
-			$this->logger->log("\nDeleting:");
-			$this->deletePaths($toDelete);
-		}
+		$this->logger->log("Creating remote file $this->deploymentFile.running");
+		$runningFile = "$this->remoteDir/$this->deploymentFile.running";
+		$this->server->createDir(str_replace('\\', '/', dirname($runningFile)));
+		$this->server->writeFile(tempnam($this->tempDir, 'deploy'), $runningFile);
 
-		foreach ($this->toPurge as $path) {
-			$this->logger->log("\nCleaning $path");
-			$this->server->purge($this->remoteDir . '/' . $path, function ($path) {
-				static $counter;
-				$path = (string) substr($path, strlen($this->remoteDir));
-				$path = preg_match('#/(.{1,60})$#', $path, $m) ? $m[1] : substr(basename($path), 0, 60);
-				$this->logger->progress(str_pad($path . ' ' . str_repeat('.', $counter++ % 30 + 60 - strlen($path)), 90));
-			});
-			$this->logger->progress(str_repeat(' ', 91));
-		}
+		try {
+			if ($toUpload) {
+				$this->logger->log("\nRenaming:");
+				$this->renamePaths($toUpload);
+				unlink($deploymentFile);
+			}
 
-		if ($this->runAfter) {
-			$this->logger->log("\nAfter-jobs:");
-			$this->runJobs($this->runAfter);
-		}
+			if ($toDelete) {
+				$this->logger->log("\nDeleting:");
+				$this->deletePaths($toDelete);
+			}
 
-		$this->logger->log("\nDeleting remote file $this->deploymentFile.running");
-		$this->server->removeFile($runningFile);
+			foreach ($this->toPurge as $path) {
+				$this->logger->log("\nCleaning $path");
+				$this->server->purge($this->remoteDir . '/' . $path, function ($path) {
+					static $counter;
+					$path = (string) substr($path, strlen($this->remoteDir));
+					$path = preg_match('#/(.{1,60})$#', $path, $m) ? $m[1] : substr(basename($path), 0, 60);
+					$this->logger->progress(str_pad($path . ' ' . str_repeat('.', $counter++ % 30 + 60 - strlen($path)), 90));
+				});
+				$this->logger->progress(str_repeat(' ', 91));
+			}
+
+			if ($this->runAfter) {
+				$this->logger->log("\nAfter-jobs:");
+				$this->runJobs($this->runAfter);
+			}
+
+		} finally {
+			$this->logger->log("\nDeleting remote file $this->deploymentFile.running");
+			$this->server->removeFile($runningFile);
+		}
 	}
 
 
