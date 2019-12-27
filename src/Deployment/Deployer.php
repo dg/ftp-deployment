@@ -410,7 +410,7 @@ class Deployer
 					[$localFile, $remotePath] = explode(' ', $m[2]);
 					$localFile = $this->localDir . '/' . $localFile;
 					if (!is_file($localFile)) {
-						throw new \RuntimeException("File $localFile doesn't exist.");
+						throw new JobException("File $localFile doesn't exist.");
 					}
 					$remotePath = $this->remoteDir . '/' . $remotePath;
 					$this->server->createDir(str_replace('\\', '/', dirname($remotePath)));
@@ -423,12 +423,12 @@ class Deployer
 					$this->logger->log("-> $out", 'gray', -3);
 				}
 				if ($err) {
-					throw new \RuntimeException('Job failed, ' . $err);
+					throw new JobException('Job failed, ' . $err);
 				}
 
 			} elseif (is_callable($job)) {
 				if ($job($this->server, $this->logger, $this) === false) {
-					throw new \RuntimeException('Job failed');
+					throw new JobException('Job failed');
 				}
 
 			} else {
