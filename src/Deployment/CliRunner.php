@@ -181,6 +181,17 @@ class CliRunner
 			$this->logger->log("Error: {$e->getMessage()} in {$e->getFile()}:{$e->getLine()}\n\n$e", 'red');
 			exit(1);
 		});
+
+		if (extension_loaded('pcntl')) {
+			pcntl_signal(SIGINT, function (): void {
+				pcntl_signal(SIGINT, SIG_DFL);
+				throw new \Exception('Terminated');
+			});
+		} elseif (function_exists('sapi_windows_set_ctrl_handler')) {
+			sapi_windows_set_ctrl_handler(function () {
+				throw new \Exception('Terminated');
+			});
+		}
 	}
 
 
