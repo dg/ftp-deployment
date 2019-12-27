@@ -33,7 +33,7 @@ jobs:
 
 
         -   stage: Static Analysis (informative)
-            install:
+            script:
                 - vendor/bin/phpstan analyse --level 5 src
 
 

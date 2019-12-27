@@ -177,7 +177,7 @@ class CliRunner
 			throw new \ErrorException($message, 0, $severity, $file, $line);
 		});
 
-		set_exception_handler(function ($e) {
+		set_exception_handler(function (\Throwable $e): void {
 			$this->logger->log("Error: {$e->getMessage()} in {$e->getFile()}:{$e->getLine()}\n\n$e", 'red');
 			exit(1);
 		});
