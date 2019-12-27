@@ -124,6 +124,12 @@ class Deployer
 
 		if (!$toUpload && !$toDelete) {
 			$this->logger->log('Already synchronized.', 'lime');
+
+			$runAfterLocal = array_filter($this->runAfter, function ($job) { return is_string($job) && preg_match('#^local:#', $job); });
+			if ($runAfterLocal) {
+				$this->logger->log("\nLocal-after-jobs:");
+				$this->runJobs($runAfterLocal);
+			}
 			return;
 
 		} elseif ($this->testMode) {
