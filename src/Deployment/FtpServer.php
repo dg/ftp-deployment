@@ -125,7 +125,7 @@ class FtpServer implements Server
 		try {
 			Safe::ftp_delete($this->connection, $file);
 		} catch (ServerException $e) {
-			if (in_array($file, (array) Safe::ftp_nlist($this->connection, $file . '*'), true)) {
+			if (in_array($file, (array) @ftp_nlist($this->connection, $file . '*'), true)) { // @ may return false when file not exists
 				throw $e;
 			}
 		}
@@ -196,7 +196,7 @@ class FtpServer implements Server
 		try {
 			Safe::ftp_rmdir($this->connection, $dir);
 		} catch (ServerException $e) {
-			if (in_array($dir, (array) Safe::ftp_nlist($this->connection, $dir . '*'), true)) {
+			if ($this->isDir($dir)) {
 				throw $e;
 			}
 		}
