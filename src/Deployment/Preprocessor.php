@@ -40,12 +40,12 @@ class Preprocessor
 	/**
 	 * Compress JS file.
 	 */
-	public function compressJs(string $content, string $origFile): string
+	public function compressJs(string $content, string $origFile): ?string
 	{
 		if (!$this->uglifyJsBinary
 			|| ($this->requireCompressMark && !preg_match('#/\*+!#', $content)) // must contain /**!
 		) {
-			return $content;
+			return null;
 		}
 		$this->logger->log("Compressing $origFile");
 
@@ -54,7 +54,7 @@ class Preprocessor
 		if (!$ok) {
 			$this->logger->log("Error while executing $this->uglifyJsBinary, install Node.js and uglify-es.", 'red');
 			$this->logger->log($output);
-			return $content;
+			return null;
 		}
 		return $output;
 	}
@@ -63,19 +63,19 @@ class Preprocessor
 	/**
 	 * Compress CSS file.
 	 */
-	public function compressCss(string $content, string $origFile): string
+	public function compressCss(string $content, string $origFile): ?string
 	{
 		if (!$this->cleanCssBinary
 			|| ($this->requireCompressMark && !preg_match('#/\*+!#', $content)) // must contain /**!
 		) {
-			return $content;
+			return null;
 		}
 		$this->logger->log("Compressing $origFile");
 
 		if ($error = $this->checkCssClean()) {
 			$this->logger->log($error, 'red');
 			$this->cleanCssBinary = null;
-			return $content;
+			return null;
 		}
 
 		$cmd = escapeshellarg($this->cleanCssBinary) . ' --compatibility ie9 -O2';
@@ -83,7 +83,7 @@ class Preprocessor
 		if (!$ok) {
 			$this->logger->log("Error while executing $cmd", 'red');
 			$this->logger->log($output);
-			return $content;
+			return null;
 		}
 		return $output;
 	}
