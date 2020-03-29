@@ -376,18 +376,27 @@ class Deployer
 
 		$full = $this->localDir . str_replace('/', DIRECTORY_SEPARATOR, $file);
 		$content = file_get_contents($full);
+
 		foreach ($this->filters[$ext] as $info) {
-			if ($info['cached'] && is_file($tempFile = $this->tempDir . '/' . md5($content))) {
-				$content = file_get_contents($tempFile);
+			is_callable($info['filter'], false, $callable_name);
+			$cacheFile = $info['cached'] ? $this->tempDir . '/' . md5($content . $callable_name) : null;
+
+			if ($cacheFile && is_file($cacheFile)) {
+				$content = file_get_contents($tempFile = $cacheFile);
 			} else {
-				$content = $info['filter']($content, $full);
-				if ($info['cached']) {
-					file_put_contents($tempFile, $content);
+				$res = $info['filter']($content, $full);
+				if ($res !== null) {
+					$content = $res;
+					if ($cacheFile) {
+						file_put_contents($tempFile = $cacheFile, $content);
+					} else {
+						$tempFile = null;
+					}
 				}
 			}
 		}
 
-		if (empty($info['cached'])) {
+		if (empty($tempFile)) {
 			$tempFile = tempnam($this->tempDir, 'deploy');
 			file_put_contents($tempFile, $content);
 		}
