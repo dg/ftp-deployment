@@ -85,6 +85,7 @@ class Helpers
 			$options = [
 				CURLOPT_RETURNTRANSFER => 1,
 				CURLOPT_FOLLOWLOCATION => 1,
+				CURLOPT_USERAGENT => "Mozilla/5.0 (Windows NT 6.1; rv:19.0) Gecko/20100101 Firefox/19.0"
 			];
 			if ($postData !== null) {
 				$options[CURLOPT_POST] = true;
