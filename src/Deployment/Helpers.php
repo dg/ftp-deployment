@@ -85,6 +85,7 @@ class Helpers
 			$options = [
 				CURLOPT_RETURNTRANSFER => 1,
 				CURLOPT_FOLLOWLOCATION => 1,
+				CURLOPT_USERAGENT => 'Mozilla/5.0 FTP-deployment',
 			];
 			if ($postData !== null) {
 				$options[CURLOPT_POST] = true;
