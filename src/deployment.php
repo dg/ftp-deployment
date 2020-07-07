@@ -12,6 +12,7 @@ if (PHP_VERSION_ID < 70100) {
 require __DIR__ . '/Deployment/Server.php';
 require __DIR__ . '/Deployment/FtpServer.php';
 require __DIR__ . '/Deployment/SshServer.php';
+require __DIR__ . '/Deployment/PhpsecServer.php';
 require __DIR__ . '/Deployment/FileServer.php';
 require __DIR__ . '/Deployment/RetryServer.php';
 require __DIR__ . '/Deployment/Helpers.php';
