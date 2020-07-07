@@ -54,21 +54,29 @@ class PhpsecServer implements Server
 
     function readFile(string $remote, string $local): void
     {
-        $this->sftp->get($remote, $local);
+        if (false === $this->sftp->get($remote, $local)) {
+            throw new ServerException("Unable to read file");
+        };
     }
 
     function writeFile(string $local, string $remote, callable $progress = null): void
     {
-        $this->sftp->put($remote, $local, SFTP::SOURCE_LOCAL_FILE, -1, -1, $progress);
+        if (false === $this->sftp->put($remote, $local, SFTP::SOURCE_LOCAL_FILE, -1, -1, $progress)) {
+            throw new ServerException("Unable to write file");
+        }
         if ($this->filePermissions) {
-            $this->sftp->chmod($this->filePermissions, $remote);
+            if (false === $this->sftp->chmod($this->filePermissions, $remote)) {
+                throw new ServerException("Unable to chmod after file creation");
+            }
         }
     }
 
     function removeFile(string $file): void
     {
         if ($this->sftp->file_exists($file)) {
-            $this->sftp->delete($file);
+            if (false === $this->sftp->delete($file)) {
+                throw new ServerException("Unable to delete file");
+            }
         }
     }
 
@@ -76,33 +84,47 @@ class PhpsecServer implements Server
     {
         if ($this->sftp->file_exists($new)) {
             $perms = $this->sftp->fileperms($new);
-            $this->sftp->delete($new);
+            if (false === $this->sftp->delete($new)) {
+                throw new ServerException("Unable to delete target file during rename");
+            }
         }
-        $this->sftp->rename($old, $new);
+        if (false === $this->sftp->rename($old, $new)) {
+            throw new ServerException("Unable to rename file");
+        }
         if (!empty($perms)) {
-            $this->sftp->chmod($perms, $new);
+            if (false === $this->sftp->chmod($perms, $new)) {
+                throw new ServerException("Unable to chmod file after renaming");
+            }
         }
     }
 
     function createDir(string $dir): void
     {
         if (trim($dir, '/') !== '' && !$this->sftp->file_exists($dir)) {
-            $this->sftp->mkdir($dir);
-            $this->sftp->chmod($this->dirPermissions ?: 0777, $dir);
+            if (false === $this->sftp->mkdir($dir)) {
+                throw new ServerException("Unable to create directory");
+            }
+            if (false === $this->sftp->chmod($this->dirPermissions ?: 0777, $dir)) {
+                throw new ServerException("Unable to chmod after creating a directory");
+            }
         }
     }
 
     function removeDir(string $dir): void
     {
         if ($this->sftp->file_exists($dir)) {
-            $this->sftp->rmdir($dir);
+            if (false === $this->sftp->rmdir($dir)) {
+                throw new ServerException("Unable to remove directory");
+            }
         }
     }
 
     function purge(string $path, callable $progress = null): void
     {
         if ($this->sftp->file_exists($path)) {
-            $this->sftp->delete($path, true);
+            if (false === $this->sftp->delete($path, true)) {
+                throw new ServerException("Unable to purge directory/file");
+            }
         }
     }
 
