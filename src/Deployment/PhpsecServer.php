@@ -35,7 +35,7 @@ class PhpsecServer implements Server
     public function __construct(string $url, string $publicKey = null, string $privateKey = null, string $passPhrase = null)
     {
         $this->url = parse_url($url);
-        if (!isset($this->url['scheme'], $this->url['user']) || $this->url['scheme'] !== 'sftp') {
+        if (!isset($this->url['scheme'], $this->url['user']) || $this->url['scheme'] !== 'phpsec') {
             throw new \InvalidArgumentException('Invalid URL or missing username');
         }
         $this->publicKey = $publicKey;

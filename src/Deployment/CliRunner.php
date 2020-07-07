@@ -124,7 +124,7 @@ class CliRunner
 			$this->logger->log('Note: connection is not encrypted', 'white/red');
 		}
 
-		if ($urlParts['scheme'] === 'ssh') {
+		if ($urlParts['scheme'] === 'phpsec') {
 		    $server = new PhpsecServer(Helpers::buildUrl($urlParts), $config['publickey'] ?? null, $config['privatekey'] ?? null, $config['passphrase'] ?? null);
         } elseif ($urlParts['scheme'] === 'sftp') {
 			$server = new SshServer(Helpers::buildUrl($urlParts), $config['publickey'] ?? null, $config['privatekey'] ?? null, $config['passphrase'] ?? null);
