@@ -54,7 +54,7 @@ colors = yes
 [my site] ; Optional section (there may be more than one section).
 ; remote FTP server
 remote = ftp://user:secretpassword@ftp.example.com/directory
-; you can use ftps://, sftp:// or file:// protocols (sftp requires SSH2 extension)
+; you can use ftps://, sftp://, file:// or phpsec:// protocols (sftp requires SSH2 extension; phpsec uses phpseclib library)
 
 ; do not like to specify user & password in 'remote'? Use these options:
 user = ...
