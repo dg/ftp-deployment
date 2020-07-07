@@ -9,6 +9,9 @@ if (PHP_VERSION_ID < 70100) {
 	exit(1);
 }
 
+if (is_file(__DIR__.'/../autoload.php') === true) {
+    include_once __DIR__.'/../autoload.php';
+}
 require __DIR__ . '/Deployment/Server.php';
 require __DIR__ . '/Deployment/FtpServer.php';
 require __DIR__ . '/Deployment/SshServer.php';
