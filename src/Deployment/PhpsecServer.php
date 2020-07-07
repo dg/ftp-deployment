@@ -54,6 +54,7 @@ class PhpsecServer implements Server
 
     function readFile(string $remote, string $local): void
     {
+        $remote = $this->normalizePath($remote);
         if (false === $this->sftp->get($remote, $local)) {
             throw new ServerException("Unable to read file");
         };
@@ -61,6 +62,7 @@ class PhpsecServer implements Server
 
     function writeFile(string $local, string $remote, callable $progress = null): void
     {
+        $remote = $this->normalizePath($remote);
         if (false === $this->sftp->put($remote, $local, SFTP::SOURCE_LOCAL_FILE, -1, -1, $progress)) {
             throw new ServerException("Unable to write file");
         }
@@ -73,6 +75,7 @@ class PhpsecServer implements Server
 
     function removeFile(string $file): void
     {
+        $file = $this->normalizePath($file);
         if ($this->sftp->file_exists($file)) {
             if (false === $this->sftp->delete($file)) {
                 throw new ServerException("Unable to delete file");
@@ -82,6 +85,8 @@ class PhpsecServer implements Server
 
     function renameFile(string $old, string $new): void
     {
+        $old = $this->normalizePath($old);
+        $new = $this->normalizePath($new);
         if ($this->sftp->file_exists($new)) {
             $perms = $this->sftp->fileperms($new);
             if (false === $this->sftp->delete($new)) {
@@ -100,12 +105,12 @@ class PhpsecServer implements Server
 
     function createDir(string $dir): void
     {
-        $trimmedDir = trim($dir, '/');
-        if ($trimmedDir !== '' && !$this->sftp->file_exists($trimmedDir)) {
-            if (false === $this->sftp->mkdir($trimmedDir)) {
+        $dir = $this->normalizePath($dir);
+        if ($dir !== '' && !$this->sftp->file_exists($dir)) {
+            if (false === $this->sftp->mkdir($dir)) {
                 throw new ServerException("Unable to create directory");
             }
-            if (false === $this->sftp->chmod($this->dirPermissions ?: 0777, $trimmedDir)) {
+            if (false === $this->sftp->chmod($this->dirPermissions ?: 0777, $dir)) {
                 throw new ServerException("Unable to chmod after creating a directory");
             }
         }
@@ -113,6 +118,7 @@ class PhpsecServer implements Server
 
     function removeDir(string $dir): void
     {
+        $dir = $this->normalizePath($dir);
         if ($this->sftp->file_exists($dir)) {
             if (false === $this->sftp->rmdir($dir)) {
                 throw new ServerException("Unable to remove directory");
@@ -122,6 +128,7 @@ class PhpsecServer implements Server
 
     function purge(string $path, callable $progress = null): void
     {
+        $path = $this->normalizePath($path);
         if ($this->sftp->file_exists($path)) {
             if (false === $this->sftp->delete($path, true)) {
                 throw new ServerException("Unable to purge directory/file");
@@ -137,5 +144,10 @@ class PhpsecServer implements Server
     function execute(string $command): string
     {
         return $this->sftp->exec($command);
+    }
+
+    public function normalizePath(string $dir): string
+    {
+        return trim($dir, '/');
     }
 }
