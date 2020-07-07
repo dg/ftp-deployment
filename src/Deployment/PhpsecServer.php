@@ -13,25 +13,20 @@ class PhpsecServer implements Server
 
 	/** @var int */
 	public $dirPermissions;
-	/**
-	 * @var array
-	 */
+
+	/** @var array */
 	private $url;
-	/**
-	 * @var string|null
-	 */
+
+	/** @var string|null */
 	private $publicKey;
-	/**
-	 * @var string|null
-	 */
+
+	/** @var string|null */
 	private $privateKey;
-	/**
-	 * @var string|null
-	 */
+
+	/** @var string|null */
 	private $passPhrase;
-	/**
-	 * @var SFTP
-	 */
+
+	/** @var SFTP */
 	private $sftp;
 
 
@@ -74,7 +69,7 @@ class PhpsecServer implements Server
 		}
 		if ($this->filePermissions) {
 			if ($this->sftp->chmod($this->filePermissions, $remote) === false) {
-				throw new ServerException("Unable to chmod after file creation");
+				throw new ServerException('Unable to chmod after file creation');
 			}
 		}
 	}
