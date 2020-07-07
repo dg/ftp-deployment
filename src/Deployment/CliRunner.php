@@ -125,8 +125,8 @@ class CliRunner
 		}
 
 		if ($urlParts['scheme'] === 'phpsec') {
-		    $server = new PhpsecServer(Helpers::buildUrl($urlParts), $config['publickey'] ?? null, $config['privatekey'] ?? null, $config['passphrase'] ?? null);
-        } elseif ($urlParts['scheme'] === 'sftp') {
+			$server = new PhpsecServer(Helpers::buildUrl($urlParts), $config['publickey'] ?? null, $config['privatekey'] ?? null, $config['passphrase'] ?? null);
+		} elseif ($urlParts['scheme'] === 'sftp') {
 			$server = new SshServer(Helpers::buildUrl($urlParts), $config['publickey'] ?? null, $config['privatekey'] ?? null, $config['passphrase'] ?? null);
 		} elseif ($urlParts['scheme'] === 'file') {
 			$server = new FileServer($config['remote']);
