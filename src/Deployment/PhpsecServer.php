@@ -100,11 +100,12 @@ class PhpsecServer implements Server
 
     function createDir(string $dir): void
     {
-        if (trim($dir, '/') !== '' && !$this->sftp->file_exists($dir)) {
-            if (false === $this->sftp->mkdir($dir)) {
+        $trimmedDir = trim($dir, '/');
+        if ($trimmedDir !== '' && !$this->sftp->file_exists($trimmedDir)) {
+            if (false === $this->sftp->mkdir($trimmedDir)) {
                 throw new ServerException("Unable to create directory");
             }
-            if (false === $this->sftp->chmod($this->dirPermissions ?: 0777, $dir)) {
+            if (false === $this->sftp->chmod($this->dirPermissions ?: 0777, $trimmedDir)) {
                 throw new ServerException("Unable to chmod after creating a directory");
             }
         }
