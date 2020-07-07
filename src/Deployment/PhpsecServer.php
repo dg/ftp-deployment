@@ -34,6 +34,7 @@ class PhpsecServer implements Server
 	 */
 	private $sftp;
 
+
 	public function __construct(string $url, string $publicKey = null, string $privateKey = null, string $passPhrase = null)
 	{
 		$this->url = parse_url($url);
@@ -45,7 +46,8 @@ class PhpsecServer implements Server
 		$this->passPhrase = $passPhrase;
 	}
 
-	function connect(): void
+
+	public function connect(): void
 	{
 		$sftp = new SFTP($this->url['host'], $this->url['port'] ?? 22);
 		if (!$sftp->login(urldecode($this->url['user']), urldecode($this->url['pass']))) {
@@ -54,101 +56,111 @@ class PhpsecServer implements Server
 		$this->sftp = $sftp;
 	}
 
-	function readFile(string $remote, string $local): void
+
+	public function readFile(string $remote, string $local): void
 	{
 		$remote = $this->normalizePath($remote);
-		if (false === $this->sftp->get($remote, $local)) {
-			throw new ServerException("Unable to read file");
-		};
+		if ($this->sftp->get($remote, $local) === false) {
+			throw new ServerException('Unable to read file');
+		}
 	}
 
-	function writeFile(string $local, string $remote, callable $progress = null): void
+
+	public function writeFile(string $local, string $remote, callable $progress = null): void
 	{
 		$remote = $this->normalizePath($remote);
-		if (false === $this->sftp->put($remote, $local, SFTP::SOURCE_LOCAL_FILE, -1, -1, $progress)) {
-			throw new ServerException("Unable to write file");
+		if ($this->sftp->put($remote, $local, SFTP::SOURCE_LOCAL_FILE, -1, -1, $progress) === false) {
+			throw new ServerException('Unable to write file');
 		}
 		if ($this->filePermissions) {
-			if (false === $this->sftp->chmod($this->filePermissions, $remote)) {
+			if ($this->sftp->chmod($this->filePermissions, $remote) === false) {
 				throw new ServerException("Unable to chmod after file creation");
 			}
 		}
 	}
 
-	function removeFile(string $file): void
+
+	public function removeFile(string $file): void
 	{
 		$file = $this->normalizePath($file);
 		if ($this->sftp->file_exists($file)) {
-			if (false === $this->sftp->delete($file)) {
-				throw new ServerException("Unable to delete file");
+			if ($this->sftp->delete($file) === false) {
+				throw new ServerException('Unable to delete file');
 			}
 		}
 	}
 
-	function renameFile(string $old, string $new): void
+
+	public function renameFile(string $old, string $new): void
 	{
 		$old = $this->normalizePath($old);
 		$new = $this->normalizePath($new);
 		if ($this->sftp->file_exists($new)) {
 			$perms = $this->sftp->fileperms($new);
-			if (false === $this->sftp->delete($new)) {
-				throw new ServerException("Unable to delete target file during rename");
+			if ($this->sftp->delete($new) === false) {
+				throw new ServerException('Unable to delete target file during rename');
 			}
 		}
-		if (false === $this->sftp->rename($old, $new)) {
-			throw new ServerException("Unable to rename file");
+		if ($this->sftp->rename($old, $new) === false) {
+			throw new ServerException('Unable to rename file');
 		}
 		if (!empty($perms)) {
-			if (false === $this->sftp->chmod($perms, $new)) {
-				throw new ServerException("Unable to chmod file after renaming");
+			if ($this->sftp->chmod($perms, $new) === false) {
+				throw new ServerException('Unable to chmod file after renaming');
 			}
 		}
 	}
 
-	function createDir(string $dir): void
+
+	public function createDir(string $dir): void
 	{
 		$dir = $this->normalizePath($dir);
 		if ($dir !== '' && !$this->sftp->file_exists($dir)) {
-			if (false === $this->sftp->mkdir($dir)) {
-				throw new ServerException("Unable to create directory");
+			if ($this->sftp->mkdir($dir) === false) {
+				throw new ServerException('Unable to create directory');
 			}
-			if (false === $this->sftp->chmod($this->dirPermissions ?: 0777, $dir)) {
-				throw new ServerException("Unable to chmod after creating a directory");
+			if ($this->sftp->chmod($this->dirPermissions ?: 0777, $dir) === false) {
+				throw new ServerException('Unable to chmod after creating a directory');
 			}
 		}
 	}
 
-	function removeDir(string $dir): void
+
+	public function removeDir(string $dir): void
 	{
 		$dir = $this->normalizePath($dir);
 		if ($this->sftp->file_exists($dir)) {
-			if (false === $this->sftp->rmdir($dir)) {
-				throw new ServerException("Unable to remove directory");
+			if ($this->sftp->rmdir($dir) === false) {
+				throw new ServerException('Unable to remove directory');
 			}
 		}
 	}
 
-	function purge(string $path, callable $progress = null): void
+
+	public function purge(string $path, callable $progress = null): void
 	{
 		$path = $this->normalizePath($path);
 		if ($this->sftp->file_exists($path)) {
-			if (false === $this->sftp->delete($path, true)) {
-				throw new ServerException("Unable to purge directory/file");
+			if ($this->sftp->delete($path, true) === false) {
+				throw new ServerException('Unable to purge directory/file');
 			}
 		}
 	}
 
-	function getDir(): string
+
+	public function getDir(): string
 	{
 		return isset($this->url['path']) ? rtrim($this->url['path'], '/') : '';
 	}
 
-	function execute(string $command): string
+
+	public function execute(string $command): string
 	{
 		return $this->sftp->exec($command);
 	}
 
-	public function normalizePath(string $dir): string
+
+	private function normalizePath(string $dir): string
 	{
 		return trim($dir, '/');
 	}
