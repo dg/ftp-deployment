@@ -17,8 +17,8 @@
 		"phpseclib/phpseclib": "2.0.27"
 	},
 	"require-dev": {
-		"nette/tester": "^2.0",
-		"phpstan/phpstan": "^0.12"
+		"nette/tester": "2.3.3",
+		"phpstan/phpstan": "0.12.40"
 	},
 	"suggest": {
 		"ext-ftp": "to connect to ftp:// server",
