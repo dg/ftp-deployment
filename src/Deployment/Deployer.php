@@ -164,7 +164,9 @@ class Deployer
 			if ($toUpload) {
 				$this->logger->log("\nRenaming:");
 				$this->renamePaths($toUpload);
-				unlink($deploymentFile);
+                if (isset($deploymentFile)) {
+                    unlink($deploymentFile);
+                }
 			}
 
 			if ($toDelete) {
