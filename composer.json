@@ -14,7 +14,7 @@
 	"require": {
 		"php": ">=7.1",
 		"ext-zlib": "*",
-		"phpseclib/phpseclib": "2.0.28"
+		"phpseclib/phpseclib": "2.0.29"
 	},
 	"require-dev": {
 		"ext-curl": "*",
