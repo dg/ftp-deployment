@@ -10,7 +10,7 @@ install:
     - travis_retry composer install --no-progress --prefer-dist
 
 script:
-    - vendor/bin/tester tests -s
+    - vendor/bin/tester tests -s -c php.ini
 
 after_failure:
     # Print *.actual content

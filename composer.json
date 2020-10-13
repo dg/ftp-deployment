@@ -17,6 +17,7 @@
 		"phpseclib/phpseclib": "2.0.28"
 	},
 	"require-dev": {
+		"ext-curl": "*",
 		"nette/tester": "2.3.3",
 		"phpstan/phpstan": "0.12.40"
 	},
