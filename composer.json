@@ -19,7 +19,7 @@
 	"require-dev": {
 		"ext-curl": "*",
 		"nette/tester": "2.3.3",
-		"phpstan/phpstan": "0.12.40"
+		"phpstan/phpstan": "0.12.49"
 	},
 	"suggest": {
 		"ext-ftp": "to connect to ftp:// server",
