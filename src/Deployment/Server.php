@@ -16,7 +16,6 @@ namespace Deployment;
  */
 interface Server
 {
-
 	/**
 	 * Connects to server.
 	 * @throws ServerException

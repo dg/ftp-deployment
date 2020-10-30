@@ -177,7 +177,9 @@ class Deployer
 				$this->server->purge($this->remoteDir . '/' . $path, function ($path) {
 					static $counter;
 					$path = (string) substr($path, strlen($this->remoteDir));
-					$path = preg_match('#/(.{1,60})$#', $path, $m) ? $m[1] : substr(basename($path), 0, 60);
+					$path = preg_match('#/(.{1,60})$#', $path, $m)
+						? $m[1]
+						: substr(basename($path), 0, 60);
 					$this->logger->progress(str_pad($path . ' ' . str_repeat('.', $counter++ % 30 + 60 - strlen($path)), 90));
 				});
 				$this->logger->progress(str_repeat(' ', 91));
@@ -257,7 +259,9 @@ class Deployer
 		foreach ($paths as $num => $path) {
 			$remotePath = $this->remoteDir . $path;
 			$isDir = substr($remotePath, -1) === '/';
-			$remoteDir = $isDir ? substr($remotePath, 0, -1) : str_replace('\\', '/', dirname($remotePath));
+			$remoteDir = $isDir
+				? substr($remotePath, 0, -1)
+				: str_replace('\\', '/', dirname($remotePath));
 			if ($remoteDir !== $prevDir) {
 				$prevDir = $remoteDir;
 				$this->server->createDir($remoteDir);
@@ -379,7 +383,9 @@ class Deployer
 
 		foreach ($this->filters[$ext] as $info) {
 			is_callable($info['filter'], false, $callable_name);
-			$cacheFile = $info['cached'] ? $this->tempDir . '/' . md5($content . $callable_name) : null;
+			$cacheFile = $info['cached']
+				? $this->tempDir . '/' . md5($content . $callable_name)
+				: null;
 
 			if ($cacheFile && is_file($cacheFile)) {
 				$content = file_get_contents($tempFile = $cacheFile);
@@ -453,8 +459,13 @@ class Deployer
 	}
 
 
-	private function writeProgress(int $count, int $total, string $path, float $percent = null, string $color = null): void
-	{
+	private function writeProgress(
+		int $count,
+		int $total,
+		string $path,
+		float $percent = null,
+		string $color = null
+	): void {
 		$len = strlen((string) $total);
 		$s = sprintf("(% {$len}d of %-{$len}d) %s", $count, $total, $path);
 		if ($percent === null) {

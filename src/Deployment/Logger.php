@@ -59,7 +59,9 @@ class Logger
 		if ($shorten) {
 			$lines = explode("\n", $s);
 			$lines = array_filter($lines);
-			$lines = $shorten > 0 ? array_slice($lines, 0, $shorten) : array_slice($lines, $shorten);
+			$lines = $shorten > 0
+				? array_slice($lines, 0, $shorten)
+				: array_slice($lines, $shorten);
 			$s = implode("\n", $lines);
 		}
 		$s .= "        \n";

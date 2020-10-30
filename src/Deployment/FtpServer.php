@@ -46,7 +46,10 @@ class FtpServer implements Server
 			throw new \Exception('PHP extension FTP is not loaded.');
 		}
 		$this->url = $url = parse_url($url);
-		if (!isset($url['scheme'], $url['user'], $url['pass']) || ($url['scheme'] !== 'ftp' && $url['scheme'] !== 'ftps')) {
+		if (
+			!isset($url['scheme'], $url['user'], $url['pass'])
+			|| ($url['scheme'] !== 'ftp' && $url['scheme'] !== 'ftps')
+		) {
 			throw new \InvalidArgumentException('Invalid URL or missing username or password');
 		} elseif ($url['scheme'] === 'ftps' && !function_exists('ftp_ssl_connect')) {
 			throw new \Exception('PHP extension OpenSSL is not built statically in PHP.');

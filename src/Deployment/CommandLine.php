@@ -49,7 +49,7 @@ class CommandLine
 			}
 
 			$name = end($m[1]);
-			$opts = isset($this->options[$name]) ? $this->options[$name] : [];
+			$opts = $this->options[$name] ?? [];
 			$this->options[$name] = $opts + [
 				self::ARGUMENT => (bool) end($m[2]),
 				self::OPTIONAL => isset($line[2]) || (substr(end($m[2]), 0, 1) === '[') || isset($opts[self::VALUE]),

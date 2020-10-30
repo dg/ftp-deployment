@@ -47,8 +47,12 @@ class SshServer implements Server
 	 * @param string $url sftp://...
 	 * @throws \Exception
 	 */
-	public function __construct(string $url, string $publicKey = null, string $privateKey = null, string $passPhrase = null)
-	{
+	public function __construct(
+		string $url,
+		string $publicKey = null,
+		string $privateKey = null,
+		string $passPhrase = null
+	) {
 		if (!extension_loaded('ssh2')) {
 			throw new \Exception('PHP extension SSH2 is not loaded.');
 		}

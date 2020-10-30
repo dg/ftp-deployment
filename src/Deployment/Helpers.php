@@ -16,7 +16,6 @@ namespace Deployment;
  */
 class Helpers
 {
-
 	/**
 	 * Computes hash.
 	 */
@@ -108,7 +107,7 @@ class Helpers
 				],
 			]));
 			$error = $output === false
-				? preg_replace("#^file_get_contents\(.*?\): #", '', error_get_last()['message'])
+				? preg_replace('#^file_get_contents\\(.*?\\): #', '', error_get_last()['message'])
 				: null;
 		}
 		return (string) $output;
