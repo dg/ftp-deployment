@@ -115,7 +115,7 @@ class RetryServer implements Server
 			if ($counter < self::RETRIES) {
 				if ($e->getMessage() !== $lastError) {
 					$lastError = $e->getMessage();
-					$this->logger->log("Error: $lastError", 'red');
+					$this->logger->log("Error: $e", 'red');
 				}
 
 				if ($method !== 'connect') {

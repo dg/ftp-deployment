@@ -64,6 +64,9 @@ class FtpServer implements Server
 	 */
 	public function connect(): void
 	{
+		if ($this->connection) { // reconnect?
+			@ftp_close($this->connection); // @ may fail
+		}
 		$this->connection = $this->url['scheme'] === 'ftp'
 			? Safe::ftp_connect($this->url['host'], $this->url['port'] ?? 21)
 			: Safe::ftp_ssl_connect($this->url['host'], $this->url['port'] ?? 21);
