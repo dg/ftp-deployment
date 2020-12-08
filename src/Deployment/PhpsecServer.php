@@ -53,7 +53,7 @@ class PhpsecServer implements Server
 			$this->sftp->disconnect(); // @ may fail
 		}
 		$sftp = new SFTP($this->url['host'], $this->url['port'] ?? 22);
-		if (!$this->privateKey !== null) {
+		if ($this->privateKey) {
 			$rsa = new RSA();
 			if ($this->passPhrase) {
 				$rsa->setPassword($this->passPhrase);
