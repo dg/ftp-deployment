@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Deployment;
 
-use phpseclib\Crypt\RSA;
-use phpseclib\Net\SFTP;
+use phpseclib3\Crypt\PublicKeyLoader;
+use phpseclib3\Net\SFTP;
 
 class PhpsecServer implements Server
 {
@@ -54,19 +54,17 @@ class PhpsecServer implements Server
 		}
 		$sftp = new SFTP($this->url['host'], $this->url['port'] ?? 22);
 		if ($this->privateKey) {
-			$rsa = new RSA;
 			if ($this->passPhrase) {
-				$rsa->setPassword($this->passPhrase);
-			}
-			if (!$rsa->loadKey(file_get_contents($this->privateKey))) {
-				throw new ServerException('Loading private key failed');
+				$rsa = PublicKeyLoader::load(file_get_contents($this->privateKey));
+			} else {
+				$rsa = PublicKeyLoader::load(file_get_contents($this->privateKey), $this->passPhrase);
 			}
 			if (!$sftp->login(urldecode($this->url['user']), $rsa)) {
-				throw new ServerException('Login Failed');
+				exit('Login Failed');
 			}
 		} else {
 			if (!$sftp->login(urldecode($this->url['user']), urldecode($this->url['pass']))) {
-				throw new ServerException('Login Failed');
+				exit('Login Failed');
 			}
 		}
 		$this->sftp = $sftp;
