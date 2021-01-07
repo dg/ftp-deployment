@@ -416,7 +416,7 @@ class Deployer
 	private function runJobs(array $jobs): void
 	{
 		foreach ($jobs as $job) {
-			if (is_string($job) && preg_match('#^(https?|local|remote|upload):\s*(.+)#', $job, $m)) {
+			if (is_string($job) && preg_match('#^(https?|local|remote|upload|download):\s*(.+)#', $job, $m)) {
 				$this->logger->log($job);
 				$out = $err = null;
 				if ($m[1] === 'local') {
@@ -426,6 +426,15 @@ class Deployer
 
 				} elseif ($m[1] === 'remote') {
 					$out = $this->server->execute($m[2]);
+
+				} elseif ($m[1] === 'download') {
+					[$remotePath, $localFile] = explode(' ', $m[2]);
+					$localFile = $this->localDir . '/' . $localFile;
+					if (is_file($localFile)) {
+						throw new JobException("File $localFile already exist.");
+					}
+					$remotePath = $this->remoteDir . '/' . $remotePath;
+					$this->server->readFile($remotePath, $localFile);
 
 				} elseif ($m[1] === 'upload') {
 					[$localFile, $remotePath] = explode(' ', $m[2]);
