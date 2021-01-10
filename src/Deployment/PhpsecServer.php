@@ -50,7 +50,7 @@ class PhpsecServer implements Server
 	public function connect(): void
 	{
 		if ($this->sftp) { // reconnect?
-			$this->sftp->disconnect(); // @ may fail
+			@$this->sftp->disconnect(); // @ may fail
 		}
 		$sftp = new SFTP($this->url['host'], $this->url['port'] ?? 22);
 		if ($this->privateKey) {
@@ -60,11 +60,11 @@ class PhpsecServer implements Server
 				$rsa = PublicKeyLoader::load(file_get_contents($this->privateKey), $this->passPhrase);
 			}
 			if (!$sftp->login(urldecode($this->url['user']), $rsa)) {
-				exit('Login Failed');
+				throw new ServerException('Login Failed with RSA key');
 			}
 		} else {
 			if (!$sftp->login(urldecode($this->url['user']), urldecode($this->url['pass']))) {
-				exit('Login Failed');
+				throw new ServerException('Login Failed with password');
 			}
 		}
 		$this->sftp = $sftp;
