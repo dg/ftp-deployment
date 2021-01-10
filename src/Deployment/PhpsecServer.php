@@ -55,12 +55,12 @@ class PhpsecServer implements Server
 		$sftp = new SFTP($this->url['host'], $this->url['port'] ?? 22);
 		if ($this->privateKey) {
 			if ($this->passPhrase) {
-				$rsa = PublicKeyLoader::load(file_get_contents($this->privateKey), $this->passPhrase);
+				$key = PublicKeyLoader::load(file_get_contents($this->privateKey), $this->passPhrase);
 			} else {
-				$rsa = PublicKeyLoader::load(file_get_contents($this->privateKey));
+				$key = PublicKeyLoader::load(file_get_contents($this->privateKey));
 			}
-			if (!$sftp->login(urldecode($this->url['user']), $rsa)) {
-				throw new ServerException('Login Failed with RSA key');
+			if (!$sftp->login(urldecode($this->url['user']), $key)) {
+				throw new ServerException('Login Failed with private key');
 			}
 		} else {
 			if (!$sftp->login(urldecode($this->url['user']), urldecode($this->url['pass']))) {
