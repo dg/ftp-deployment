@@ -42,6 +42,20 @@ class JobRunner
 
 	public function remote(string $command): array
 	{
+		if (preg_match('#^(mkdir|rmdir|unlink|mv)\s+(\S+)(?:\s+(\S+))?()$#', $command, $m)) {
+			[, $cmd, $a, $b] = $m;
+			if ($cmd === 'mkdir') {
+				$this->server->createDir($a);
+			} elseif ($cmd === 'rmdir') {
+				$this->server->removeDir($a);
+			} elseif ($cmd === 'unlink') {
+				$this->server->removeFile($a);
+			} elseif ($cmd === 'mv') {
+				$this->server->renameFile($a, $b);
+			}
+			return [null, null];
+		}
+
 		$out = $this->server->execute($command);
 		return [$out, null];
 	}
