@@ -186,7 +186,7 @@ This tool will combine scripts together and minify them with the Closure Compile
 Installing FTP Deployment
 -------------------------
 
-FTP Deployment 3.x requires PHP 7.1 or later (version 2.x requires PHP 5.4 or newer). It also requires openssl extensions for ftps:// and SSH2 extension for sftp:// connections.
+FTP Deployment 3.x requires PHP 7.4 or later (version 2.x requires PHP 5.4 or newer). It also requires openssl extensions for ftps:// and SSH2 extension for sftp:// connections.
 
 The easiest way to obtain FTP Deployment is to download [a single PHAR file](https://github.com/dg/ftp-deployment/releases).
 
@@ -206,14 +206,9 @@ composer create-project dg/ftp-deployment
 ```
 
 Are you looking for php_ssh2.dll?
-- [php_ssh2.dll for PHP 7.1 x86](https://files.nette.org/misc/7.1-x86/php_ssh2.dll)
-- [php_ssh2.dll for PHP 7.1 x64](https://files.nette.org/misc/7.1-x64/php_ssh2.dll)
-- [php_ssh2.dll for PHP 7.2 x86](https://files.nette.org/misc/7.2-x86/php_ssh2.dll) (seems buggy)
-- [php_ssh2.dll for PHP 7.2 x64](https://files.nette.org/misc/7.2-x64/php_ssh2.dll)
-- [php_ssh2.dll for PHP 7.3 x86](https://files.nette.org/misc/7.3-x86/php_ssh2.dll)
-- [php_ssh2.dll for PHP 7.3 x64](https://files.nette.org/misc/7.3-x64/php_ssh2.dll)
 - [php_ssh2.dll for PHP 7.4 x86](https://files.nette.org/misc/7.4-x86/php_ssh2.dll)
 - [php_ssh2.dll for PHP 7.4 x64](https://files.nette.org/misc/7.4-x64/php_ssh2.dll)
+- [php_ssh2.dll for PHP 8.0 x64](https://files.nette.org/misc/8.0-x64/php_ssh2.dll)
 
 Need SSH authenticate using a public key?
 
