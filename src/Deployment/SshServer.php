@@ -18,11 +18,9 @@ namespace Deployment;
  */
 class SshServer implements Server
 {
-	/** @var int */
-	public $filePermissions;
+	public ?int $filePermissions = null;
 
-	/** @var int */
-	public $dirPermissions;
+	public ?int $dirPermissions = null;
 
 	/** @var resource */
 	private $connection;
@@ -30,17 +28,14 @@ class SshServer implements Server
 	/** @var resource */
 	private $sftp;
 
-	/** @var array  see parse_url() */
-	private $url;
+	/** see parse_url() */
+	private array $url;
 
-	/** @var string|null */
-	private $publicKey;
+	private ?string $publicKey;
 
-	/** @var string|null */
-	private $privateKey;
+	private ?string $privateKey;
 
-	/** @var string */
-	private $passPhrase;
+	private ?string $passPhrase;
 
 
 	/**

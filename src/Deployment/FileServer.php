@@ -16,8 +16,7 @@ namespace Deployment;
  */
 class FileServer implements Server
 {
-	/** @var string */
-	private $root;
+	private string $root;
 
 
 	/**

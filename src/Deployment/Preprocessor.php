@@ -18,17 +18,16 @@ namespace Deployment;
  */
 class Preprocessor
 {
-	/** @var string|null  path to UglifyJS binary */
-	public $uglifyJsBinary = 'uglifyjs';
+	/** path to UglifyJS binary */
+	public ?string $uglifyJsBinary = 'uglifyjs';
 
-	/** @var string|null  path to clean-css binary */
-	public $cleanCssBinary = 'cleancss';
+	/** path to clean-css binary */
+	public ?string $cleanCssBinary = 'cleancss';
 
-	/** @var bool  compress only file when contains /**! */
-	public $requireCompressMark = true;
+	/** compress only file when contains /**! */
+	public bool $requireCompressMark = true;
 
-	/** @var Logger */
-	private $logger;
+	private Logger $logger;
 
 
 	public function __construct(Logger $logger)
