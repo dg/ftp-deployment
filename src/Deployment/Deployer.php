@@ -125,7 +125,7 @@ class Deployer
 		if (!$toUpload && !$toDelete) {
 			$this->logger->log('Already synchronized.', 'lime');
 
-			$runAfterLocal = array_filter($this->runAfter, function ($job) { return is_string($job) && preg_match('#^local:#', $job); });
+			$runAfterLocal = array_filter($this->runAfter, fn($job) => is_string($job) && preg_match('#^local:#', $job));
 			if ($runAfterLocal) {
 				$this->logger->log("\nLocal-after-jobs:");
 				$this->runJobs($runAfterLocal);
@@ -283,7 +283,7 @@ class Deployer
 				$remotePath . self::TEMPORARY_SUFFIX,
 				function ($percent) use ($num, $paths, $path) {
 					$this->writeProgress($num + 1, count($paths), $path, $percent, 'green');
-				}
+				},
 			);
 			$this->writeProgress($num + 1, count($paths), $path, null, 'green');
 		}
@@ -296,7 +296,7 @@ class Deployer
 	 */
 	private function renamePaths(array $paths): void
 	{
-		$files = array_values(array_filter($paths, function ($path) { return substr($path, -1) !== '/'; }));
+		$files = array_values(array_filter($paths, fn($path) => substr($path, -1) !== '/'));
 		foreach ($files as $num => $file) {
 			$this->writeProgress($num + 1, count($files), "Renaming $file", null, 'olive');
 			$remoteFile = $this->remoteDir . $file;

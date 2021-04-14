@@ -219,23 +219,25 @@ class CliRunner
 
 	private function loadConfig(): ?array
 	{
-		$cmd = new CommandLine(<<<'XX'
+		$cmd = new CommandLine(
+			<<<'XX'
 
-FTP deployment v3.5
--------------------
-Usage:
-	deployment <config_file> [-t | --test]
+				FTP deployment v3.5
+				-------------------
+				Usage:
+					deployment <config_file> [-t | --test]
 
-Options:
-	-t | --test       Run in test-mode.
-	--section <name>  Only deploys the named section.
-	--generate        Only generates deployment file.
-	--no-progress     Hide the progress indicators.
+				Options:
+					-t | --test       Run in test-mode.
+					--section <name>  Only deploys the named section.
+					--generate        Only generates deployment file.
+					--no-progress     Hide the progress indicators.
 
-XX
-		, [
-			'config' => [CommandLine::REALPATH => true],
-		]);
+				XX,
+			[
+				'config' => [CommandLine::REALPATH => true],
+			],
+		);
 
 		if ($cmd->isEmpty()) {
 			$cmd->help();
