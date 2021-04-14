@@ -9,26 +9,19 @@ use phpseclib3\Net\SFTP;
 
 class PhpsecServer implements Server
 {
-	/** @var int */
-	public $filePermissions;
+	public ?int $filePermissions = null;
 
-	/** @var int */
-	public $dirPermissions;
+	public ?int $dirPermissions = null;
 
-	/** @var array */
-	private $url;
+	private array $url;
 
-	/** @var string|null */
-	private $publicKey;
+	private ?string $publicKey;
 
-	/** @var string|null */
-	private $privateKey;
+	private ?string $privateKey;
 
-	/** @var string|null */
-	private $passPhrase;
+	private ?string $passPhrase;
 
-	/** @var SFTP */
-	private $sftp;
+	private ?SFTP $sftp = null;
 
 
 	public function __construct(

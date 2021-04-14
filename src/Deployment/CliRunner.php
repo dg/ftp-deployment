@@ -16,8 +16,7 @@ namespace Deployment;
  */
 class CliRunner
 {
-	/** @var array */
-	public $defaults = [
+	public array $defaults = [
 		'local' => '',
 		'passivemode' => true,
 		'include' => '',
@@ -31,19 +30,17 @@ class CliRunner
 	];
 
 	/** @var string[] */
-	public $ignoreMasks = ['*.bak', '.svn', '.git*', 'Thumbs.db', '.DS_Store', '.idea'];
+	public array $ignoreMasks = ['*.bak', '.svn', '.git*', 'Thumbs.db', '.DS_Store', '.idea'];
 
-	/** @var Logger */
-	private $logger;
+	private Logger $logger;
 
-	/** @var string */
-	private $configFile;
+	private string $configFile;
 
-	/** @var string|null  test|generate|null */
-	private $mode;
+	/** test|generate|null */
+	private ?string $mode;
 
 	/** @var array[] */
-	private $batches = [];
+	private array $batches = [];
 
 	/** @var resource */
 	private $lock;
@@ -171,7 +168,7 @@ class CliRunner
 		$deployment->deploymentFile = empty($config['deploymentfile'])
 			? $deployment->deploymentFile
 			: $config['deploymentfile'];
-		$deployment->allowDelete = $config['allowdelete'];
+		$deployment->allowDelete = (bool) $config['allowdelete'];
 		$deployment->toPurge = self::toArray($config['purge'], true);
 		$deployment->runBefore = self::toArray($config['before'], true);
 		$deployment->runAfterUpload = self::toArray($config['afterupload'], true);

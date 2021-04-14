@@ -13,14 +13,11 @@ namespace Deployment;
 
 class JobRunner
 {
-	/** @var Server */
-	private $server;
+	private Server $server;
 
-	/** @var string */
-	private $localDir;
+	private string $localDir;
 
-	/** @var string */
-	private $remoteDir;
+	private string $remoteDir;
 
 
 	public function __construct(Server $server, string $localDir, string $remoteDir)

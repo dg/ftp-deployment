@@ -20,20 +20,17 @@ class FtpServer implements Server
 
 	private const BLOCK_SIZE = 400000;
 
-	/** @var int */
-	public $filePermissions;
+	public ?int $filePermissions = null;
 
-	/** @var int */
-	public $dirPermissions;
+	public ?int $dirPermissions = null;
 
 	/** @var resource */
 	private $connection;
 
-	/** @var array  see parse_url() */
-	private $url;
+	/** see parse_url() */
+	private array $url;
 
-	/** @var bool */
-	private $passiveMode = true;
+	private bool $passiveMode = true;
 
 
 	/**

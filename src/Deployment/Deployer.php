@@ -18,53 +18,44 @@ class Deployer
 {
 	private const TEMPORARY_SUFFIX = '.deploytmp';
 
-	/** @var string */
-	public $deploymentFile = '.htdeployment';
+	public string $deploymentFile = '.htdeployment';
 
 	/** @var string[] */
-	public $includeMasks = [];
+	public array $includeMasks = [];
 
 	/** @var string[] */
-	public $ignoreMasks = [];
+	public array $ignoreMasks = [];
 
-	/** @var bool */
-	public $testMode = false;
+	public bool $testMode = false;
 
-	/** @var bool */
-	public $allowDelete = false;
+	public bool $allowDelete = false;
 
 	/** @var string[] relative paths */
-	public $toPurge = [];
+	public array $toPurge = [];
 
 	/** @var array of string|callable */
-	public $runBefore = [];
+	public array $runBefore = [];
 
 	/** @var array of string|callable */
-	public $runAfterUpload = [];
+	public array $runAfterUpload = [];
 
 	/** @var array of string|callable */
-	public $runAfter = [];
+	public array $runAfter = [];
 
-	/** @var string */
-	public $tempDir = '';
+	public string $tempDir = '';
 
 	/** @var string[] */
-	public $preprocessMasks = [];
+	public array $preprocessMasks = [];
 
-	/** @var string */
-	private $localDir;
+	private string $localDir;
 
-	/** @var string */
-	private $remoteDir;
+	private string $remoteDir;
 
-	/** @var Logger */
-	private $logger;
+	private Logger $logger;
 
-	/** @var array */
-	private $filters = [];
+	private array $filters = [];
 
-	/** @var Server */
-	private $server;
+	private Server $server;
 
 
 	public function __construct(Server $server, string $localDir, Logger $logger)

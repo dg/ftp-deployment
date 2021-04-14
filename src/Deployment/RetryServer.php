@@ -19,11 +19,9 @@ class RetryServer implements Server
 	private const RETRIES = 20;
 	private const DELAY = 2;
 
-	/** @var Server */
-	private $server;
+	private Server $server;
 
-	/** @var Logger */
-	private $logger;
+	private Logger $logger;
 
 
 	public function __construct(Server $server, Logger $logger)

@@ -16,17 +16,14 @@ namespace Deployment;
  */
 class Logger
 {
-	/** @var bool */
-	public $useColors;
+	public bool $useColors;
 
-	/** @var bool */
-	public $showProgress = true;
+	public bool $showProgress = true;
 
 	/** @var resource */
 	private $file;
 
-	/** @var array */
-	private $colors = [
+	private array $colors = [
 		'black' => '0;30',
 		'gray' => '1;30',
 		'silver' => '0;37',

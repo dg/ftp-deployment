@@ -24,16 +24,15 @@ class CommandLine
 		VALUE = 'default';
 
 	/** @var array[] */
-	private $options = [];
+	private array $options = [];
 
 	/** @var string[] */
-	private $aliases = [];
+	private array $aliases = [];
 
 	/** @var string[] */
-	private $positional = [];
+	private array $positional = [];
 
-	/** @var string */
-	private $help;
+	private string $help;
 
 
 	public function __construct(string $help, array $defaults = [])
