@@ -122,7 +122,7 @@ class FileServer implements Server
 
 		$iterator = new \RecursiveIteratorIterator(
 			new \RecursiveDirectoryIterator($dir, \FilesystemIterator::SKIP_DOTS),
-			\RecursiveIteratorIterator::CHILD_FIRST
+			\RecursiveIteratorIterator::CHILD_FIRST,
 		);
 		foreach ($iterator as $name => $file) {
 			$file->isDir() ? Safe::rmdir($name) : Safe::unlink($name);

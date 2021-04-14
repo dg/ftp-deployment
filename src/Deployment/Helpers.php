@@ -65,7 +65,7 @@ class Helpers
 			if (fnmatch(
 				implode('/', $neg && $isDir ? array_slice($parts, 0, count($path)) : $parts),
 				implode('/', array_slice($path, 0, count($parts))),
-				FNM_CASEFOLD | FNM_PATHNAME
+				FNM_CASEFOLD | FNM_PATHNAME,
 			)) {
 				$res = !$neg;
 			}

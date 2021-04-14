@@ -163,7 +163,7 @@ class Preprocessor
 			$pipes,
 			null,
 			null,
-			['bypass_shell' => $bypassShell]
+			['bypass_shell' => $bypassShell],
 		);
 
 		fwrite($pipes[0], $input);
