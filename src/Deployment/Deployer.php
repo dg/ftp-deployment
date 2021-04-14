@@ -415,29 +415,16 @@ class Deployer
 	 */
 	private function runJobs(array $jobs): void
 	{
+		$runner = new JobRunner($this->server, $this->localDir, $this->remoteDir);
+
 		foreach ($jobs as $job) {
-			if (is_string($job) && preg_match('#^(https?|local|remote|upload):\s*(.+)#', $job, $m)) {
+			if (is_string($job) && preg_match('#^(https?|local|remote|upload|download):\s*(.+)#', $job, $m)) {
 				$this->logger->log($job);
-				$out = $err = null;
-				if ($m[1] === 'local') {
-					@exec($m[2], $out, $code);
-					$out = trim(implode("\n", $out));
-					$err = $code !== 0 ? "exit code $code" : null;
-
-				} elseif ($m[1] === 'remote') {
-					$out = $this->server->execute($m[2]);
-
-				} elseif ($m[1] === 'upload') {
-					[$localFile, $remotePath] = explode(' ', $m[2]);
-					$localFile = $this->localDir . '/' . $localFile;
-					if (!is_file($localFile)) {
-						throw new JobException("File $localFile doesn't exist.");
-					}
-					$remotePath = $this->remoteDir . '/' . $remotePath;
-					$this->server->createDir(str_replace('\\', '/', dirname($remotePath)));
-					$this->server->writeFile($localFile, $remotePath);
+				$method = $m[1];
+				if ($method === 'http' || $method === 'https') {
+					[$out, $err] = $runner->http($m[0]);
 				} else {
-					$out = Helpers::fetchUrl($job, $err);
+					[$out, $err] = $runner->$method($m[2]);
 				}
 
 				if ($out != null) { // intentionally ==

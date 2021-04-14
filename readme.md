@@ -1,8 +1,8 @@
-FTP Deployment: smart upload [![Buy me a coffee](https://files.nette.org/images/coffee1s.png)](https://nette.org/make-donation?to=deployment)
-====================================
+FTP Deployment: smart upload
+============================
 
 [![Downloads this Month](https://img.shields.io/packagist/dm/dg/ftp-deployment.svg)](https://packagist.org/packages/dg/ftp-deployment)
-[![Build Status](https://travis-ci.org/dg/ftp-deployment.svg?branch=master)](https://travis-ci.org/dg/ftp-deployment)
+[![Tests](https://github.com/dg/ftp-deployment/workflows/Tests/badge.svg?branch=master)](https://github.com/dg/ftp-deployment/actions)
 [![Latest Stable Version](https://poser.pugx.org/dg/ftp-deployment/v/stable)](https://github.com/dg/ftp-deployment/releases)
 [![License](https://img.shields.io/badge/license-New%20BSD-blue.svg)](https://github.com/dg/ftp-deployment/blob/master/license.md)
 
@@ -17,12 +17,14 @@ Once the process is automated, it costs you a fraction of time and minimizes the
 but many people are still using FTP. This tool is designed for them.
 
 
-Support Project
----------------
+Support Me
+----------
 
 Do you like FTP Deployment? Are you looking forward to the new features?
 
-[![Donate](https://files.nette.org/icons/donation-1.svg?)](https://nette.org/make-donation?to=deployment)
+[![Buy me a coffee](https://files.nette.org/icons/donation-3.svg)](https://github.com/sponsors/dg)
+
+Thank you!
 
 
 How it Works

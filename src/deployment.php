@@ -24,6 +24,7 @@ require __DIR__ . '/Deployment/Preprocessor.php';
 require __DIR__ . '/Deployment/CommandLine.php';
 require __DIR__ . '/Deployment/CliRunner.php';
 require __DIR__ . '/Deployment/ServerException.php';
+require __DIR__ . '/Deployment/JobRunner.php';
 require __DIR__ . '/Deployment/JobException.php';
 
 
