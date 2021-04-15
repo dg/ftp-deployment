@@ -42,9 +42,10 @@ class JobRunner
 
 	public function remote(string $command): array
 	{
-		if (preg_match('#^(mkdir|rmdir|unlink|mv)\s+(\S+)(?:\s+(\S+))?()$#', $command, $m)) {
+		if (preg_match('#^(mkdir|rmdir|unlink|mv|chmod)\s+(\S+)(?:\s+(\S+))?()$#', $command, $m)) {
 			[, $cmd, $a, $b] = $m;
 			$a = '/' . ltrim($a, '/');
+			$b = '/' . ltrim($b, '/');
 			if ($cmd === 'mkdir') {
 				$this->server->createDir($a);
 			} elseif ($cmd === 'rmdir') {
@@ -52,8 +53,9 @@ class JobRunner
 			} elseif ($cmd === 'unlink') {
 				$this->server->removeFile($a);
 			} elseif ($cmd === 'mv') {
-				$b = '/' . ltrim($b, '/');
 				$this->server->renameFile($a, $b);
+			} elseif ($cmd === 'chmod') {
+				$this->server->chmod($b, octdec($m[2]));
 			}
 			return [null, null];
 		}
