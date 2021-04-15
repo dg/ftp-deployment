@@ -53,6 +53,7 @@ namespace Deployment;
  * @method static string stream_get_contents(resource $handle, int $maxlength = -1, int $offset = -1)
  * @method static void stream_set_blocking(resource $stream, bool $mode)
  * @method static void unlink(string $filename)
+ * @method static void chmod(string $filename, int $permissions)
  */
 class Safe
 {

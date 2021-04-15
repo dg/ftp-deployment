@@ -158,6 +158,14 @@ class PhpsecServer implements Server
 	}
 
 
+	public function chmod(string $path, int $permissions): void
+	{
+		if ($this->sftp->chmod($permissions, $path) === false) {
+			throw new ServerException('Unable to chmod file');
+		}
+	}
+
+
 	public function getDir(): string
 	{
 		return isset($this->url['path']) ? rtrim($this->url['path'], '/') : '';

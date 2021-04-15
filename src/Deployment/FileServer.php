@@ -134,6 +134,16 @@ class FileServer implements Server
 
 
 	/**
+	 * Changes file permissions.
+	 * @throws ServerException
+	 */
+	public function chmod(string $path, int $permissions): void
+	{
+		Safe::chmod($path, $permissions);
+	}
+
+
+	/**
 	 * Returns current directory.
 	 */
 	public function getDir(): string

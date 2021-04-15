@@ -81,6 +81,12 @@ class RetryServer implements Server
 	}
 
 
+	public function chmod(string $path, int $permissions): void
+	{
+		$this->retry(__FUNCTION__, func_get_args());
+	}
+
+
 	public function getDir(): string
 	{
 		return $this->retry(__FUNCTION__, func_get_args());

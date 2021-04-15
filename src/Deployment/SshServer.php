@@ -215,6 +215,16 @@ class SshServer implements Server
 
 
 	/**
+	 * Changes file permissions.
+	 * @throws ServerException
+	 */
+	public function chmod(string $path, int $permissions): void
+	{
+		Safe::ssh2_sftp_chmod($this->sftp, $path, $permissions);
+	}
+
+
+	/**
 	 * Returns current directory.
 	 */
 	public function getDir(): string
