@@ -65,6 +65,12 @@ interface Server
 	function purge(string $path, callable $progress = null): void;
 
 	/**
+	 * Changes file permissions. Path is absolute.
+	 * @throws ServerException
+	 */
+	function chmod(string $path, int $permissions): void;
+
+	/**
 	 * Returns current directory.
 	 */
 	function getDir(): string;

@@ -271,7 +271,7 @@ class FtpServer implements Server
 	/**
 	 * @throws ServerException
 	 */
-	private function chmod(string $file, int $perms): void
+	public function chmod(string $file, int $perms): void
 	{
 		try {
 			Safe::ftp_chmod($this->connection, $perms, $file);
