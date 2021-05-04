@@ -214,7 +214,7 @@ class Deployer
 			return null;
 		}
 		$s = file_get_contents($tempFile);
-		$content = @gzdecode($s) ?: gzinflate($s);
+		$content = @gzinflate($s) ?: gzdecode($s);
 		$res = [];
 		foreach (explode("\n", $content) as $item) {
 			if (count($item = explode('=', $item, 2)) === 2) {
@@ -236,7 +236,7 @@ class Deployer
 		}
 		$file = $this->localDir . '/' . $this->deploymentFile;
 		@mkdir(dirname($file), 0777, true); // @ dir may exists
-		file_put_contents($file, gzdeflate($s, 9));
+		file_put_contents($file, gzencode($s, 9));
 		return $file;
 	}
 
