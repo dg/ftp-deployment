@@ -111,6 +111,7 @@ class FtpServer implements Server
 				: Safe::ftp_nb_continue($this->connection);
 
 			$blocks++;
+			usleep(10000);
 		} while ($ret === FTP_MOREDATA);
 
 		if ($this->filePermissions) {
