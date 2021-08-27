@@ -115,7 +115,7 @@ class CliRunner
 		if (
 			empty($config['remote'])
 			|| !($urlParts = parse_url($config['remote']))
-			|| !isset($urlParts['scheme'], $urlParts['host'])
+			|| !isset($urlParts['scheme'])
 		) {
 			throw new \Exception("Missing or invalid 'remote' URL in config.");
 		}

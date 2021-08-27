@@ -57,7 +57,7 @@ class SshServer implements Server
 			throw new \Exception('PHP extension SSH2 is not loaded.');
 		}
 		$this->url = parse_url($url);
-		if (!isset($this->url['scheme'], $this->url['user']) || $this->url['scheme'] !== 'sftp') {
+		if (!isset($this->url['scheme'], $this->url['user'], $this->url['host']) || $this->url['scheme'] !== 'sftp') {
 			throw new \InvalidArgumentException('Invalid URL or missing username');
 		}
 		$this->publicKey = $publicKey;
