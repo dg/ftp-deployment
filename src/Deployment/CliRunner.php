@@ -71,6 +71,7 @@ class CliRunner
 		$time = time();
 		$this->logger->log('Started at ' . date('[Y/m/d H:i]'));
 		$this->logger->log("Config file is $this->configFile");
+		$res = 0;
 
 		foreach ($this->batches as $name => $batch) {
 			$this->logger->log("\nDeploying $name");
@@ -98,13 +99,14 @@ class CliRunner
 				$deployment->deploy();
 			} catch (JobException | ServerException $e) {
 				$this->logger->log("Error: {$e->getMessage()} in {$e->getFile()}:{$e->getLine()}\n\n$e", 'red');
+				$res = 1;
 			}
 			$this->logger->log("\n\n");
 		}
 
 		$time = time() - $time;
 		$this->logger->log('Finished at ' . date('[Y/m/d H:i]') . " (in $time seconds)\n----------------------------------------------\n\n", 'lime');
-		return 0;
+		return $res;
 	}
 
 
