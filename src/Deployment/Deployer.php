@@ -222,7 +222,8 @@ class Deployer
 		} catch (ServerException $e) {
 			return null;
 		}
-		$content = gzinflate(file_get_contents($tempFile));
+		$s = file_get_contents($tempFile);
+		$content = @gzdecode($s) ?: gzinflate($s);
 		$res = [];
 		foreach (explode("\n", $content) as $item) {
 			if (count($item = explode('=', $item, 2)) === 2) {
