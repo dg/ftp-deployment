@@ -137,25 +137,25 @@ class Deployer
 			$this->runJobs($runBefore[0]);
 		}
 
-		if ($toUpload) {
-			$this->logger->log("\nUploading:");
-			$this->uploadPaths($toUpload);
-			if ($this->runAfterUpload) {
-				$this->logger->log("\nAfter-upload-jobs:");
-				$this->runJobs($this->runAfterUpload);
-			}
-		}
-
-		$this->logger->log("Creating remote file $this->deploymentFile.running");
-		$runningFile = "$this->remoteDir/$this->deploymentFile.running";
-		$this->server->createDir(str_replace('\\', '/', dirname($runningFile)));
-		$this->server->writeFile(tempnam($this->tempDir, 'deploy'), $runningFile);
-
 		try {
+			$tempFiles = [];
+			if ($toUpload) {
+				$this->logger->log("\nUploading:");
+				$this->uploadPaths($toUpload, $tempFiles);
+				if ($this->runAfterUpload) {
+					$this->logger->log("\nAfter-upload-jobs:");
+					$this->runJobs($this->runAfterUpload);
+				}
+			}
+
+			$this->logger->log("Creating remote file $this->deploymentFile.running");
+			$runningFile = "$this->remoteDir/$this->deploymentFile.running";
+			$this->server->createDir(str_replace('\\', '/', dirname($runningFile)));
+			$this->server->writeFile(tempnam($this->tempDir, 'deploy'), $runningFile);
+
 			if ($toUpload) {
 				$this->logger->log("\nRenaming:");
-				$this->renamePaths($toUpload);
-				unlink($deploymentFile);
+				$this->renamePaths($toUpload, $tempFiles);
 			}
 
 			if ($toDelete) {
@@ -182,8 +182,17 @@ class Deployer
 			}
 
 		} finally {
-			$this->logger->log("\nDeleting remote file $this->deploymentFile.running");
-			$this->server->removeFile($runningFile);
+			if (isset($runningFile)) {
+				$this->logger->log("\nDeleting remote file $this->deploymentFile.running");
+				$this->server->removeFile($runningFile);
+			}
+			if (isset($deploymentFile)) {
+				unlink($deploymentFile);
+			}
+			if ($tempFiles) {
+				$this->logger->log("\nDeleting temporary files:");
+				$this->deletePaths(array_keys($tempFiles));
+			}
 		}
 	}
 
@@ -245,7 +254,7 @@ class Deployer
 	 * Uploades files and creates directories.
 	 * @param  string[]  $paths  relative paths, starts with /
 	 */
-	private function uploadPaths(array $paths): void
+	private function uploadPaths(array $paths, array &$tempFiles): void
 	{
 		$prevDir = null;
 		foreach ($paths as $num => $path) {
@@ -264,6 +273,7 @@ class Deployer
 				continue;
 			}
 
+			$tempFiles[$path . self::TEMPORARY_SUFFIX] = true;
 			$localFile = $this->preprocess($path);
 			if ($localFile !== $this->localDir . $path) {
 				$path .= ' (filters applied)';
@@ -285,13 +295,14 @@ class Deployer
 	 * Renames uploaded files.
 	 * @param  string[]  $paths  relative paths, starts with /
 	 */
-	private function renamePaths(array $paths): void
+	private function renamePaths(array $paths, array &$tempFiles): void
 	{
 		$files = array_values(array_filter($paths, fn($path) => substr($path, -1) !== '/'));
 		foreach ($files as $num => $file) {
 			$this->writeProgress($num + 1, count($files), "Renaming $file", null, 'olive');
 			$remoteFile = $this->remoteDir . $file;
 			$this->server->renameFile($remoteFile . self::TEMPORARY_SUFFIX, $remoteFile);
+			unset($tempFiles[$file . self::TEMPORARY_SUFFIX]);
 		}
 	}
 
