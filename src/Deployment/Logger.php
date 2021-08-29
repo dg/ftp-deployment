@@ -16,7 +16,7 @@ namespace Deployment;
  */
 class Logger
 {
-	public bool $useColors;
+	public bool $useColors = false;
 
 	public bool $showProgress = true;
 
