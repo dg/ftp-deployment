@@ -75,6 +75,7 @@ class CliRunner
 
 			$deployment = $this->createDeployer($batch);
 			$deployment->tempDir = $tempDir;
+            $deployment->ignoreCert = $config['ignoreCert'];
 
 			if ($this->mode === 'generate') {
 				$this->logger->log('Scanning files');
@@ -259,6 +260,10 @@ class CliRunner
 		$this->batches = isset($config['remote']) && is_string($config['remote'])
 			? ['' => $config]
 			: array_filter($config, 'is_array');
+
+        if (isset($config['ignoreCert']) === false || is_bool($config['ignoreCert']) === false) {
+            $config['ignoreCert'] = false;
+        }
 
 		if (isset($options['--section'])) {
 			$section = $options['--section'];

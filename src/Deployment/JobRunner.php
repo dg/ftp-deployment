@@ -89,9 +89,9 @@ class JobRunner
 	}
 
 
-	public function http(string $url): array
+	public function http(string $url, bool $ignoreCert = false): array
 	{
-		$out = Helpers::fetchUrl($url, $err);
+		$out = Helpers::fetchUrl($url, $err, null, $ignoreCert);
 		return [$out, $err];
 	}
 }

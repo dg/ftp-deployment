@@ -30,6 +30,8 @@ class Deployer
 
 	public bool $allowDelete = false;
 
+	public bool $ignoreCert = false;
+
 	/** @var string[] relative paths */
 	public array $toPurge = [];
 
@@ -425,7 +427,7 @@ class Deployer
 				$this->logger->log($job);
 				$method = $m[1];
 				if ($method === 'http' || $method === 'https') {
-					[$out, $err] = $runner->http($m[0]);
+					[$out, $err] = $runner->http($m[0], $this->ignoreCert);
 				} else {
 					[$out, $err] = $runner->$method($m[2]);
 				}

@@ -77,7 +77,7 @@ class Helpers
 	/**
 	 * Processes HTTP request.
 	 */
-	public static function fetchUrl(string $url, ?string &$error, array $postData = null): string
+	public static function fetchUrl(string $url, ?string &$error, array $postData = null, bool $ignoreCert = false): string
 	{
 		if (extension_loaded('curl')) {
 			$ch = curl_init($url);
@@ -86,6 +86,10 @@ class Helpers
 				CURLOPT_FOLLOWLOCATION => 1,
 				CURLOPT_USERAGENT => 'Mozilla/5.0 FTP-deployment',
 			];
+            if ($ignoreCert === true) {
+                $options[CURLOPT_SSL_VERIFYPEER] = false;
+                $options[CURLOPT_SSL_VERIFYHOST] = false;
+            }
 			if ($postData !== null) {
 				$options[CURLOPT_POST] = true;
 				$options[CURLOPT_POSTFIELDS] = http_build_query($postData, '', '&');
