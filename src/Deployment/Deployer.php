@@ -427,6 +427,9 @@ class Deployer
 				$this->logger->log($job);
 				$method = $m[1];
 				if ($method === 'http' || $method === 'https') {
+                    if ($this->ignoreCert === true) {
+                        $this->logger->log('[Ignoring certificate validity]', 'yellow');
+                    }
 					[$out, $err] = $runner->http($m[0], $this->ignoreCert);
 				} else {
 					[$out, $err] = $runner->$method($m[2]);
