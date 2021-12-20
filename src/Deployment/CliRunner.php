@@ -230,6 +230,7 @@ class CliRunner
 					--section <name>  Only deploys the named section.
 					--generate        Only generates deployment file.
 					--no-progress     Hide the progress indicators.
+					--ignore-cert     Ignores certificate validity on https job run.
 
 				XX,
 			[
@@ -263,6 +264,9 @@ class CliRunner
 
         if (isset($config['ignoreCert']) === false || is_bool($config['ignoreCert']) === false) {
             $config['ignoreCert'] = false;
+        }
+        if (isset($options['--ignore-cert'])) {
+            $config['ignoreCert'] = true;
         }
 
 		if (isset($options['--section'])) {
