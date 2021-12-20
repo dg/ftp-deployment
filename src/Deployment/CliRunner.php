@@ -75,7 +75,7 @@ class CliRunner
 
 			$deployment = $this->createDeployer($batch);
 			$deployment->tempDir = $tempDir;
-            $deployment->ignoreCert = $config['ignoreCert'];
+            $deployment->ignoreCert = $config['ignorecert'];
 
 			if ($this->mode === 'generate') {
 				$this->logger->log('Scanning files');
