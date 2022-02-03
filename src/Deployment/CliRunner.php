@@ -206,6 +206,8 @@ class CliRunner
 				pcntl_signal(SIGINT, SIG_DFL);
 				throw new \Exception('Terminated');
 			});
+			pcntl_async_signals(true);
+
 		} elseif (function_exists('sapi_windows_set_ctrl_handler')) {
 			sapi_windows_set_ctrl_handler(function () {
 				throw new \Exception('Terminated');
