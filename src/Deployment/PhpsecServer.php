@@ -56,18 +56,12 @@ class PhpsecServer implements Server
 				throw new ServerException('Login failed with password');
 			}
 		}
-		if (isset($this->url['path'])) {
-			if (!$sftp->chdir($this->url['path'])) {
-				throw new ServerException('Unable to to switch to path '.$this->url['path']);
-			}
-		}
 		$this->sftp = $sftp;
 	}
 
 
 	public function readFile(string $remote, string $local): void
 	{
-		$remote = $this->normalizePath($remote);
 		if ($this->sftp->get($remote, $local) === false) {
 			throw new ServerException('Unable to read file');
 		}
@@ -76,7 +70,6 @@ class PhpsecServer implements Server
 
 	public function writeFile(string $local, string $remote, callable $progress = null): void
 	{
-		$remote = $this->normalizePath($remote);
 		if ($this->sftp->put($remote, $local, SFTP::SOURCE_LOCAL_FILE, -1, -1, $progress) === false) {
 			throw new ServerException('Unable to write file');
 		}
@@ -90,7 +83,6 @@ class PhpsecServer implements Server
 
 	public function removeFile(string $file): void
 	{
-		$file = $this->normalizePath($file);
 		if ($this->sftp->file_exists($file)) {
 			if ($this->sftp->delete($file) === false) {
 				throw new ServerException('Unable to delete file');
@@ -101,8 +93,6 @@ class PhpsecServer implements Server
 
 	public function renameFile(string $old, string $new): void
 	{
-		$old = $this->normalizePath($old);
-		$new = $this->normalizePath($new);
 		if ($this->sftp->file_exists($new)) {
 			$perms = $this->sftp->fileperms($new);
 			if ($this->sftp->delete($new) === false) {
@@ -122,7 +112,6 @@ class PhpsecServer implements Server
 
 	public function createDir(string $dir): void
 	{
-		$dir = $this->normalizePath($dir);
 		if ($dir !== '' && !$this->sftp->file_exists($dir)) {
 			if ($this->sftp->mkdir($dir) === false) {
 				throw new ServerException('Unable to create directory');
@@ -136,7 +125,6 @@ class PhpsecServer implements Server
 
 	public function removeDir(string $dir): void
 	{
-		$dir = $this->normalizePath($dir);
 		if ($this->sftp->file_exists($dir)) {
 			if ($this->sftp->rmdir($dir) === false) {
 				throw new ServerException('Unable to remove directory');
@@ -147,7 +135,6 @@ class PhpsecServer implements Server
 
 	public function purge(string $path, callable $progress = null): void
 	{
-		$path = $this->normalizePath($path);
 		if ($this->sftp->file_exists($path)) {
 			if ($this->sftp->delete($path, true) === false) {
 				throw new ServerException('Unable to purge directory/file');
@@ -173,11 +160,5 @@ class PhpsecServer implements Server
 	public function execute(string $command): string
 	{
 		return $this->sftp->exec($command);
-	}
-
-
-	private function normalizePath(string $dir): string
-	{
-		return trim($dir, '/');
 	}
 }
