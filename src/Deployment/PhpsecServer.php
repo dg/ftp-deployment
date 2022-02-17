@@ -57,7 +57,9 @@ class PhpsecServer implements Server
 			}
 		}
 		if (isset($this->url['path'])) {
-			$sftp->chdir($this->url['path']);
+			if (!$sftp->chdir($this->url['path'])) {
+				throw new ServerException('Unable to to switch to path '.$this->url['path']);
+			}
 		}
 		$this->sftp = $sftp;
 	}
