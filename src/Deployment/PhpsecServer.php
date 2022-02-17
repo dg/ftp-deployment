@@ -56,6 +56,9 @@ class PhpsecServer implements Server
 				throw new ServerException('Login failed with password');
 			}
 		}
+		if (isset($this->url['path'])) {
+			$sftp->chdir($this->url['path']);
+		}
 		$this->sftp = $sftp;
 	}
 
