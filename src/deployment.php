@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Deployment;
 
-if (PHP_VERSION_ID < 70400) {
-	echo 'Error: Deployment requires PHP 7.4 or newer.';
+if (PHP_VERSION_ID < 80000) {
+	echo 'Error: Deployment requires PHP 8.0 or newer.';
 	exit(1);
 }
 
