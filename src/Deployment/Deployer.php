@@ -26,6 +26,8 @@ class Deployer
 	/** @var string[] */
 	public array $ignoreMasks = [];
 
+    public bool $ignoreRemote = true;
+
 	public bool $testMode = false;
 
 	public bool $allowDelete = false;
@@ -227,7 +229,13 @@ class Deployer
 		$res = [];
 		foreach (explode("\n", $content) as $item) {
 			if (count($item = explode('=', $item, 2)) === 2) {
-				$res[$item[1]] = $item[0] === '1' ? true : $item[0];
+                if ($this->ignoreRemote === true) {
+                    $res[$item[1]] = $item[0] === '1' ? true : $item[0];
+                }else {
+                    if (Helpers::matchMask($item[1], $this->ignoreMasks, is_dir("$this->remoteDir/$item[1]")) === false) {
+                        $res[$item[1]] = $item[0] === '1' ? true : $item[0];
+                    }
+                }
 			}
 		}
 		return $res;

@@ -79,6 +79,9 @@ ignore = "
 	!temp/.htaccess
 "
 
+; if no, ignore section will be taken into account on remote side (default is yes)
+ignoreRemote = yes
+
 ; explicit list of files and directories to include (by default includes all files and directories)
 include = "
 	/app

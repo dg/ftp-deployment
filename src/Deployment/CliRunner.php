@@ -21,6 +21,7 @@ class CliRunner
 		'passivemode' => true,
 		'include' => '',
 		'ignore' => '',
+        'ignoreremote' => true,
 		'allowdelete' => true,
 		'purge' => '',
 		'before' => '',
@@ -169,6 +170,7 @@ class CliRunner
 			? $deployment->deploymentFile
 			: $config['deploymentfile'];
 		$deployment->allowDelete = (bool) $config['allowdelete'];
+        $deployment->ignoreRemote = (bool) $config['ignoreremote'];
 		$deployment->toPurge = self::toArray($config['purge'], true);
 		$deployment->runBefore = self::toArray($config['before'], true);
 		$deployment->runAfterUpload = self::toArray($config['afterupload'], true);
