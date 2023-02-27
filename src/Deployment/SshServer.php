@@ -41,7 +41,9 @@ class SshServer implements Server
 	public function __construct(
 		string $url,
 		string $publicKey = null,
+		#[\SensitiveParameter]
 		string $privateKey = null,
+		#[\SensitiveParameter]
 		string $passPhrase = null,
 	) {
 		if (!extension_loaded('ssh2')) {

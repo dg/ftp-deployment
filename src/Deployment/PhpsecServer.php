@@ -21,7 +21,9 @@ class PhpsecServer implements Server
 	public function __construct(
 		string $url,
 		string $publicKey = null,
+		#[\SensitiveParameter]
 		string $privateKey = null,
+		#[\SensitiveParameter]
 		string $passPhrase = null,
 	) {
 		$this->url = parse_url($url);

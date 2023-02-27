@@ -34,8 +34,11 @@ class FtpServer implements Server
 	 * @param  string  $url  ftp://... or ftps://...
 	 * @throws \Exception
 	 */
-	public function __construct(string $url, bool $passiveMode = true)
-	{
+	public function __construct(
+		#[\SensitiveParameter]
+		string $url,
+		bool $passiveMode = true,
+	) {
 		if (!extension_loaded('ftp')) {
 			throw new \Exception('PHP extension FTP is not loaded.');
 		}
