@@ -14,9 +14,7 @@ namespace Deployment;
 class JobRunner
 {
 	private Server $server;
-
 	private string $localDir;
-
 	private string $remoteDir;
 
 

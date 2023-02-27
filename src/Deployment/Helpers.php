@@ -48,7 +48,7 @@ class Helpers
 				$pattern = substr($pattern, 1);
 			}
 
-			if (strpos($pattern, '/') === false) { // no slash means base name
+			if (!str_contains($pattern, '/')) { // no slash means base name
 				if (fnmatch($pattern, end($path), FNM_CASEFOLD)) {
 					$res = !$neg;
 				}

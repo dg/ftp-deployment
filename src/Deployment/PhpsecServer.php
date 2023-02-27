@@ -10,17 +10,11 @@ use phpseclib3\Net\SFTP;
 class PhpsecServer implements Server
 {
 	public ?int $filePermissions = null;
-
 	public ?int $dirPermissions = null;
-
 	private array $url;
-
 	private ?string $publicKey;
-
 	private ?string $privateKey;
-
 	private ?string $passPhrase;
-
 	private ?SFTP $sftp = null;
 
 
@@ -28,7 +22,7 @@ class PhpsecServer implements Server
 		string $url,
 		string $publicKey = null,
 		string $privateKey = null,
-		string $passPhrase = null
+		string $passPhrase = null,
 	) {
 		$this->url = parse_url($url);
 		if (!isset($this->url['scheme'], $this->url['user'], $this->url['host']) || $this->url['scheme'] !== 'phpsec') {

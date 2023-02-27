@@ -17,11 +17,9 @@ namespace Deployment;
 class FtpServer implements Server
 {
 	private const RETRIES = 10;
-
 	private const BLOCK_SIZE = 400000;
 
 	public ?int $filePermissions = null;
-
 	public ?int $dirPermissions = null;
 
 	/** @var resource */
@@ -29,7 +27,6 @@ class FtpServer implements Server
 
 	/** see parse_url() */
 	private array $url;
-
 	private bool $passiveMode = true;
 
 
@@ -221,7 +218,7 @@ class FtpServer implements Server
 		foreach ((array) Safe::ftp_nlist($this->connection, $dir) as $entry) {
 			if ($entry == null || $entry === $dir || preg_match('#(^|/)\\.+$#', $entry)) { // intentionally ==
 				continue;
-			} elseif (strpos($entry, '/') === false) {
+			} elseif (!str_contains($entry, '/')) {
 				$entry = "$dir/$entry";
 			}
 

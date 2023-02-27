@@ -22,7 +22,7 @@ define('TEMP_DIR', __DIR__ . '/tmp/' . getmypid());
 Tester\Helpers::purge(TEMP_DIR);
 
 
-function test(\Closure $function)
+function test(Closure $function)
 {
 	$function();
 }

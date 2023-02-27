@@ -20,7 +20,6 @@ class RetryServer implements Server
 	private const DELAY = 2;
 
 	private Server $server;
-
 	private Logger $logger;
 
 

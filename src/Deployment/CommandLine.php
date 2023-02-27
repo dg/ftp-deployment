@@ -31,7 +31,6 @@ class CommandLine
 
 	/** @var string[] */
 	private array $positional = [];
-
 	private string $help;
 
 

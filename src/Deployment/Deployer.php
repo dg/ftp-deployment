@@ -25,9 +25,7 @@ class Deployer
 
 	/** @var string[] */
 	public array $ignoreMasks = [];
-
 	public bool $testMode = false;
-
 	public bool $allowDelete = false;
 
 	/** @var string[] relative paths */
@@ -41,20 +39,15 @@ class Deployer
 
 	/** @var array of string|callable */
 	public array $runAfter = [];
-
 	public string $tempDir = '';
 
 	/** @var string[] */
 	public array $preprocessMasks = [];
 
 	private string $localDir;
-
 	private string $remoteDir;
-
 	private Logger $logger;
-
 	private array $filters = [];
-
 	private Server $server;
 
 
@@ -454,8 +447,9 @@ class Deployer
 		int $total,
 		string $path,
 		float $percent = null,
-		string $color = null
-	): void {
+		string $color = null,
+	): void
+	{
 		$len = strlen((string) $total);
 		$s = sprintf("(% {$len}d of %-{$len}d) %s", $count, $total, $path);
 		if ($percent === null) {

@@ -19,7 +19,6 @@ namespace Deployment;
 class SshServer implements Server
 {
 	public ?int $filePermissions = null;
-
 	public ?int $dirPermissions = null;
 
 	/** @var resource */
@@ -30,11 +29,8 @@ class SshServer implements Server
 
 	/** see parse_url() */
 	private array $url;
-
 	private ?string $publicKey;
-
 	private ?string $privateKey;
-
 	private ?string $passPhrase;
 
 
@@ -46,7 +42,7 @@ class SshServer implements Server
 		string $url,
 		string $publicKey = null,
 		string $privateKey = null,
-		string $passPhrase = null
+		string $passPhrase = null,
 	) {
 		if (!extension_loaded('ssh2')) {
 			throw new \Exception('PHP extension SSH2 is not loaded.');

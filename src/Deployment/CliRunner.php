@@ -31,9 +31,7 @@ class CliRunner
 
 	/** @var string[] */
 	public array $ignoreMasks = ['*.bak', '.svn', '.git*', 'Thumbs.db', '.DS_Store', '.idea'];
-
 	private Logger $logger;
-
 	private string $configFile;
 
 	/** test|generate|null */

@@ -121,7 +121,7 @@ class Preprocessor
 				$tmp = $dir . '/';
 				if (substr($newDir, 0, strlen($tmp)) === $tmp) {
 					$s = preg_replace('#\burl\(["\']?(?=[.\w])(?!\w+:)#', '$0' . substr($newDir, strlen($tmp)) . '/', $s);
-				} elseif (strpos($s, 'url(') !== false) {
+				} elseif (str_contains($s, 'url(')) {
 					return $m[0];
 				}
 			}
