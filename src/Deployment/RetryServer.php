@@ -16,8 +16,8 @@ namespace Deployment;
  */
 class RetryServer implements Server
 {
-	private const RETRIES = 20;
-	private const DELAY = 2;
+	private const Retries = 20;
+	private const Delay = 2;
 
 	private Server $server;
 	private Logger $logger;
@@ -115,7 +115,7 @@ class RetryServer implements Server
 			return $this->server->$method(...$args);
 
 		} catch (ServerException $e) {
-			if ($counter < self::RETRIES) {
+			if ($counter < self::Retries) {
 				if ($e->getMessage() !== $lastError) {
 					$lastError = $e->getMessage();
 					$this->logger->log("Error: $e", 'red');
@@ -128,7 +128,7 @@ class RetryServer implements Server
 				$counter++;
 				$this->logger->progress('retrying ' . str_pad(str_repeat('.', $counter % 40), 40));
 
-				sleep(self::DELAY);
+				sleep(self::Delay);
 				goto retry;
 			}
 			throw $e;

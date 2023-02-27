@@ -16,7 +16,7 @@ namespace Deployment;
  */
 class Deployer
 {
-	private const TEMPORARY_SUFFIX = '.deploytmp';
+	private const TemporarySuffix = '.deploytmp';
 
 	public string $deploymentFile = '.htdeployment';
 
@@ -266,7 +266,7 @@ class Deployer
 				continue;
 			}
 
-			$tempFiles[$path . self::TEMPORARY_SUFFIX] = true;
+			$tempFiles[$path . self::TemporarySuffix] = true;
 			$localFile = $this->preprocess($path);
 			if ($localFile !== $this->localDir . $path) {
 				$path .= ' (filters applied)';
@@ -274,7 +274,7 @@ class Deployer
 
 			$this->server->writeFile(
 				$localFile,
-				$remotePath . self::TEMPORARY_SUFFIX,
+				$remotePath . self::TemporarySuffix,
 				function ($percent) use ($num, $paths, $path) {
 					$this->writeProgress($num + 1, count($paths), $path, $percent, 'green');
 				},
@@ -294,8 +294,8 @@ class Deployer
 		foreach ($files as $num => $file) {
 			$this->writeProgress($num + 1, count($files), "Renaming $file", null, 'olive');
 			$remoteFile = $this->remoteDir . $file;
-			$this->server->renameFile($remoteFile . self::TEMPORARY_SUFFIX, $remoteFile);
-			unset($tempFiles[$file . self::TEMPORARY_SUFFIX]);
+			$this->server->renameFile($remoteFile . self::TemporarySuffix, $remoteFile);
+			unset($tempFiles[$file . self::TemporarySuffix]);
 		}
 	}
 

@@ -232,7 +232,7 @@ class CliRunner
 
 				XX,
 			[
-				'config' => [CommandLine::REALPATH => true],
+				'config' => [CommandLine::RealPath => true],
 			],
 		);
 

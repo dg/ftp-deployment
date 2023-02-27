@@ -17,11 +17,11 @@ namespace Deployment;
 class CommandLine
 {
 	public const
-		ARGUMENT = 'argument',
-		OPTIONAL = 'optional',
-		REPEATABLE = 'repeatable',
-		REALPATH = 'realpath',
-		VALUE = 'default';
+		Argument = 'argument',
+		Optional = 'optional',
+		Repeatable = 'repeatable',
+		RealPath = 'realpath',
+		Value = 'default';
 
 	/** @var array[] */
 	private array $options = [];
@@ -49,10 +49,10 @@ class CommandLine
 			$name = end($m[1]);
 			$opts = $this->options[$name] ?? [];
 			$this->options[$name] = $opts + [
-				self::ARGUMENT => (bool) end($m[2]),
-				self::OPTIONAL => isset($line[2]) || (substr(end($m[2]), 0, 1) === '[') || isset($opts[self::VALUE]),
-				self::REPEATABLE => (bool) end($m[3]),
-				self::VALUE => $line[2] ?? null,
+				self::Argument => (bool) end($m[2]),
+				self::Optional => isset($line[2]) || (substr(end($m[2]), 0, 1) === '[') || isset($opts[self::Value]),
+				self::Repeatable => (bool) end($m[3]),
+				self::Value => $line[2] ?? null,
 			];
 			if ($name !== $m[1][0]) {
 				$this->aliases[$m[1][0]] = $name;
@@ -83,7 +83,7 @@ class CommandLine
 				}
 				$name = current($this->positional);
 				$this->checkArg($this->options[$name], $arg);
-				if (empty($this->options[$name][self::REPEATABLE])) {
+				if (empty($this->options[$name][self::Repeatable])) {
 					$params[$name] = $arg;
 					next($this->positional);
 				} else {
@@ -103,19 +103,19 @@ class CommandLine
 
 			$opt = $this->options[$name];
 
-			if ($arg !== true && empty($opt[self::ARGUMENT])) {
+			if ($arg !== true && empty($opt[self::Argument])) {
 				throw new \Exception("Option $name has not argument.");
 
-			} elseif ($arg === true && !empty($opt[self::ARGUMENT])) {
+			} elseif ($arg === true && !empty($opt[self::Argument])) {
 				if (isset($args[$i]) && $args[$i][0] !== '-') {
 					$arg = $args[$i++];
-				} elseif (empty($opt[self::OPTIONAL])) {
+				} elseif (empty($opt[self::Optional])) {
 					throw new \Exception("Option $name requires argument.");
 				}
 			}
 			$this->checkArg($opt, $arg);
 
-			if (empty($opt[self::REPEATABLE])) {
+			if (empty($opt[self::Repeatable])) {
 				$params[$name] = $arg;
 			} else {
 				$params[$name][] = $arg;
@@ -125,14 +125,14 @@ class CommandLine
 		foreach ($this->options as $name => $opt) {
 			if (isset($params[$name])) {
 				continue;
-			} elseif (isset($opt[self::VALUE])) {
-				$params[$name] = $opt[self::VALUE];
-			} elseif ($name[0] !== '-' && empty($opt[self::OPTIONAL])) {
+			} elseif (isset($opt[self::Value])) {
+				$params[$name] = $opt[self::Value];
+			} elseif ($name[0] !== '-' && empty($opt[self::Optional])) {
 				throw new \Exception("Missing required argument <$name>.");
 			} else {
 				$params[$name] = null;
 			}
-			if (!empty($opt[self::REPEATABLE])) {
+			if (!empty($opt[self::Repeatable])) {
 				$params[$name] = (array) $params[$name];
 			}
 		}
@@ -148,7 +148,7 @@ class CommandLine
 
 	public function checkArg(array $opt, &$arg): void
 	{
-		if (!empty($opt[self::REALPATH])) {
+		if (!empty($opt[self::RealPath])) {
 			$path = realpath($arg);
 			if ($path === false) {
 				throw new \Exception("File path '$arg' not found.");

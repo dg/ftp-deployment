@@ -16,8 +16,8 @@ namespace Deployment;
  */
 class FtpServer implements Server
 {
-	private const RETRIES = 10;
-	private const BLOCK_SIZE = 400000;
+	private const Retries = 10;
+	private const BlockSize = 400000;
 
 	public ?int $filePermissions = null;
 	public ?int $dirPermissions = null;
@@ -101,7 +101,7 @@ class FtpServer implements Server
 		$blocks = 0;
 		do {
 			if ($progress) {
-				$progress(min($blocks * self::BLOCK_SIZE / $size, 100));
+				$progress(min($blocks * self::BlockSize / $size, 100));
 			}
 			$ret = $blocks === 0
 				? Safe::ftp_nb_put($this->connection, $remote, $local, FTP_BINARY)
