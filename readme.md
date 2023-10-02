@@ -2,7 +2,7 @@ FTP Deployment: smart upload
 ============================
 
 [![Downloads this Month](https://img.shields.io/packagist/dm/dg/ftp-deployment.svg)](https://packagist.org/packages/dg/ftp-deployment)
-[![Tests](https://github.com/dg/ftp-deployment/workflows/Tests/badge.svg?branch=master)](https://github.com/dg/ftp-deployment/actions)
+[![Tests](https://github.com/dg/ftp-deployment/actions/workflows/tests.yml/badge.svg?branch=master)](https://github.com/dg/ftp-deployment/actions/workflows/tests.yml)
 [![Latest Stable Version](https://poser.pugx.org/dg/ftp-deployment/v/stable)](https://github.com/dg/ftp-deployment/releases)
 [![License](https://img.shields.io/badge/license-New%20BSD-blue.svg)](https://github.com/dg/ftp-deployment/blob/master/license.md)
 
