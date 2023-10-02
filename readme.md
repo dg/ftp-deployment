@@ -190,11 +190,11 @@ FTP Deployment 3.6 requires PHP 8.0 or later. It also requires openssl extension
 
 The easiest way to obtain FTP Deployment is to download [a single PHAR file](https://github.com/dg/ftp-deployment/releases).
 
-If you want to use minification, install [Node.js](https://nodejs.org/en/) and [UglifyES](https://www.npmjs.com/package/uglify-es)
+If you want to use minification, install [Node.js](https://nodejs.org/en/), [UglifyJS 3](https://www.npmjs.com/package/uglify-js)
 for JavaScript minification and [clean-css](https://www.npmjs.com/package/clean-css-cli) for CSS minification.
 
 ```
-npm install uglify-es -g
+npm install uglify-js -g
 npm install clean-css-cli -g
 ```
 
