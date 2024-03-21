@@ -16,6 +16,8 @@ namespace Deployment;
  */
 class FileServer implements Server
 {
+	public ?int $filePermissions = null;
+	public ?int $dirPermissions = null;
 	private string $root;
 
 
@@ -59,6 +61,9 @@ class FileServer implements Server
 	public function writeFile(string $local, string $remote, callable $progress = null): void
 	{
 		Safe::copy($local, $this->root . $remote);
+		if ($this->filePermissions) {
+			$this->chmod($remote, $this->filePermissions);
+		}
 	}
 
 
@@ -91,7 +96,7 @@ class FileServer implements Server
 	public function createDir(string $dir): void
 	{
 		if (trim($dir, '/') !== '' && !file_exists($path = $this->root . $dir)) {
-			Safe::mkdir($path, 0777, true);
+			Safe::mkdir($path, $this->dirPermissions ?? 0777, true);
 		}
 	}
 
