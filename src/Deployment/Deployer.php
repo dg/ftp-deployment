@@ -67,6 +67,13 @@ class Deployer
 	 */
 	public function deploy(): void
 	{
+		if (file_exists("$this->localDir/.git")) {
+			@exec("cd $this->localDir && git rev-parse --abbrev-ref HEAD", $git_branch, $code);
+			$git_branch = trim(implode("\n", $git_branch));
+			$git_branch_color = $git_branch === 'main' ? 'aqua' : 'red';
+			$this->logger->log("Current git branch: $git_branch", $git_branch_color);
+		}
+
 		$this->logger->log('Connecting to server');
 		$this->server->connect();
 		$this->remoteDir = $this->server->getDir();
