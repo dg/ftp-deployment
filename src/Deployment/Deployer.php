@@ -348,7 +348,9 @@ class Deployer
 				continue;
 
 			} elseif (Helpers::matchMask($short, $this->ignoreMasks, is_dir($path))) {
-				$this->logger->log(str_pad("Ignoring .$short", 40), 'gray');
+				if (!str_ends_with($short, '.DS_Store')) {
+					$this->logger->log(str_pad("Ignoring .$short", 40), 'gray');
+				}
 				continue;
 
 			} elseif ($this->includeMasks && !Helpers::matchMask($short, $this->includeMasks, is_dir($path))) {
