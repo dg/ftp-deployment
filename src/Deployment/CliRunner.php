@@ -155,7 +155,7 @@ class CliRunner
                 : self::toArray($config['preprocess']); // intentionally ==
             $preprocessor = new Preprocessor($this->logger);
             if (isset($config['requireCompressMark'])) {
-                $preprocessor->requireCompressMark = 'no' !== $config['requireCompressMark'];
+                $preprocessor->requireCompressMark = $config['requireCompressMark'] !== 'no';
             }
             $deployment->addFilter('js', [$preprocessor, 'expandApacheImports']);
             $deployment->addFilter('js', [$preprocessor, 'compressJs'], true);
