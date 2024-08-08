@@ -56,6 +56,17 @@ class FtpServer implements Server
 
 
 	/**
+	 * Suppresses error on closing.
+	 */
+	public function __destruct()
+	{
+		if ($this->connection) {
+			@ftp_close($this->connection); // @ may fail
+		}
+	}
+
+
+	/**
 	 * Connects to FTP server.
 	 * @throws ServerException
 	 */
