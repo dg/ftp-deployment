@@ -124,4 +124,17 @@ class Helpers
 			. (isset($url['port']) ? ':' . $url['port'] : '')
 			. ($url['path'] ?? '');
 	}
+
+
+	public static function getHiddenInput(string $prompt = ''): string
+	{
+		if ($prompt) {
+			echo $prompt;
+		}
+		@exec('stty -echo 2>&1');
+		$password = stream_get_line(STDIN, 1024, PHP_EOL);
+		echo PHP_EOL;
+		@exec('stty echo 2>&1');
+		return $password;
+	}
 }

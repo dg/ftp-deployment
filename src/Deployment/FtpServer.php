@@ -79,7 +79,11 @@ class FtpServer implements Server
 			? Safe::ftp_connect($this->url['host'], $this->url['port'] ?? 21)
 			: Safe::ftp_ssl_connect($this->url['host'], $this->url['port'] ?? 21);
 
-		Safe::ftp_login($this->connection, urldecode($this->url['user']), urldecode($this->url['pass']));
+		$pass = $this->url['pass'];
+		if ($pass === 'STDIN') {
+			$pass = Helpers::getHiddenInput("Enter password for {$this->url['user']}: ");
+		}
+		Safe::ftp_login($this->connection, urldecode($this->url['user']), urldecode($pass));
 
 		if ($this->passiveMode) {
 			Safe::ftp_set_option($this->connection, FTP_USEPASVADDRESS, false);

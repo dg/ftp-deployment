@@ -70,9 +70,17 @@ class SshServer implements Server
 		}
 		$this->connection = Safe::ssh2_connect($this->url['host'], $this->url['port'] ?? 22);
 		if (isset($this->url['pass'])) {
-			Safe::ssh2_auth_password($this->connection, urldecode($this->url['user']), urldecode($this->url['pass']));
+			$pass = $this->url['pass'];
+			if ($pass === 'STDIN') {
+				$pass = Helpers::getHiddenInput("Enter password for {$this->url['user']}: ");
+			}
+			Safe::ssh2_auth_password($this->connection, urldecode($this->url['user']), urldecode($pass));
 		} elseif ($this->publicKey && $this->privateKey) {
-			Safe::ssh2_auth_pubkey_file($this->connection, urldecode($this->url['user']), $this->publicKey, $this->privateKey, (string) $this->passPhrase);
+			$passPhrase = $this->passPhrase;
+			if ($passPhrase === 'STDIN') {
+				$passPhrase = Helpers::getHiddenInput("Enter password for private key: ");
+			}
+			Safe::ssh2_auth_pubkey_file($this->connection, urldecode($this->url['user']), $this->publicKey, $this->privateKey, (string) $passPhrase);
 		} else {
 			Safe::ssh2_auth_agent($this->connection, urldecode($this->url['user']));
 		}
