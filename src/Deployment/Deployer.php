@@ -150,7 +150,9 @@ class Deployer
 			$this->logger->log("Creating remote file $this->deploymentFile.running");
 			$runningFile = "$this->remoteDir/$this->deploymentFile.running";
 			$this->server->createDir(str_replace('\\', '/', dirname($runningFile)));
-			$this->server->writeFile(tempnam($this->tempDir, 'deploy'), $runningFile);
+			$localRunningFile = tempnam($this->tempDir, 'deploy');
+			$this->server->writeFile($localRunningFile, $runningFile);
+			unlink($localRunningFile);
 
 			if ($toUpload) {
 				$this->logger->log("\nRenaming:");
