@@ -219,9 +219,11 @@ class Deployer
 				$this->server->readFile($this->remoteDir . '/' . $this->deploymentFile, $tempFile);
 			}
 		} catch (ServerException $e) {
+			unlink($tempFile);
 			return null;
 		}
 		$s = file_get_contents($tempFile);
+		unlink($tempFile);
 		$content = @gzinflate($s) ?: gzdecode($s);
 		$res = [];
 		foreach (explode("\n", $content) as $item) {
