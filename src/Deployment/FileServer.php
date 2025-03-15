@@ -58,7 +58,7 @@ class FileServer implements Server
 	 * Uploads file.
 	 * @throws ServerException
 	 */
-	public function writeFile(string $local, string $remote, callable $progress = null): void
+	public function writeFile(string $local, string $remote, ?callable $progress = null): void
 	{
 		Safe::copy($local, $this->root . $remote);
 		if ($this->filePermissions) {
@@ -117,7 +117,7 @@ class FileServer implements Server
 	 * Recursive deletes content of directory or file.
 	 * @throws ServerException
 	 */
-	public function purge(string $dir, callable $progress = null): void
+	public function purge(string $dir, ?callable $progress = null): void
 	{
 		$dir = $this->root . $dir;
 		if (!file_exists($dir)) {

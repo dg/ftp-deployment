@@ -77,7 +77,7 @@ class Helpers
 	/**
 	 * Processes HTTP request.
 	 */
-	public static function fetchUrl(string $url, ?string &$error, array $postData = null): string
+	public static function fetchUrl(string $url, ?string &$error, ?array $postData = null): string
 	{
 		if (extension_loaded('curl')) {
 			$ch = curl_init($url);

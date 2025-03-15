@@ -20,11 +20,11 @@ class PhpsecServer implements Server
 
 	public function __construct(
 		string $url,
-		string $publicKey = null,
+		?string $publicKey = null,
 		#[\SensitiveParameter]
-		string $privateKey = null,
+		?string $privateKey = null,
 		#[\SensitiveParameter]
-		string $passPhrase = null,
+		?string $passPhrase = null,
 	) {
 		$this->url = parse_url($url);
 		if (!isset($this->url['scheme'], $this->url['user'], $this->url['host']) || $this->url['scheme'] !== 'phpsec') {
@@ -64,7 +64,7 @@ class PhpsecServer implements Server
 	}
 
 
-	public function writeFile(string $local, string $remote, callable $progress = null): void
+	public function writeFile(string $local, string $remote, ?callable $progress = null): void
 	{
 		if ($this->sftp->put($remote, $local, SFTP::SOURCE_LOCAL_FILE, -1, -1, $progress) === false) {
 			throw new ServerException('Unable to write file');
@@ -129,7 +129,7 @@ class PhpsecServer implements Server
 	}
 
 
-	public function purge(string $path, callable $progress = null): void
+	public function purge(string $path, ?callable $progress = null): void
 	{
 		if ($this->sftp->file_exists($path)) {
 			if ($this->sftp->delete($path, true) === false) {

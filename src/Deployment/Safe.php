@@ -89,7 +89,7 @@ class Safe
 
 
 	/** @throws ServerException */
-	public static function exec(string $command, array &$output = null, int &$return_var = null): string
+	public static function exec(string $command, ?array &$output = null, ?int &$return_var = null): string
 	{
 		return self::__callStatic(__FUNCTION__, [$command, &$output, &$return_var]);
 	}

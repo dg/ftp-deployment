@@ -47,7 +47,7 @@ class Logger
 	}
 
 
-	public function log(string $s, string $color = null, int $shorten = 1): void
+	public function log(string $s, ?string $color = null, int $shorten = 1): void
 	{
 		fwrite($this->file, $s . "\n");
 

@@ -40,11 +40,11 @@ class SshServer implements Server
 	 */
 	public function __construct(
 		string $url,
-		string $publicKey = null,
+		?string $publicKey = null,
 		#[\SensitiveParameter]
-		string $privateKey = null,
+		?string $privateKey = null,
 		#[\SensitiveParameter]
-		string $passPhrase = null,
+		?string $passPhrase = null,
 	) {
 		if (!extension_loaded('ssh2')) {
 			throw new \Exception('PHP extension SSH2 is not loaded.');
@@ -94,7 +94,7 @@ class SshServer implements Server
 	 * Uploads file to FTP server.
 	 * @throws ServerException
 	 */
-	public function writeFile(string $local, string $remote, callable $progress = null): void
+	public function writeFile(string $local, string $remote, ?callable $progress = null): void
 	{
 		$size = max(filesize($local), 1);
 		$len = 0;
@@ -173,7 +173,7 @@ class SshServer implements Server
 	 * Recursive deletes content of directory or file.
 	 * @throws ServerException
 	 */
-	public function purge(string $dir, callable $progress = null): void
+	public function purge(string $dir, ?callable $progress = null): void
 	{
 		if (!file_exists($path = 'ssh2.sftp://' . (int) $this->sftp . $dir)) {
 			return;
