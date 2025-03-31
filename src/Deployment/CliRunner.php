@@ -143,7 +143,7 @@ class CliRunner
 
 		$server = new RetryServer($server, $this->logger);
 
-		if (!preg_match('#/|\\\\|[a-z]:#iA', $config['local'])) {
+		if (!preg_match('#/|\\\|[a-z]:#iA', $config['local'])) {
 			$config['local'] = dirname($this->configFile) . '/' . $config['local'];
 		}
 
