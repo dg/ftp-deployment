@@ -32,7 +32,7 @@ interface Server
 	 * Uploads file to server. Paths are absolute.
 	 * @throws ServerException
 	 */
-	function writeFile(string $local, string $remote, callable $progress = null): void;
+	function writeFile(string $local, string $remote, ?callable $progress = null): void;
 
 	/**
 	 * Removes file from server if exists. Path is absolute.
@@ -62,7 +62,7 @@ interface Server
 	 * Recursive deletes content of directory or file. Path is absolute.
 	 * @throws ServerException
 	 */
-	function purge(string $path, callable $progress = null): void;
+	function purge(string $path, ?callable $progress = null): void;
 
 	/**
 	 * Changes file permissions. Path is absolute.

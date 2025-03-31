@@ -106,7 +106,7 @@ class FtpServer implements Server
 	 * Uploads file to FTP server.
 	 * @throws ServerException
 	 */
-	public function writeFile(string $local, string $remote, callable $progress = null): void
+	public function writeFile(string $local, string $remote, ?callable $progress = null): void
 	{
 		$size = max(filesize($local), 1);
 		$blocks = 0;
@@ -222,7 +222,7 @@ class FtpServer implements Server
 	 * Recursive deletes content of directory or file.
 	 * @throws ServerException
 	 */
-	public function purge(string $dir, callable $progress = null): void
+	public function purge(string $dir, ?callable $progress = null): void
 	{
 		if (!$this->isDir($dir)) {
 			return;

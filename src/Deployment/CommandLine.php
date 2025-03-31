@@ -67,7 +67,7 @@ class CommandLine
 	}
 
 
-	public function parse(array $args = null): array
+	public function parse(?array $args = null): array
 	{
 		if ($args === null) {
 			$args = isset($_SERVER['argv']) ? array_slice($_SERVER['argv'], 1) : [];

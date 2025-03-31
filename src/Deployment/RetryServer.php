@@ -42,7 +42,7 @@ class RetryServer implements Server
 	}
 
 
-	public function writeFile(string $local, string $remote, callable $progress = null): void
+	public function writeFile(string $local, string $remote, ?callable $progress = null): void
 	{
 		$this->retry(__FUNCTION__, func_get_args());
 	}
@@ -72,7 +72,7 @@ class RetryServer implements Server
 	}
 
 
-	public function purge(string $path, callable $progress = null): void
+	public function purge(string $path, ?callable $progress = null): void
 	{
 		$this->retry(__FUNCTION__, func_get_args());
 	}
