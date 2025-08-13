@@ -227,10 +227,10 @@ class CliRunner
 					deployment <config_file> [-t | --test]
 
 				Options:
-					-t | --test		  Run in test-mode.
+					-t | --test       Run in test-mode.
 					--section <name>  Only deploys the named section.
-					--generate		  Only generates deployment file.
-					--no-progress	  Hide the progress indicators.
+					--generate        Only generates deployment file.
+					--no-progress     Hide the progress indicators.
 
 				XX,
 			[
