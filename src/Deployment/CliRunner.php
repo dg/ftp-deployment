@@ -27,7 +27,7 @@ class CliRunner
         'afterupload' => '',
         'after' => '',
         'preprocess' => false,
-        'requirecompressmark' => true
+        'requirecompressmark' => true,
     ];
 
     /** @var string[] */
