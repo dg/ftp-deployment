@@ -27,6 +27,7 @@ class CliRunner
 		'afterupload' => '',
 		'after' => '',
 		'preprocess' => false,
+		'requirecompressmark' => true,
 	];
 
 	/** @var string[] */
@@ -154,6 +155,7 @@ class CliRunner
 				? ['*.js', '*.css']
 				: self::toArray($config['preprocess']); // intentionally ==
 			$preprocessor = new Preprocessor($this->logger);
+			$preprocessor->requireCompressMark = (bool) $config['requirecompressmark'];
 			$deployment->addFilter('js', [$preprocessor, 'expandApacheImports']);
 			$deployment->addFilter('js', [$preprocessor, 'compressJs'], true);
 			$deployment->addFilter('css', [$preprocessor, 'expandApacheImports']);
