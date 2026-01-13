@@ -151,7 +151,7 @@ class Preprocessor
 
 	/**
 	 * Executes command.
-	 * @return array  [success, output]
+	 * @return array{bool, string} [success, output]
 	 * @throws \ErrorException
 	 */
 	private function execute(string $command, string $input, bool $bypassShell = true): array

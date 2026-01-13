@@ -96,17 +96,17 @@ class RetryServer implements Server
 	}
 
 
-	public function noRetry(string $method, ...$args)
+	public function noRetry(string $method, mixed ...$args): void
 	{
 		$this->server->$method(...$args);
 	}
 
 
 	/**
-	 * @return mixed
+	 * @param list<mixed>  $args
 	 * @throws ServerException
 	 */
-	private function retry(string $method, array $args)
+	private function retry(string $method, array $args): mixed
 	{
 		$counter = 0;
 		$lastError = null;

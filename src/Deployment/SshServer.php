@@ -27,7 +27,7 @@ class SshServer implements Server
 	/** @var resource */
 	private $sftp;
 
-	/** see parse_url() */
+	/** @var array{scheme?: string, host?: string, port?: int, user?: string, pass?: string, path?: string, query?: string, fragment?: string} */
 	private array $url;
 	private ?string $publicKey;
 	private ?string $privateKey;
@@ -35,7 +35,7 @@ class SshServer implements Server
 
 
 	/**
-	 * @param string $url sftp://...
+	 * @param string  $url sftp://...
 	 * @throws \Exception
 	 */
 	public function __construct(

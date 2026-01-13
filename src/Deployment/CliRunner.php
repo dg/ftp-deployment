@@ -285,6 +285,7 @@ class CliRunner
 	}
 
 
+	/** @return array<string, mixed> */
 	protected function loadConfigFile(string $file): array
 	{
 		if (pathinfo($file, PATHINFO_EXTENSION) == 'php') {
@@ -295,7 +296,7 @@ class CliRunner
 	}
 
 
-	public static function toArray($val, bool $lines = false): array
+	public static function toArray(mixed $val, bool $lines = false): array
 	{
 		return is_array($val)
 			? array_filter($val)

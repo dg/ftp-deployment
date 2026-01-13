@@ -26,6 +26,7 @@ class JobRunner
 	}
 
 
+	/** @return array{?string, ?string} */
 	public function local(string $command): array
 	{
 		@exec($command, $out, $code);
@@ -35,6 +36,7 @@ class JobRunner
 	}
 
 
+	/** @return array{?string, ?string} */
 	public function remote(string $command): array
 	{
 		if (preg_match('#^(mkdir|rmdir|unlink|mv|chmod)\s+(\S+)(?:\s+(\S+))?()$#', $command, $m)) {
@@ -60,6 +62,7 @@ class JobRunner
 	}
 
 
+	/** @return array{?string, ?string} */
 	public function download(string $command): array
 	{
 		[$remotePath, $localFile] = explode(' ', $command);
@@ -73,6 +76,7 @@ class JobRunner
 	}
 
 
+	/** @return array{?string, ?string} */
 	public function upload(string $command): array
 	{
 		[$localFile, $remotePath] = explode(' ', $command);
@@ -87,6 +91,7 @@ class JobRunner
 	}
 
 
+	/** @return array{?string, ?string} */
 	public function http(string $url): array
 	{
 		$out = Helpers::fetchUrl($url, $err);

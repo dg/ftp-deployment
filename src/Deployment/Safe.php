@@ -58,10 +58,10 @@ namespace Deployment;
 class Safe
 {
 	/**
-	 * @return mixed
+	 * @param list<mixed>  $args
 	 * @throws ServerException
 	 */
-	public static function __callStatic(string $func, array $args = [])
+	public static function __callStatic(string $func, array $args = []): mixed
 	{
 		set_error_handler(function (int $severity, string $message) {
 			if (ini_get('html_errors')) {

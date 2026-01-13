@@ -25,7 +25,7 @@ class FtpServer implements Server
 	/** @var resource */
 	private $connection;
 
-	/** see parse_url() */
+	/** @var array{scheme?: string, host?: string, port?: int, user?: string, pass?: string, path?: string, query?: string, fragment?: string} */
 	private array $url;
 	private bool $passiveMode = true;
 
