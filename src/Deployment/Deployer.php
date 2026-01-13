@@ -29,13 +29,13 @@ class Deployer
 	/** @var string[] relative paths */
 	public array $toPurge = [];
 
-	/** @var array of string|callable */
+	/** @var list<string|(callable(Server, Logger, Deployer): (false|void))> */
 	public array $runBefore = [];
 
-	/** @var array of string|callable */
+	/** @var list<string|(callable(Server, Logger, Deployer): (false|void))> */
 	public array $runAfterUpload = [];
 
-	/** @var array of string|callable */
+	/** @var list<string|(callable(Server, Logger, Deployer): (false|void))> */
 	public array $runAfter = [];
 	public string $tempDir = '';
 
@@ -45,6 +45,8 @@ class Deployer
 	private string $localDir;
 	private string $remoteDir;
 	private Logger $logger;
+
+	/** @var array<string, list<array{filter: callable(string, string): ?string, cached: bool}>> */
 	private array $filters = [];
 	private Server $server;
 
@@ -190,6 +192,7 @@ class Deployer
 
 	/**
 	 * Appends preprocessor for files.
+	 * @param callable(string, string): ?string  $filter
 	 */
 	public function addFilter(string $extension, callable $filter, bool $cached = false): void
 	{
@@ -199,7 +202,7 @@ class Deployer
 
 	/**
 	 * Downloads and decodes .htdeployment from the server.
-	 * @return string[]|null  relative paths, starts with /
+	 * @return ?array<string, string|true> relative paths, starts with /
 	 */
 	private function loadDeploymentFile(): ?array
 	{
@@ -227,6 +230,7 @@ class Deployer
 
 	/**
 	 * Prepares .htdeployment for upload.
+	 * @param array<string, string|true>  $localPaths
 	 */
 	public function writeDeploymentFile(array $localPaths): string
 	{
@@ -244,6 +248,7 @@ class Deployer
 	/**
 	 * Uploades files and creates directories.
 	 * @param  string[]  $paths  relative paths, starts with /
+	 * @param  array<string, true>  $tempFiles
 	 */
 	private function uploadPaths(array $paths, array &$tempFiles): void
 	{
@@ -285,6 +290,7 @@ class Deployer
 	/**
 	 * Renames uploaded files.
 	 * @param  string[]  $paths  relative paths, starts with /
+	 * @param  array<string, true>  $tempFiles
 	 */
 	private function renamePaths(array $paths, array &$tempFiles): void
 	{
@@ -323,8 +329,8 @@ class Deployer
 
 	/**
 	 * Scans directory.
-	 * @param  string   $subdir  relative subdir, starts with /
-	 * @return string[] relative paths, starts with /
+	 * @param  string  $subdir  relative subdir, starts with /
+	 * @return array<string, string|true> relative paths, starts with /
 	 */
 	public function collectPaths(string $subdir = ''): array
 	{
@@ -405,7 +411,7 @@ class Deployer
 
 
 	/**
-	 * @param  array  $jobs  string|callable
+	 * @param list<string|(callable(Server, Logger, Deployer): (false|void))>  $jobs
 	 */
 	private function runJobs(array $jobs): void
 	{

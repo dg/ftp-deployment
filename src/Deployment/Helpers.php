@@ -74,6 +74,8 @@ class Helpers
 
 	/**
 	 * Processes HTTP request.
+	 * @param ?array<string, scalar>  $postData
+	 * @param-out ?string  $error
 	 */
 	public static function fetchUrl(string $url, ?string &$error, ?array $postData = null): string
 	{
@@ -112,6 +114,9 @@ class Helpers
 	}
 
 
+	/**
+	 * @param array{scheme?: string, host?: string, port?: int, user?: string, pass?: string, path?: string}  $url
+	 */
 	public static function buildUrl(array $url): string
 	{
 		return (isset($url['scheme']) ? $url['scheme'] . '://' : '')
