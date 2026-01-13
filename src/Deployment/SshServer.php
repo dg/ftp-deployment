@@ -19,13 +19,13 @@ class SshServer implements Server
 	public ?int $filePermissions = null;
 	public ?int $dirPermissions = null;
 
-	/** @var resource */
+	/** @var resource|null */
 	private $connection;
 
-	/** @var resource */
+	/** @var resource|null */
 	private $sftp;
 
-	/** see parse_url() */
+	/** @var array{scheme: string, host: string, user: string, pass?: string, port?: int, path?: string} */
 	private array $url;
 	private ?string $publicKey;
 	private ?string $privateKey;
@@ -33,7 +33,7 @@ class SshServer implements Server
 
 
 	/**
-	 * @param string $url sftp://...
+	 * @param string  $url sftp://...
 	 * @throws \Exception
 	 */
 	public function __construct(

@@ -20,10 +20,10 @@ class FtpServer implements Server
 	public ?int $filePermissions = null;
 	public ?int $dirPermissions = null;
 
-	/** @var resource */
+	/** @var resource|null */
 	private $connection;
 
-	/** see parse_url() */
+	/** @var array{scheme: string, host: string, user: string, pass: string, port?: int, path?: string} */
 	private array $url;
 	private bool $passiveMode = true;
 

@@ -21,7 +21,7 @@ class CommandLine
 		RealPath = 'realpath',
 		Value = 'default';
 
-	/** @var array[] */
+	/** @var array<string, array{argument?: bool, optional?: bool, repeatable?: bool, realpath?: bool, default?: ?string}> */
 	private array $options = [];
 
 	/** @var string[] */
@@ -32,6 +32,7 @@ class CommandLine
 	private string $help;
 
 
+	/** @param array<string, array{argument?: bool, optional?: bool, repeatable?: bool, realpath?: bool, default?: ?string}> $defaults */
 	public function __construct(string $help, array $defaults = [])
 	{
 		$this->help = $help;
@@ -65,6 +66,10 @@ class CommandLine
 	}
 
 
+	/**
+	 * @param  ?list<string>  $args
+	 * @return array<string, mixed>
+	 */
 	public function parse(?array $args = null): array
 	{
 		if ($args === null) {
@@ -144,7 +149,8 @@ class CommandLine
 	}
 
 
-	public function checkArg(array $opt, &$arg): void
+	/** @param array<string, mixed> $opt */
+	public function checkArg(array $opt, mixed &$arg): void
 	{
 		if (!empty($opt[self::RealPath])) {
 			$path = realpath($arg);

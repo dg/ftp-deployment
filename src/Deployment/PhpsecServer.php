@@ -9,6 +9,8 @@ class PhpsecServer implements Server
 {
 	public ?int $filePermissions = null;
 	public ?int $dirPermissions = null;
+
+	/** @var array{scheme: string, host: string, user: string, pass?: string, port?: int, path?: string} */
 	private array $url;
 	private ?string $publicKey;
 	private ?string $privateKey;

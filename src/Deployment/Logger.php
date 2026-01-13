@@ -19,6 +19,8 @@ class Logger
 
 	/** @var resource */
 	private $file;
+
+	/** @var array<string, string> */
 	private array $colors = [
 		'black' => '0;30',
 		'gray' => '1;30',

@@ -14,6 +14,7 @@ namespace Deployment;
  */
 class CliRunner
 {
+	/** @var array<string, string|bool> */
 	public array $defaults = [
 		'local' => '',
 		'passivemode' => true,
@@ -32,13 +33,13 @@ class CliRunner
 	private Logger $logger;
 	private string $configFile;
 
-	/** test|generate|null */
+	/** @var 'test'|'generate'|null */
 	private ?string $mode;
 
-	/** @var array[] */
+	/** @var array<string, array<string, mixed>> */
 	private array $batches = [];
 
-	/** @var resource */
+	/** @var resource|null holds file lock for process lifetime */
 	private $lock;
 
 
@@ -103,6 +104,7 @@ class CliRunner
 	}
 
 
+	/** @param array<string, mixed> $config */
 	private function createDeployer(array $config): Deployer
 	{
 		if (
@@ -212,6 +214,7 @@ class CliRunner
 	}
 
 
+	/** @return ?array<string, mixed> */
 	private function loadConfig(): ?array
 	{
 		$cmd = new CommandLine(
@@ -283,6 +286,7 @@ class CliRunner
 	}
 
 
+	/** @return array<string, mixed> */
 	protected function loadConfigFile(string $file): array
 	{
 		if (pathinfo($file, PATHINFO_EXTENSION) == 'php') {
@@ -293,7 +297,11 @@ class CliRunner
 	}
 
 
-	public static function toArray($val, bool $lines = false): array
+	/**
+	 * @param  string|list<string>  $val
+	 * @return list<string>
+	 */
+	public static function toArray(mixed $val, bool $lines = false): array
 	{
 		return is_array($val)
 			? array_filter($val)
