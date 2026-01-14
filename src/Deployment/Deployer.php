@@ -69,6 +69,13 @@ class Deployer
 	 */
 	public function deploy(): void
 	{
+		if (file_exists("$this->localDir/.git")) {
+			@exec("cd $this->localDir && git rev-parse --abbrev-ref HEAD", $git_branch, $code);
+			$git_branch = trim(implode("\n", $git_branch));
+			$git_branch_color = $git_branch === 'main' ? 'aqua' : 'red';
+			$this->logger->log("Current git branch: $git_branch", $git_branch_color);
+		}
+
 		$this->logger->log('Connecting to server');
 		$this->server->connect();
 		$this->remoteDir = $this->server->getDir();
@@ -111,10 +118,9 @@ class Deployer
 		if (!$toUpload && !$toDelete) {
 			$this->logger->log('Already synchronized.', 'lime');
 
-			$runAfterLocal = array_filter($this->runAfter, fn($job) => is_string($job) && preg_match('#^local:#', $job));
-			if ($runAfterLocal) {
-				$this->logger->log("\nLocal-after-jobs:");
-				$this->runJobs($runAfterLocal);
+			if ($this->runAfter) {
+				$this->logger->log("\nAfter-jobs:");
+				$this->runJobs($this->runAfter);
 			}
 			return;
 
@@ -146,7 +152,9 @@ class Deployer
 			$this->logger->log("Creating remote file $this->deploymentFile.running");
 			$runningFile = "$this->remoteDir/$this->deploymentFile.running";
 			$this->server->createDir(str_replace('\\', '/', dirname($runningFile)));
-			$this->server->writeFile(tempnam($this->tempDir, 'deploy'), $runningFile);
+			$localRunningFile = tempnam($this->tempDir, 'deploy');
+			$this->server->writeFile($localRunningFile, $runningFile);
+			unlink($localRunningFile);
 
 			if ($toUpload) {
 				$this->logger->log("\nRenaming:");
@@ -216,9 +224,11 @@ class Deployer
 				$this->server->readFile($this->remoteDir . '/' . $this->deploymentFile, $tempFile);
 			}
 		} catch (ServerException $e) {
+			unlink($tempFile);
 			return null;
 		}
 		$s = file_get_contents($tempFile);
+		unlink($tempFile);
 		$content = @gzinflate($s) ?: gzdecode($s);
 		$res = [];
 		foreach (explode("\n", $content) as $item) {
@@ -346,7 +356,9 @@ class Deployer
 				continue;
 
 			} elseif (Helpers::matchMask($short, $this->ignoreMasks, is_dir($path))) {
-				$this->logger->log(str_pad("Ignoring .$short", 40), 'gray');
+				if (!str_ends_with($short, '.DS_Store')) {
+					$this->logger->log(str_pad("Ignoring .$short", 40), 'gray');
+				}
 				continue;
 
 			} elseif ($this->includeMasks && !Helpers::matchMask($short, $this->includeMasks, is_dir($path))) {

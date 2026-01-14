@@ -45,7 +45,11 @@ class PhpsecServer implements Server
 		}
 		$sftp = new SFTP($this->url['host'], $this->url['port'] ?? 22);
 		if ($this->privateKey) {
-			$key = PublicKeyLoader::load(file_get_contents($this->privateKey), $this->passPhrase ?? false);
+			$passPhrase = $this->passPhrase ?? false;
+			if ($passPhrase === 'STDIN') {
+				$passPhrase = Helpers::getHiddenInput("Enter password for private key: ");
+			}
+			$key = PublicKeyLoader::load(file_get_contents($this->privateKey), $passPhrase);
 			if (!$sftp->login(urldecode($this->url['user']), $key)) {
 				throw new ServerException('Login failed with private key');
 			}

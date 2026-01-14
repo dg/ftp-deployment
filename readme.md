@@ -215,5 +215,5 @@ Need SSH authenticate using a public key?
 ```
 publicKey = '/key/id_rsa.pub'
 privateKey = '/key/id_rsa'
-passPhrase = 'yourpass' #optional - If needed passphrase for privateKey
+passPhrase = 'yourpass' #optional - If needed passphrase for privateKey, or set to STDIN to enter via command line
 ```
