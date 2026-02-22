@@ -106,14 +106,15 @@ class RetryServer implements Server
 	 */
 	private function retry(string $method, array $args): mixed
 	{
-		$counter = 0;
-		$lastError = null;
-		retry:
-		try {
-			return $this->server->$method(...$args);
+		$lastError = '';
+		for ($counter = 0; ; $counter++) {
+			try {
+				return $this->server->$method(...$args);
 
-		} catch (ServerException $e) {
-			if ($counter < self::Retries) {
+			} catch (ServerException $e) {
+				if ($counter >= self::Retries) {
+					throw $e;
+				}
 				if ($e->getMessage() !== $lastError) {
 					$lastError = $e->getMessage();
 					$this->logger->log("Error: $e", 'red');
@@ -123,13 +124,10 @@ class RetryServer implements Server
 					$this->retry('connect', []); // first try to reconnect
 				}
 
-				$counter++;
-				$this->logger->progress('retrying ' . str_pad(str_repeat('.', $counter % 40), 40));
+				$this->logger->progress('retrying ' . str_pad(str_repeat('.', ($counter + 1) % 40), 40));
 
 				sleep(self::Delay);
-				goto retry;
 			}
-			throw $e;
 		}
 	}
 }
