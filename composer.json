@@ -18,7 +18,9 @@
 	},
 	"require-dev": {
 		"nette/tester": "^2.0",
-		"phpstan/phpstan": "^0.12"
+		"phpstan/phpstan": "^2.1",
+		"phpstan/extension-installer": "^1.4",
+		"nette/phpstan-rules": "^1.0"
 	},
 	"suggest": {
 		"ext-ftp": "to connect to ftp:// server",
@@ -30,9 +32,18 @@
 		"classmap": ["src/"]
 	},
 	"bin": ["deployment"],
+	"scripts": {
+		"phpstan": "phpstan analyse",
+		"tester": "tester tests -s"
+	},
 	"extra": {
 		"branch-alias": {
 			"dev-master": "3.7-dev"
+		}
+	},
+	"config": {
+		"allow-plugins": {
+			"phpstan/extension-installer": true
 		}
 	}
 }
