@@ -103,10 +103,9 @@ class Deployer
 
 		if ($localPaths !== $remotePaths) { // ignores allowDelete
 			$deploymentFile = $this->writeDeploymentFile($localPaths);
-			$toUpload[] = "/$this->deploymentFile"; // must be last
 		}
 
-		if (!$toUpload && !$toDelete) {
+		if (!$toUpload && !$toDelete && !isset($deploymentFile)) {
 			$this->logger->log('Already synchronized.', 'lime');
 
 			$runAfterLocal = array_filter($this->runAfter, fn($job) => is_string($job) && preg_match('#^local:#', $job));
@@ -135,10 +134,20 @@ class Deployer
 			if ($toUpload) {
 				$this->logger->log("\nUploading:");
 				$this->uploadPaths($toUpload, $tempFiles);
-				if ($this->runAfterUpload) {
-					$this->logger->log("\nAfter-upload-jobs:");
-					$this->runJobs($this->runAfterUpload);
-				}
+			}
+
+			if (isset($deploymentFile)) {
+				$toUpload[] = "/$this->deploymentFile";
+				$tempFiles["/$this->deploymentFile" . self::TemporarySuffix] = true;
+				$this->server->writeFile(
+					$deploymentFile,
+					$this->remoteDir . '/' . $this->deploymentFile . self::TemporarySuffix,
+				);
+			}
+
+			if ($this->runAfterUpload) {
+				$this->logger->log("\nAfter-upload-jobs:");
+				$this->runJobs($this->runAfterUpload);
 			}
 
 			$this->logger->log("Creating remote file $this->deploymentFile.running");
