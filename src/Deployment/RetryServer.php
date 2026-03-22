@@ -19,12 +19,14 @@ class RetryServer implements Server
 
 	private Server $server;
 	private Logger $logger;
+	private ?InterruptHandler $interruptHandler;
 
 
-	public function __construct(Server $server, Logger $logger)
+	public function __construct(Server $server, Logger $logger, ?InterruptHandler $interruptHandler = null)
 	{
 		$this->server = $server;
 		$this->logger = $logger;
+		$this->interruptHandler = $interruptHandler;
 	}
 
 
@@ -106,10 +108,23 @@ class RetryServer implements Server
 	 */
 	private function retry(string $method, array $args): mixed
 	{
+		$interruptible = in_array($method, ['writeFile', 'readFile', 'removeFile', 'renameFile', 'removeDir'], true);
 		$lastError = '';
 		for ($counter = 0; ; $counter++) {
 			try {
 				return $this->server->$method(...$args);
+
+			} catch (SkipException | TerminatedException $e) {
+				// These exceptions are thrown from user callbacks (e.g. progress callback in writeFile)
+				// and may interrupt a transfer mid-stream, leaving the connection in a broken state.
+				// Reconnect before re-throwing so that subsequent operations (e.g. cleanup) work.
+				if ($method !== 'connect') {
+					try {
+						$this->server->connect();
+					} catch (\Throwable) {
+					}
+				}
+				throw $e;
 
 			} catch (ServerException $e) {
 				if ($counter >= self::Retries) {
@@ -126,7 +141,13 @@ class RetryServer implements Server
 
 				$this->logger->progress('retrying ' . str_pad(str_repeat('.', ($counter + 1) % 40), 40));
 
-				sleep(self::Delay);
+				// Fragmented sleep (200ms intervals) to stay responsive to Ctrl+C
+				for ($i = 0; $i < self::Delay * 5; $i++) {
+					usleep(200_000);
+					if ($interruptible) {
+						$this->interruptHandler?->check("Retry $method");
+					}
+				}
 			}
 		}
 	}

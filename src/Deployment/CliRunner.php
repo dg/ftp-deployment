@@ -32,6 +32,7 @@ class CliRunner
 	public array $ignoreMasks = ['*.bak', '.svn', '.git*', 'Thumbs.db', '.DS_Store', '.idea', '.claude'];
 	private Logger $logger;
 	private string $configFile;
+	private InterruptHandler $interruptHandler;
 
 	/** @var 'test'|'generate'|null */
 	private ?string $mode;
@@ -46,6 +47,7 @@ class CliRunner
 	public function run(): ?int
 	{
 		$this->logger = new Logger('php://memory');
+		$this->interruptHandler = new InterruptHandler;
 		$this->setupPhp();
 
 		$config = $this->loadConfig();
@@ -56,6 +58,7 @@ class CliRunner
 		$this->logger = new Logger($config['log']);
 		$this->logger->useColors = (bool) $config['colors'];
 		$this->logger->showProgress = (bool) $config['progress'];
+		$this->interruptHandler->logger = $this->logger;
 
 		if (!is_dir($tempDir = $config['tempdir'])) {
 			$this->logger->log("Creating temporary directory $tempDir");
@@ -94,8 +97,20 @@ class CliRunner
 			} catch (JobException | ServerException $e) {
 				$this->logger->log("Error: {$e->getMessage()} in {$e->getFile()}:{$e->getLine()}\n\n$e", 'red');
 				$res = 1;
+			} catch (TerminatedException $e) {
+				$this->logger->log($e->getMessage(), 'red');
+				$res = 1;
+				break;
 			}
 			$this->logger->log("\n\n");
+		}
+
+		if ($this->interruptHandler->hasSkipped()) {
+			$this->logger->log("\nSkipped operations:", 'yellow');
+			foreach ($this->interruptHandler->getSkipped() as $skipped) {
+				$this->logger->log("  - $skipped", 'yellow');
+			}
+			$res = 1;
 		}
 
 		$time = time() - $time;
@@ -141,13 +156,13 @@ class CliRunner
 			? null
 			: octdec($config['dirpermissions']);
 
-		$server = new RetryServer($server, $this->logger);
+		$server = new RetryServer($server, $this->logger, $this->interruptHandler);
 
 		if (!preg_match('#/|\\\|[a-z]:#iA', $config['local'])) {
 			$config['local'] = dirname($this->configFile) . '/' . $config['local'];
 		}
 
-		$deployment = new Deployer($server, $config['local'], $this->logger);
+		$deployment = new Deployer($server, $config['local'], $this->logger, $this->interruptHandler);
 
 		if ($config['preprocess']) {
 			$deployment->preprocessMasks = $config['preprocess'] == 1
@@ -199,18 +214,7 @@ class CliRunner
 			exit(1);
 		});
 
-		if (extension_loaded('pcntl')) {
-			pcntl_signal(SIGINT, function (): void {
-				pcntl_signal(SIGINT, SIG_DFL);
-				throw new \Exception('Terminated');
-			});
-			pcntl_async_signals(true);
-
-		} elseif (function_exists('sapi_windows_set_ctrl_handler')) {
-			sapi_windows_set_ctrl_handler(function () {
-				throw new \Exception('Terminated');
-			});
-		}
+		$this->interruptHandler->register();
 	}
 
 
