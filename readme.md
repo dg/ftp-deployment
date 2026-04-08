@@ -186,7 +186,7 @@ This tool will combine scripts together and minify them with the Closure Compile
 Installing FTP Deployment
 -------------------------
 
-FTP Deployment 3.6 requires PHP 8.0 or later. It also requires openssl extensions for ftps:// and SSH2 extension for sftp:// connections.
+FTP Deployment requires PHP 8.0 or later. It also requires openssl extensions for ftps:// and SSH2 extension for sftp:// connections.
 
 The easiest way to obtain FTP Deployment is to download [a single PHAR file](https://github.com/dg/ftp-deployment/releases).
 
