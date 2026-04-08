@@ -43,7 +43,8 @@ class Logger
 
 	public function __construct(string $file)
 	{
-		$this->file = fopen($file, 'a');
+		$this->file = fopen($file, 'a')
+			?: throw new \RuntimeException("Cannot open log file '$file'");
 	}
 
 

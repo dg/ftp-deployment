@@ -47,10 +47,11 @@ class SshServer implements Server
 		if (!extension_loaded('ssh2')) {
 			throw new \Exception('PHP extension SSH2 is not loaded.');
 		}
-		$this->url = parse_url($url);
-		if (!isset($this->url['scheme'], $this->url['user'], $this->url['host']) || $this->url['scheme'] !== 'sftp') {
+		$url = parse_url($url);
+		if (!$url || !isset($url['scheme'], $url['user'], $url['host']) || $url['scheme'] !== 'sftp') {
 			throw new \InvalidArgumentException('Invalid URL or missing username');
 		}
+		$this->url = $url;
 		$this->publicKey = $publicKey;
 		$this->privateKey = $privateKey;
 		$this->passPhrase = $passPhrase;
@@ -84,7 +85,7 @@ class SshServer implements Server
 	 */
 	public function readFile(string $remote, string $local): void
 	{
-		Safe::copy('ssh2.sftp://' . (int) $this->sftp . $remote, $local);
+		Safe::copy('ssh2.sftp://' . (int) $this->getConnection() . $remote, $local);
 	}
 
 
@@ -97,7 +98,7 @@ class SshServer implements Server
 		$size = max(filesize($local), 1);
 		$len = 0;
 		$i = Safe::fopen($local, 'rb');
-		$o = Safe::fopen('ssh2.sftp://' . (int) $this->sftp . $remote, 'wb');
+		$o = Safe::fopen('ssh2.sftp://' . (int) $this->getConnection() . $remote, 'wb');
 		while (!feof($i)) {
 			$s = Safe::fread($i, 10000);
 			if (Safe::fwrite($o, $s, strlen($s)) !== strlen($s)) {
@@ -109,7 +110,7 @@ class SshServer implements Server
 			}
 		}
 		if ($this->filePermissions) {
-			Safe::ssh2_sftp_chmod($this->sftp, $remote, $this->filePermissions);
+			Safe::ssh2_sftp_chmod($this->getConnection(), $remote, $this->filePermissions);
 		}
 	}
 
@@ -120,7 +121,7 @@ class SshServer implements Server
 	 */
 	public function removeFile(string $file): void
 	{
-		if (file_exists($path = 'ssh2.sftp://' . (int) $this->sftp . $file)) {
+		if (file_exists($path = 'ssh2.sftp://' . (int) $this->getConnection() . $file)) {
 			Safe::unlink($path);
 		}
 	}
@@ -132,13 +133,13 @@ class SshServer implements Server
 	 */
 	public function renameFile(string $old, string $new): void
 	{
-		if (file_exists($path = 'ssh2.sftp://' . (int) $this->sftp . $new)) {
+		if (file_exists($path = 'ssh2.sftp://' . (int) $this->getConnection() . $new)) {
 			$perms = fileperms($path);
 			$this->removeFile($new);
 		}
-		Safe::ssh2_sftp_rename($this->sftp, $old, $new);
+		Safe::ssh2_sftp_rename($this->getConnection(), $old, $new);
 		if (!empty($perms)) {
-			Safe::ssh2_sftp_chmod($this->sftp, $new, $perms);
+			Safe::ssh2_sftp_chmod($this->getConnection(), $new, $perms);
 		}
 	}
 
@@ -149,8 +150,8 @@ class SshServer implements Server
 	 */
 	public function createDir(string $dir): void
 	{
-		if (trim($dir, '/') !== '' && !file_exists('ssh2.sftp://' . (int) $this->sftp . $dir)) {
-			Safe::ssh2_sftp_mkdir($this->sftp, $dir, $this->dirPermissions ?: 0o777, true);
+		if (trim($dir, '/') !== '' && !file_exists('ssh2.sftp://' . (int) $this->getConnection() . $dir)) {
+			Safe::ssh2_sftp_mkdir($this->getConnection(), $dir, $this->dirPermissions ?: 0o777, true);
 		}
 	}
 
@@ -161,7 +162,7 @@ class SshServer implements Server
 	 */
 	public function removeDir(string $dir): void
 	{
-		if (file_exists($path = 'ssh2.sftp://' . (int) $this->sftp . $dir)) {
+		if (file_exists($path = 'ssh2.sftp://' . (int) $this->getConnection() . $dir)) {
 			Safe::rmdir($path);
 		}
 	}
@@ -173,7 +174,7 @@ class SshServer implements Server
 	 */
 	public function purge(string $dir, ?callable $progress = null): void
 	{
-		if (!file_exists($path = 'ssh2.sftp://' . (int) $this->sftp . $dir)) {
+		if (!file_exists($path = 'ssh2.sftp://' . (int) $this->getConnection() . $dir)) {
 			return;
 		}
 
@@ -211,7 +212,7 @@ class SshServer implements Server
 	 */
 	public function chmod(string $path, int $permissions): void
 	{
-		Safe::ssh2_sftp_chmod($this->sftp, $path, $permissions);
+		Safe::ssh2_sftp_chmod($this->getConnection(), $path, $permissions);
 	}
 
 
@@ -230,10 +231,28 @@ class SshServer implements Server
 	 */
 	public function execute(string $command): string
 	{
-		$stream = Safe::ssh2_exec($this->connection, $command);
+		$stream = Safe::ssh2_exec($this->connection(), $command);
 		Safe::stream_set_blocking($stream, true);
 		$out = Safe::stream_get_contents($stream);
 		fclose($stream);
 		return $out;
+	}
+
+
+	/**
+	 * @return resource
+	 */
+	private function connection(): mixed
+	{
+		return $this->connection ?? throw new ServerException('Not connected. Call connect() first.');
+	}
+
+
+	/**
+	 * @return resource
+	 */
+	private function getConnection(): mixed
+	{
+		return $this->sftp ?? throw new ServerException('Not connected. Call connect() first.');
 	}
 }

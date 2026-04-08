@@ -16,7 +16,7 @@ class ServerException extends \Exception
 		parent::__construct($message);
 		if ($file) {
 			$this->file = $file;
-			$this->line = $line;
+			$this->line = $line ?? 0;
 		}
 	}
 }

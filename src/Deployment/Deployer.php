@@ -58,10 +58,11 @@ class Deployer
 		Logger $logger,
 		?InterruptHandler $interruptHandler = null,
 	) {
-		$this->localDir = realpath($localDir);
-		if (!$this->localDir) {
+		$path = realpath($localDir);
+		if (!$path) {
 			throw new \InvalidArgumentException("Directory $localDir not found.");
 		}
+		$this->localDir = $path;
 		$this->server = $server;
 		$this->logger = $logger;
 		$this->interruptHandler = $interruptHandler;
@@ -77,14 +78,18 @@ class Deployer
 		$this->server->connect();
 		$this->remoteDir = $this->server->getDir();
 
-		$runBefore = [null, null];
+		$localBefore = $otherBefore = [];
 		foreach ($this->runBefore as $job) {
-			$runBefore[is_string($job) && preg_match('#^local:#', $job)][] = $job;
+			if (is_string($job) && preg_match('#^local:#', $job)) {
+				$localBefore[] = $job;
+			} else {
+				$otherBefore[] = $job;
+			}
 		}
 
-		if ($runBefore[1]) {
+		if ($localBefore) {
 			$this->logger->log("\nLocal-jobs:");
-			$this->runJobs($runBefore[1]);
+			$this->runJobs($localBefore);
 			$this->logger->log('');
 		}
 
@@ -114,7 +119,7 @@ class Deployer
 		if (!$toUpload && !$toDelete && !isset($deploymentFile)) {
 			$this->logger->log('Already synchronized.', 'lime');
 
-			$runAfterLocal = array_filter($this->runAfter, fn($job) => is_string($job) && preg_match('#^local:#', $job));
+			$runAfterLocal = array_values(array_filter($this->runAfter, fn($job) => is_string($job) && preg_match('#^local:#', $job)));
 			if ($runAfterLocal) {
 				$this->logger->log("\nLocal-after-jobs:");
 				$this->runJobs($runAfterLocal);
@@ -130,9 +135,9 @@ class Deployer
 			return;
 		}
 
-		if ($runBefore[0]) {
+		if ($otherBefore) {
 			$this->logger->log("\nBefore-jobs:");
-			$this->runJobs($runBefore[0]);
+			$this->runJobs($otherBefore);
 		}
 
 		try {
@@ -258,7 +263,13 @@ class Deployer
 			return null;
 		}
 		$s = file_get_contents($tempFile);
+		if ($s === false) {
+			return null;
+		}
 		$content = @gzinflate($s) ?: gzdecode($s);
+		if ($content === false) {
+			return null;
+		}
 		$res = [];
 		foreach (explode("\n", $content) as $item) {
 			if (count($item = explode('=', $item, 2)) === 2) {
@@ -368,7 +379,7 @@ class Deployer
 			} catch (SkipException) {
 				$this->interruptHandler->addSkipped("Rename $file");
 				$skippedPaths[] = $file;
-				continue; // skipped temp file stays in $tempFiles → cleaned up by finally block
+				continue; // skipped temp file stays in $tempFiles, cleaned up by finally block
 			}
 			unset($tempFiles[$file . self::TemporarySuffix]);
 		}
@@ -415,6 +426,9 @@ class Deployer
 	{
 		$list = [];
 		$iterator = dir($this->localDir . $subdir);
+		if (!$iterator) {
+			throw new \RuntimeException("Cannot open directory {$this->localDir}{$subdir}");
+		}
 		$counter = 0;
 		while (($entry = $iterator->read()) !== false) {
 			$this->logger->progress(str_pad(str_repeat('.', $counter++ % 40), 40));
@@ -459,15 +473,18 @@ class Deployer
 
 		$full = $this->localDir . str_replace('/', DIRECTORY_SEPARATOR, $file);
 		$content = file_get_contents($full);
+		if ($content === false) {
+			return $this->localDir . $file;
+		}
 
 		foreach ($this->filters[$ext] as $info) {
-			is_callable($info['filter'], false, $callable_name);
+			$callable_name = is_array($info['filter']) ? implode('::', $info['filter']) : '';
 			$cacheFile = $info['cached']
 				? $this->tempDir . '/' . md5($content . $callable_name)
 				: null;
 
 			if ($cacheFile && is_file($cacheFile)) {
-				$content = file_get_contents($tempFile = $cacheFile);
+				$content = (string) file_get_contents($tempFile = $cacheFile);
 			} else {
 				$res = $info['filter']($content, $full);
 				if ($res !== null) {

@@ -49,8 +49,8 @@ class JobRunner
 				$this->server->removeFile($a);
 			} elseif ($cmd === 'mv') {
 				$this->server->renameFile($a, $b);
-			} elseif ($cmd === 'chmod') {
-				$this->server->chmod($b, octdec($m[2]));
+			} else { // chmod
+				$this->server->chmod($b, (int) octdec($m[2]));
 			}
 			return [null, null];
 		}

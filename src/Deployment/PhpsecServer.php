@@ -2,6 +2,7 @@
 
 namespace Deployment;
 
+use phpseclib3\Crypt\Common\PrivateKey;
 use phpseclib3\Crypt\PublicKeyLoader;
 use phpseclib3\Net\SFTP;
 
@@ -12,7 +13,6 @@ class PhpsecServer implements Server
 
 	/** @var array{scheme: string, host: string, user: string, pass?: string, port?: int, path?: string} */
 	private array $url;
-	private ?string $publicKey;
 	private ?string $privateKey;
 	private ?string $passPhrase;
 	private ?SFTP $sftp = null;
@@ -26,11 +26,11 @@ class PhpsecServer implements Server
 		#[\SensitiveParameter]
 		?string $passPhrase = null,
 	) {
-		$this->url = parse_url($url);
-		if (!isset($this->url['scheme'], $this->url['user'], $this->url['host']) || $this->url['scheme'] !== 'phpsec') {
+		$url = parse_url($url);
+		if (!$url || !isset($url['scheme'], $url['user'], $url['host']) || $url['scheme'] !== 'phpsec') {
 			throw new \InvalidArgumentException('Invalid URL or missing username');
 		}
-		$this->publicKey = $publicKey;
+		$this->url = $url;
 		$this->privateKey = $privateKey;
 		$this->passPhrase = $passPhrase;
 	}
@@ -43,12 +43,16 @@ class PhpsecServer implements Server
 		}
 		$sftp = new SFTP($this->url['host'], $this->url['port'] ?? 22);
 		if ($this->privateKey) {
-			$key = PublicKeyLoader::load(file_get_contents($this->privateKey), $this->passPhrase ?? false);
-			if (!$sftp->login(urldecode($this->url['user']), $key)) {
+			$content = file_get_contents($this->privateKey);
+			if ($content === false) {
+				throw new ServerException("Unable to read private key file: $this->privateKey");
+			}
+			$key = PublicKeyLoader::load($content, $this->passPhrase ?? '');
+			if (!$key instanceof PrivateKey || !$sftp->login(urldecode($this->url['user']), $key)) {
 				throw new ServerException('Login failed with private key');
 			}
 		} else {
-			if (!$sftp->login(urldecode($this->url['user']), urldecode($this->url['pass']))) {
+			if (!$sftp->login(urldecode($this->url['user']), urldecode($this->url['pass'] ?? ''))) {
 				throw new ServerException('Login failed with password');
 			}
 		}
@@ -58,7 +62,7 @@ class PhpsecServer implements Server
 
 	public function readFile(string $remote, string $local): void
 	{
-		if ($this->sftp->get($remote, $local) === false) {
+		if ($this->getConnection()->get($remote, $local) === false) {
 			throw new ServerException('Unable to read file');
 		}
 	}
@@ -66,11 +70,12 @@ class PhpsecServer implements Server
 
 	public function writeFile(string $local, string $remote, ?callable $progress = null): void
 	{
-		if ($this->sftp->put($remote, $local, SFTP::SOURCE_LOCAL_FILE, -1, -1, $progress) === false) {
+		$sftp = $this->getConnection();
+		if ($sftp->put($remote, $local, SFTP::SOURCE_LOCAL_FILE, -1, -1, $progress) === false) {
 			throw new ServerException('Unable to write file');
 		}
 		if ($this->filePermissions) {
-			if ($this->sftp->chmod($this->filePermissions, $remote) === false) {
+			if ($sftp->chmod($this->filePermissions, $remote) === false) {
 				throw new ServerException('Unable to chmod after file creation');
 			}
 		}
@@ -79,8 +84,9 @@ class PhpsecServer implements Server
 
 	public function removeFile(string $file): void
 	{
-		if ($this->sftp->file_exists($file)) {
-			if ($this->sftp->delete($file) === false) {
+		$sftp = $this->getConnection();
+		if ($sftp->file_exists($file)) {
+			if ($sftp->delete($file) === false) {
 				throw new ServerException('Unable to delete file');
 			}
 		}
@@ -89,17 +95,18 @@ class PhpsecServer implements Server
 
 	public function renameFile(string $old, string $new): void
 	{
-		if ($this->sftp->file_exists($new)) {
-			$perms = $this->sftp->fileperms($new);
-			if ($this->sftp->delete($new) === false) {
+		$sftp = $this->getConnection();
+		if ($sftp->file_exists($new)) {
+			$perms = $sftp->fileperms($new);
+			if ($sftp->delete($new) === false) {
 				throw new ServerException('Unable to delete target file during rename');
 			}
 		}
-		if ($this->sftp->rename($old, $new) === false) {
+		if ($sftp->rename($old, $new) === false) {
 			throw new ServerException('Unable to rename file');
 		}
 		if (!empty($perms)) {
-			if ($this->sftp->chmod($perms, $new) === false) {
+			if ($sftp->chmod($perms, $new) === false) {
 				throw new ServerException('Unable to chmod file after renaming');
 			}
 		}
@@ -108,11 +115,12 @@ class PhpsecServer implements Server
 
 	public function createDir(string $dir): void
 	{
-		if ($dir !== '' && !$this->sftp->file_exists($dir)) {
-			if ($this->sftp->mkdir($dir) === false) {
+		$sftp = $this->getConnection();
+		if ($dir !== '' && !$sftp->file_exists($dir)) {
+			if ($sftp->mkdir($dir) === false) {
 				throw new ServerException('Unable to create directory');
 			}
-			if ($this->sftp->chmod($this->dirPermissions ?: 0o777, $dir) === false) {
+			if ($sftp->chmod($this->dirPermissions ?: 0o777, $dir) === false) {
 				throw new ServerException('Unable to chmod after creating a directory');
 			}
 		}
@@ -121,8 +129,9 @@ class PhpsecServer implements Server
 
 	public function removeDir(string $dir): void
 	{
-		if ($this->sftp->file_exists($dir)) {
-			if ($this->sftp->rmdir($dir) === false) {
+		$sftp = $this->getConnection();
+		if ($sftp->file_exists($dir)) {
+			if ($sftp->rmdir($dir) === false) {
 				throw new ServerException('Unable to remove directory');
 			}
 		}
@@ -131,8 +140,9 @@ class PhpsecServer implements Server
 
 	public function purge(string $path, ?callable $progress = null): void
 	{
-		if ($this->sftp->file_exists($path)) {
-			if ($this->sftp->delete($path, true) === false) {
+		$sftp = $this->getConnection();
+		if ($sftp->file_exists($path)) {
+			if ($sftp->delete($path, true) === false) {
 				throw new ServerException('Unable to purge directory/file');
 			}
 		}
@@ -141,7 +151,7 @@ class PhpsecServer implements Server
 
 	public function chmod(string $path, int $permissions): void
 	{
-		if ($this->sftp->chmod($permissions, $path) === false) {
+		if ($this->getConnection()->chmod($permissions, $path) === false) {
 			throw new ServerException('Unable to chmod file');
 		}
 	}
@@ -155,6 +165,16 @@ class PhpsecServer implements Server
 
 	public function execute(string $command): string
 	{
-		return $this->sftp->exec($command);
+		$result = $this->getConnection()->exec($command);
+		if (!is_string($result)) {
+			throw new ServerException("Failed to execute command: $command");
+		}
+		return $result;
+	}
+
+
+	private function getConnection(): SFTP
+	{
+		return $this->sftp ?? throw new ServerException('Not connected. Call connect() first.');
 	}
 }

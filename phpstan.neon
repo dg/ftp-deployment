@@ -3,3 +3,16 @@ parameters:
 
 	paths:
 		- src
+
+	ignoreErrors:
+		-	# Property holds file lock for process lifetime, intentionally never read
+			identifier: property.onlyWritten
+			path: src/Deployment/CliRunner.php
+
+		-	# Parameter kept for API compatibility with SshServer constructor
+			identifier: constructor.unusedParameter
+			path: src/Deployment/PhpsecServer.php
+
+		-	# Intentional dynamic dispatch: $func is always a valid PHP function name
+			identifier: callable.nonCallable
+			path: src/Deployment/Safe.php

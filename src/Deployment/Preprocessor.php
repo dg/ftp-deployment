@@ -88,6 +88,9 @@ class Preprocessor
 
 	private function checkCssClean(): ?string
 	{
+		if (!$this->cleanCssBinary) {
+			return 'clean-css binary not configured';
+		}
 		[$ok, $output] = $this->execute(escapeshellarg($this->cleanCssBinary) . ' --version', '', false);
 		if (!$ok) {
 			return "Error while executing $this->cleanCssBinary, install Node.js and clean-css-cli.";
@@ -113,6 +116,9 @@ class Preprocessor
 
 			$this->logger->log("Including $file");
 			$s = file_get_contents($file);
+			if ($s === false) {
+				return $m[0];
+			}
 			$newDir = dirname($file);
 			$s = $this->expandCssImports($s, $file);
 			if ($newDir !== $dir) {
@@ -142,7 +148,11 @@ class Preprocessor
 			}
 
 			$this->logger->log("Including $file");
-			return $this->expandApacheImports(file_get_contents($file), $file);
+			$s = file_get_contents($file);
+			if ($s === false) {
+				return $m[0];
+			}
+			return $this->expandApacheImports($s, $file);
 		}, $content);
 	}
 
@@ -162,6 +172,9 @@ class Preprocessor
 			null,
 			['bypass_shell' => $bypassShell],
 		);
+		if (!$process) {
+			return [false, ''];
+		}
 
 		fwrite($pipes[0], $input);
 		fclose($pipes[0]);

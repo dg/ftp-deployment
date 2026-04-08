@@ -161,6 +161,6 @@ class FileServer implements Server
 	public function execute(string $command): string
 	{
 		Safe::exec($command, $out);
-		return implode("\n", $out);
+		return implode("\n", $out ?? []);
 	}
 }

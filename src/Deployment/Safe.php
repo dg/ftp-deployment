@@ -69,7 +69,7 @@ class Safe
 				$message = $m[1];
 			}
 			$trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);
-			throw new ServerException($message, $trace[2]['file'], $trace[2]['line']);
+			throw new ServerException($message, $trace[2]['file'] ?? null, $trace[2]['line'] ?? null);
 		});
 		try {
 			$res = $func(...$args);
@@ -80,7 +80,7 @@ class Safe
 		}
 		if ($res === false) {
 			$trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);
-			throw new ServerException("$func() failures.", $trace[1]['file'], $trace[1]['line']);
+			throw new ServerException("$func() failures.", $trace[1]['file'] ?? null, $trace[1]['line'] ?? null);
 		}
 		return $res;
 	}

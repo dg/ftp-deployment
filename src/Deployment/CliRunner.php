@@ -151,10 +151,10 @@ class CliRunner
 		}
 		$server->filePermissions = empty($config['filepermissions'])
 			? null
-			: octdec($config['filepermissions']);
+			: (int) octdec($config['filepermissions']);
 		$server->dirPermissions = empty($config['dirpermissions'])
 			? null
-			: octdec($config['dirpermissions']);
+			: (int) octdec($config['dirpermissions']);
 
 		$server = new RetryServer($server, $this->logger, $this->interruptHandler);
 
@@ -257,9 +257,11 @@ class CliRunner
 			throw new \Exception('Missing config.');
 		}
 
-		if (!flock($this->lock = fopen($options['config'], 'r'), LOCK_EX | LOCK_NB)) {
+		$lock = fopen($options['config'], 'r');
+		if (!$lock || !flock($lock, LOCK_EX | LOCK_NB)) {
 			throw new \Exception('It seems that you are in the middle of another deployment.');
 		}
+		$this->lock = $lock;
 
 		$this->batches = isset($config['remote']) && is_string($config['remote'])
 			? ['' => $config]
@@ -296,7 +298,8 @@ class CliRunner
 		if (pathinfo($file, PATHINFO_EXTENSION) == 'php') {
 			return include $file;
 		} else {
-			return parse_ini_file($file, true);
+			return parse_ini_file($file, true)
+				?: throw new \Exception("Unable to parse config file '$file'.");
 		}
 	}
 
@@ -308,7 +311,7 @@ class CliRunner
 	public static function toArray(mixed $val, bool $lines = false): array
 	{
 		return is_array($val)
-			? array_filter($val)
+			? array_values(array_filter($val))
 			: preg_split($lines ? '#\s*\n\s*#' : '#\s+#', $val, -1, PREG_SPLIT_NO_EMPTY);
 	}
 
