@@ -112,7 +112,7 @@ class PhpsecServer implements Server
 			if ($this->sftp->mkdir($dir) === false) {
 				throw new ServerException('Unable to create directory');
 			}
-			if ($this->sftp->chmod($this->dirPermissions ?: 0777, $dir) === false) {
+			if ($this->sftp->chmod($this->dirPermissions ?: 0o777, $dir) === false) {
 				throw new ServerException('Unable to chmod after creating a directory');
 			}
 		}

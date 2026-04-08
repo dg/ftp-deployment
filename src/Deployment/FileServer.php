@@ -96,7 +96,7 @@ class FileServer implements Server
 	public function createDir(string $dir): void
 	{
 		if (trim($dir, '/') !== '' && !file_exists($path = $this->root . $dir)) {
-			Safe::mkdir($path, $this->dirPermissions ?? 0777, true);
+			Safe::mkdir($path, $this->dirPermissions ?? 0o777, true);
 		}
 	}
 

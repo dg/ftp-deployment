@@ -92,7 +92,7 @@ class Deployer
 
 		$this->logger->log("Scanning files in $this->localDir");
 		static $cache;
-		$localPaths = &$cache[serialize([$this->localDir, $this->ignoreMasks, $this->includeMasks, $this->filters, $this->preprocessMasks])];
+		$localPaths = &$cache[serialize([$this->localDir, $this->ignoreMasks, $this->includeMasks, array_keys($this->filters), $this->preprocessMasks])];
 		if ($localPaths === null) {
 			$localPaths = $this->collectPaths();
 		}
@@ -237,7 +237,7 @@ class Deployer
 			$s .= "$v=$k\n";
 		}
 		$file = $this->localDir . '/' . $this->deploymentFile;
-		@mkdir(dirname($file), 0777, true); // @ dir may exists
+		@mkdir(dirname($file), 0o777, true); // @ dir may exists
 		file_put_contents($file, gzencode($s, 9));
 		return $file;
 	}

@@ -152,7 +152,7 @@ class SshServer implements Server
 	public function createDir(string $dir): void
 	{
 		if (trim($dir, '/') !== '' && !file_exists('ssh2.sftp://' . (int) $this->sftp . $dir)) {
-			Safe::ssh2_sftp_mkdir($this->sftp, $dir, $this->dirPermissions ?: 0777, true);
+			Safe::ssh2_sftp_mkdir($this->sftp, $dir, $this->dirPermissions ?: 0o777, true);
 		}
 	}
 

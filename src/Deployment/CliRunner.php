@@ -60,7 +60,7 @@ class CliRunner
 
 		if (!is_dir($tempDir = $config['tempdir'])) {
 			$this->logger->log("Creating temporary directory $tempDir");
-			mkdir($tempDir, 0777, true);
+			mkdir($tempDir, 0o777, true);
 		}
 
 		$time = time();
@@ -154,11 +154,11 @@ class CliRunner
 				? ['*.js', '*.css']
 				: self::toArray($config['preprocess']); // intentionally ==
 			$preprocessor = new Preprocessor($this->logger);
-			$deployment->addFilter('js', [$preprocessor, 'expandApacheImports']);
-			$deployment->addFilter('js', [$preprocessor, 'compressJs'], true);
-			$deployment->addFilter('css', [$preprocessor, 'expandApacheImports']);
-			$deployment->addFilter('css', [$preprocessor, 'expandCssImports']);
-			$deployment->addFilter('css', [$preprocessor, 'compressCss'], true);
+			$deployment->addFilter('js', $preprocessor->expandApacheImports(...));
+			$deployment->addFilter('js', $preprocessor->compressJs(...), true);
+			$deployment->addFilter('css', $preprocessor->expandApacheImports(...));
+			$deployment->addFilter('css', $preprocessor->expandCssImports(...));
+			$deployment->addFilter('css', $preprocessor->compressCss(...), true);
 		}
 
 		$deployment->includeMasks = self::toArray($config['include'], true);
