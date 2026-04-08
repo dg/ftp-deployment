@@ -74,12 +74,10 @@ class FtpServer implements Server
 	 */
 	public function connect(): void
 	{
-		if ($this->connection) { // reconnect?
-			try {
-				Safe::ftp_close($this->connection);
-			} catch (\Throwable) {
-			}
-		}
+		// Don't use ftp_close() for reconnects — it sends QUIT which can block
+		// indefinitely if a transfer was interrupted mid-stream (server still
+		// waits for data on the data channel). Just abandon the resource.
+		$this->connection = null;
 		$this->connection = $this->url['scheme'] === 'ftp'
 			? Safe::ftp_connect($this->url['host'], $this->url['port'] ?? 21)
 			: Safe::ftp_ssl_connect($this->url['host'], $this->url['port'] ?? 21);
@@ -103,7 +101,9 @@ class FtpServer implements Server
 	 */
 	public function readFile(string $remote, string $local): void
 	{
-		Safe::ftp_get($this->getConnection(), $local, $remote, FTP_BINARY);
+		$this->withReconnect(function () use ($remote, $local) {
+			Safe::ftp_get($this->getConnection(), $local, $remote, FTP_BINARY);
+		});
 	}
 
 
@@ -113,16 +113,26 @@ class FtpServer implements Server
 	 */
 	public function writeFile(string $local, string $remote, ?callable $progress = null): void
 	{
-		$conn = $this->getConnection();
 		$size = max(filesize($local), 1);
 		$blocks = 0;
+		$reconnects = 0;
 		do {
 			if ($progress) {
 				$progress(min($blocks * self::BlockSize / $size, 100));
 			}
-			$ret = $blocks === 0
-				? Safe::ftp_nb_put($conn, $remote, $local, FTP_BINARY)
-				: Safe::ftp_nb_continue($conn);
+
+			try {
+				$ret = $blocks === 0
+					? Safe::ftp_nb_put($this->getConnection(), $remote, $local, FTP_BINARY)
+					: Safe::ftp_nb_continue($this->getConnection());
+			} catch (ServerException $e) {
+				if ($this->url['scheme'] !== 'ftps' || ++$reconnects > 3) {
+					throw $e;
+				}
+				$this->connect();
+				$blocks = 0;
+				$ret = Safe::ftp_nb_put($this->getConnection(), $remote, $local, FTP_BINARY);
+			}
 
 			$blocks++;
 			usleep(10000);
@@ -305,6 +315,25 @@ class FtpServer implements Server
 		} catch (ServerException $e) {
 			$perms = str_pad(decoct($perms), 4, '0', STR_PAD_LEFT);
 			Safe::ftp_site($this->getConnection(), "CHMOD $perms $file");
+		}
+	}
+
+
+	/**
+	 * For FTPS, retries the operation once with a fresh connection.
+	 * FTPS data connections are prone to intermittent SSL errors.
+	 * @param  callable(): void  $operation
+	 */
+	private function withReconnect(callable $operation): void
+	{
+		try {
+			$operation();
+		} catch (ServerException $e) {
+			if ($this->url['scheme'] !== 'ftps') {
+				throw $e;
+			}
+			$this->connect();
+			$operation();
 		}
 	}
 
