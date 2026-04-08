@@ -11,6 +11,7 @@ if (@!include __DIR__ . '/../vendor/autoload.php') {
 
 // configure environment
 Tester\Environment::setup();
+Tester\Environment::setupFunctions();
 date_default_timezone_set('Europe/Prague');
 
 
@@ -18,9 +19,3 @@ date_default_timezone_set('Europe/Prague');
 define('TEMP_DIR', __DIR__ . '/tmp/' . getmypid());
 @mkdir(dirname(TEMP_DIR)); // @ - directory may already exist
 Tester\Helpers::purge(TEMP_DIR);
-
-
-function test(Closure $function)
-{
-	$function();
-}
