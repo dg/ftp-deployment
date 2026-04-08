@@ -51,7 +51,7 @@ class Preprocessor
 		$cmd = escapeshellarg($this->uglifyJsBinary) . ' --compress --mangle';
 		[$ok, $output] = $this->execute($cmd, $content, false);
 		if (!$ok) {
-			$this->logger->log("Error while executing $this->uglifyJsBinary, install Node.js and uglify-es.", 'red');
+			$this->logger->log("Error while executing $this->uglifyJsBinary, install Node.js and uglify-js.", 'red');
 			$this->logger->log($output);
 			return null;
 		}
