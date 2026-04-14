@@ -287,7 +287,7 @@ class CliRunner
 		$config = array_change_key_case($config, CASE_LOWER) + [
 			'log' => preg_replace('#\.\w+$#', '.log', $this->configFile),
 			'tempdir' => sys_get_temp_dir() . '/deployment',
-			'progress' => true,
+			'progress' => Console::detectTerminal(),
 			'colors' => Console::detectColors(),
 		];
 		$config['progress'] = $options['--no-progress'] ? false : $config['progress'];
