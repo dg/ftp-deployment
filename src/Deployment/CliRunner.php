@@ -281,10 +281,10 @@ class CliRunner
 		}
 
 		foreach ($this->batches as &$batch) {
-			$batch = array_change_key_case($batch, CASE_LOWER) + $this->defaults;
+			$batch = array_change_key_case($batch) + $this->defaults;
 		}
 
-		$config = array_change_key_case($config, CASE_LOWER) + [
+		$config = array_change_key_case($config) + [
 			'log' => preg_replace('#\.\w+$#', '.log', $this->configFile),
 			'tempdir' => sys_get_temp_dir() . '/deployment',
 			'progress' => Console::detectTerminal(),

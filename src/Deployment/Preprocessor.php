@@ -123,7 +123,7 @@ class Preprocessor
 			$s = $this->expandCssImports($s, $file);
 			if ($newDir !== $dir) {
 				$tmp = $dir . '/';
-				if (substr($newDir, 0, strlen($tmp)) === $tmp) {
+				if (str_starts_with($newDir, $tmp)) {
 					$s = preg_replace('#\burl\(["\']?(?=[.\w])(?!\w+:)#', '$0' . substr($newDir, strlen($tmp)) . '/', $s);
 				} elseif (str_contains($s, 'url(')) {
 					return $m[0];

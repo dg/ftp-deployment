@@ -41,7 +41,7 @@ class Helpers
 		$path = explode('/', ltrim($path, '/'));
 		foreach ($patterns as $pattern) {
 			$pattern = strtr($pattern, '\\', '/');
-			if ($neg = substr($pattern, 0, 1) === '!') {
+			if ($neg = str_starts_with($pattern, '!')) {
 				$pattern = substr($pattern, 1);
 			}
 
@@ -51,7 +51,7 @@ class Helpers
 				}
 				continue;
 
-			} elseif (substr($pattern, -1) === '/') { // trailing slash means directory
+			} elseif (str_ends_with($pattern, '/')) { // trailing slash means directory
 				$pattern = trim($pattern, '/');
 				if (!$isDir && count($path) <= count(explode('/', $pattern))) {
 					continue;

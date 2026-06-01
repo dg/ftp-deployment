@@ -142,7 +142,7 @@ class PhpsecServer implements Server
 	{
 		$sftp = $this->getConnection();
 		if ($sftp->file_exists($path)) {
-			if ($sftp->delete($path, true) === false) {
+			if ($sftp->delete($path) === false) {
 				throw new ServerException('Unable to purge directory/file');
 			}
 		}
