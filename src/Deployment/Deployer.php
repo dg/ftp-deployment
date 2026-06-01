@@ -80,7 +80,7 @@ class Deployer
 
 		$localBefore = $otherBefore = [];
 		foreach ($this->runBefore as $job) {
-			if (is_string($job) && preg_match('#^local:#', $job)) {
+			if (is_string($job) && str_starts_with($job, 'local:')) {
 				$localBefore[] = $job;
 			} else {
 				$otherBefore[] = $job;
@@ -119,7 +119,7 @@ class Deployer
 		if (!$toUpload && !$toDelete && !isset($deploymentFile)) {
 			$this->logger->log('Already synchronized.', 'lime');
 
-			$runAfterLocal = array_values(array_filter($this->runAfter, fn($job) => is_string($job) && preg_match('#^local:#', $job)));
+			$runAfterLocal = array_values(array_filter($this->runAfter, fn($job) => is_string($job) && str_starts_with($job, 'local:')));
 			if ($runAfterLocal) {
 				$this->logger->log("\nLocal-after-jobs:");
 				$this->runJobs($runAfterLocal);
@@ -206,7 +206,7 @@ class Deployer
 				$this->logger->log("\nCleaning $path");
 				$this->server->purge($this->remoteDir . '/' . $path, function ($path) {
 					static $counter;
-					$path = (string) substr($path, strlen($this->remoteDir));
+					$path = substr($path, strlen($this->remoteDir));
 					$path = preg_match('#/(.{1,60})$#', $path, $m)
 						? $m[1]
 						: substr(basename($path), 0, 60);
@@ -259,7 +259,7 @@ class Deployer
 			} else {
 				$this->server->readFile($this->remoteDir . '/' . $this->deploymentFile, $tempFile);
 			}
-		} catch (ServerException $e) {
+		} catch (ServerException) {
 			return null;
 		}
 		$s = file_get_contents($tempFile);
@@ -316,7 +316,7 @@ class Deployer
 			}
 
 			$remotePath = $this->remoteDir . $path;
-			$isDir = substr($remotePath, -1) === '/';
+			$isDir = str_ends_with($remotePath, '/');
 			$remoteDir = $isDir
 				? substr($remotePath, 0, -1)
 				: str_replace('\\', '/', dirname($remotePath));
@@ -365,7 +365,7 @@ class Deployer
 	private function renamePaths(array $paths, array &$tempFiles): array
 	{
 		$skippedPaths = [];
-		$files = array_values(array_filter($paths, fn($path) => substr($path, -1) !== '/'));
+		$files = array_values(array_filter($paths, fn($path) => !str_ends_with($path, '/')));
 		foreach ($files as $num => $file) {
 			try {
 				// Deployment file rename is never skippable to keep server state consistent
@@ -401,7 +401,7 @@ class Deployer
 			try {
 				$this->interruptHandler?->check("Delete $path");
 				$this->writeProgress($num + 1, count($paths), "Deleting $path", null, 'maroon');
-				if (substr($path, -1) === '/') { // is directory?
+				if (str_ends_with($path, '/')) { // is directory?
 					$this->server->removeDir($remotePath);
 				} else {
 					$this->server->removeFile($remotePath);

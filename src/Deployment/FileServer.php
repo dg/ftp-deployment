@@ -24,7 +24,7 @@ class FileServer implements Server
 	 */
 	public function __construct(string $url)
 	{
-		if (substr($url, 0, 7) !== 'file://') {
+		if (!str_starts_with($url, 'file://')) {
 			throw new \InvalidArgumentException('Invalid URL');
 		}
 		$this->root = $url;

@@ -201,7 +201,7 @@ class FtpServer implements Server
 						$this->chmod($path, $this->dirPermissions);
 					}
 				}
-			} catch (ServerException $e) {
+			} catch (ServerException) {
 				if (!$this->isDir($path)) {
 					throw new ServerException("Cannot create directory '$path'.");
 				}
@@ -312,7 +312,7 @@ class FtpServer implements Server
 	{
 		try {
 			Safe::ftp_chmod($this->getConnection(), $perms, $file);
-		} catch (ServerException $e) {
+		} catch (ServerException) {
 			$perms = str_pad(decoct($perms), 4, '0', STR_PAD_LEFT);
 			Safe::ftp_site($this->getConnection(), "CHMOD $perms $file");
 		}
