@@ -60,8 +60,9 @@ remote = ftp://user:secretpassword@ftp.example.com/directory
 user = ...
 password = ...
 
-; any value may reference an environment variable, which is handy for secrets in CI/CD:
-password = %env(FTP_PASSWORD)%
+; any value may reference an environment variable, which is handy for secrets in CI/CD
+; (quote it in .ini configs, because INI treats the parentheses as special otherwise):
+password = "%env(FTP_PASSWORD)%"
 
 ; FTP passive mode
 passiveMode = yes
