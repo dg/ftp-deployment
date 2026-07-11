@@ -21,6 +21,7 @@ class PhpsecServer extends BaseServer
 		private ?string $privateKey = null,
 		#[\SensitiveParameter]
 		private ?string $passPhrase = null,
+		private readonly ?string $hostKey = null,
 	) {
 		$url = parse_url($url);
 		if (!$url || !isset($url['scheme'], $url['user'], $url['host']) || $url['scheme'] !== 'phpsec') {
@@ -36,6 +37,16 @@ class PhpsecServer extends BaseServer
 			@$this->sftp->disconnect(); // @ the connection may already be closed
 		}
 		$sftp = new SFTP($this->url['host'], $this->url['port'] ?? 22);
+
+		// Verify the server host key before sending any credentials.
+		if ($this->hostKey !== null) {
+			$actual = $sftp->getServerPublicHostKey();
+			if ($actual === false || !Helpers::matchHostKey($this->hostKey, $actual)) {
+				throw new ServerException('SSH host key verification failed'
+					. ($actual === false ? '.' : " (server key: $actual)."));
+			}
+		}
+
 		if ($this->privateKey) {
 			$content = file_get_contents($this->privateKey);
 			if ($content === false) {

@@ -66,6 +66,10 @@ password = ${FTP_PASSWORD}
 ; FTP passive mode
 passiveMode = yes
 
+; verify the SSH server host key (sftp:// and phpsec://) against man-in-the-middle attacks;
+; phpsec:// accepts the full public key, an "SHA256:..." or an MD5 fingerprint, sftp:// only an MD5 or SHA1 hex fingerprint
+hostKey = "SHA256:xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+
 ; local path (optional)
 local = .
 

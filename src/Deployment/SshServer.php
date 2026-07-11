@@ -37,6 +37,7 @@ class SshServer extends BaseServer
 		private ?string $privateKey = null,
 		#[\SensitiveParameter]
 		private ?string $passPhrase = null,
+		private readonly ?string $hostKey = null,
 	) {
 		if (!extension_loaded('ssh2')) {
 			throw new \Exception('PHP extension SSH2 is not loaded.');
@@ -44,6 +45,8 @@ class SshServer extends BaseServer
 		$url = parse_url($url);
 		if (!$url || !isset($url['scheme'], $url['user'], $url['host']) || $url['scheme'] !== 'sftp') {
 			throw new \InvalidArgumentException('Invalid URL or missing username');
+		} elseif ($hostKey !== null && !preg_match('#^([0-9a-f]{32}|[0-9a-f]{40})$#D', Helpers::normalizeFingerprint($hostKey))) {
+			throw new \InvalidArgumentException('Option hostKey of sftp:// accepts only an MD5 or SHA1 hex fingerprint, use phpsec:// for SHA256 or a full key.');
 		}
 		$this->url = $url;
 	}
@@ -59,6 +62,18 @@ class SshServer extends BaseServer
 			@ssh2_disconnect($this->connection); // @ the connection may already be closed
 		}
 		$this->connection = Safe::ssh2_connect($this->url['host'], $this->url['port'] ?? 22);
+
+		// Verify the server host key before authenticating. ext-ssh2 only exposes
+		// hex fingerprints, so we match against the MD5 or SHA1 fingerprint.
+		if ($this->hostKey !== null) {
+			$md5 = (string) ssh2_fingerprint($this->connection, SSH2_FINGERPRINT_MD5 | SSH2_FINGERPRINT_HEX);
+			$sha1 = (string) ssh2_fingerprint($this->connection, SSH2_FINGERPRINT_SHA1 | SSH2_FINGERPRINT_HEX);
+			$want = Helpers::normalizeFingerprint($this->hostKey);
+			if ($want !== Helpers::normalizeFingerprint($md5) && $want !== Helpers::normalizeFingerprint($sha1)) {
+				throw new ServerException("SSH host key verification failed (server MD5 fingerprint: $md5, SHA1: $sha1).");
+			}
+		}
+
 		if (isset($this->url['pass'])) {
 			Safe::ssh2_auth_password($this->connection, urldecode($this->url['user']), urldecode($this->url['pass']));
 		} elseif ($this->publicKey && $this->privateKey) {
