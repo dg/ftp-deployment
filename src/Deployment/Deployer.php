@@ -156,6 +156,28 @@ class Deployer
 			$this->runJobs($otherBefore);
 		}
 
+		$this->transfer($toUpload, $toDelete, $localPaths, $remotePaths, $deploymentFile ?? null);
+	}
+
+
+	/**
+	 * Runs the upload/rename/delete/purge phase inside a transactional envelope: creates
+	 * the .running marker up front and, on exit, removes it together with all temp files
+	 * (best-effort when the phase failed, so a cleanup error never masks the original one).
+	 * @param  string[]  $toUpload
+	 * @param  string[]  $toDelete
+	 * @param  array<string, string|true>  $localPaths
+	 * @param  array<string, string|true>  $remotePaths
+	 * @param  ?string  $deploymentFile  local path of the prepared deployment file, or null
+	 */
+	private function transfer(
+		array $toUpload,
+		array $toDelete,
+		array $localPaths,
+		array $remotePaths,
+		?string $deploymentFile,
+	): void
+	{
 		$failed = false;
 		$tempFiles = [];
 		try {
@@ -172,7 +194,7 @@ class Deployer
 				$toUpload = array_values(array_diff($toUpload, $skippedPaths));
 			}
 
-			if (isset($deploymentFile)) {
+			if ($deploymentFile !== null) {
 				$adjustedPaths = $localPaths;
 				$this->revertSkippedPaths($adjustedPaths, $skippedPaths, $remotePaths);
 				$deploymentFile = $this->writeDeploymentFile($adjustedPaths);
@@ -196,12 +218,7 @@ class Deployer
 				// leaving the old version on server. Re-generate the deployment file to
 				// reflect the actual server state, otherwise next deploy would skip these files.
 				if ($skippedRenames && isset($adjustedPaths)) {
-					$this->revertSkippedPaths($adjustedPaths, $skippedRenames, $remotePaths);
-					$deploymentFile = $this->writeDeploymentFile($adjustedPaths);
-					$this->server->writeFile(
-						$deploymentFile,
-						$this->remoteDir . '/' . $this->deploymentFile,
-					);
+					$deploymentFile = $this->regenerateDeploymentFile($adjustedPaths, $skippedRenames, $remotePaths);
 				}
 			}
 
@@ -211,25 +228,11 @@ class Deployer
 				// Skipped deletes leave files on server that the deployment file
 				// no longer tracks. Add them back so next deploy retries the deletion.
 				if ($skippedDeletes && isset($adjustedPaths)) {
-					$this->revertSkippedPaths($adjustedPaths, $skippedDeletes, $remotePaths);
-					$deploymentFile = $this->writeDeploymentFile($adjustedPaths);
-					$this->server->writeFile(
-						$deploymentFile,
-						$this->remoteDir . '/' . $this->deploymentFile,
-					);
+					$deploymentFile = $this->regenerateDeploymentFile($adjustedPaths, $skippedDeletes, $remotePaths);
 				}
 			}
 
-			foreach ($this->toPurge as $path) {
-				$this->logger->log("\nCleaning $path");
-				$this->server->purge($this->remoteDir . '/' . $path, function ($path) {
-					static $counter;
-					$path = (string) substr($path, strlen($this->remoteDir));
-					$path = Ansi::truncate($path, 60, keepEnd: true); // the name of the file is at the end
-					$this->logger->progress($path . ' ' . str_repeat('.', $counter++ % 30));
-				});
-				$this->logger->progress('');
-			}
+			$this->purgePaths();
 
 			if ($this->runAfter) {
 				$this->logger->log("\nAfter-jobs:");
@@ -247,7 +250,7 @@ class Deployer
 				$this->logger->log("\nDeleting remote file $this->deploymentFile.running");
 				$this->removeRemoteFile($runningFile, bestEffort: $failed);
 			}
-			if (isset($deploymentFile)) {
+			if ($deploymentFile !== null) {
 				unlink($deploymentFile);
 			}
 			if ($tempFiles) {
@@ -255,6 +258,40 @@ class Deployer
 				$this->deletePaths(array_keys($tempFiles), bestEffort: $failed);
 			}
 			$this->cleanup();
+		}
+	}
+
+
+	/**
+	 * After some operations were skipped, rewrites the deployment file to reflect the
+	 * real server state and uploads it under its final name.
+	 * @param  array<string, string|true>  $adjustedPaths
+	 * @param  string[]  $skipped
+	 * @param  array<string, string|true>  $remotePaths
+	 */
+	private function regenerateDeploymentFile(array &$adjustedPaths, array $skipped, array $remotePaths): string
+	{
+		$this->revertSkippedPaths($adjustedPaths, $skipped, $remotePaths);
+		$file = $this->writeDeploymentFile($adjustedPaths);
+		$this->server->writeFile($file, $this->remoteDir . '/' . $this->deploymentFile);
+		return $file;
+	}
+
+
+	/**
+	 * Recursively deletes the configured purge directories on the server.
+	 */
+	private function purgePaths(): void
+	{
+		foreach ($this->toPurge as $path) {
+			$this->logger->log("\nCleaning $path");
+			$this->server->purge($this->remoteDir . '/' . $path, function ($path) {
+				static $counter;
+				$path = (string) substr($path, strlen($this->remoteDir));
+				$path = Ansi::truncate($path, 60, keepEnd: true); // the name of the file is at the end
+				$this->logger->progress($path . ' ' . str_repeat('.', $counter++ % 30));
+			});
+			$this->logger->progress('');
 		}
 	}
 
