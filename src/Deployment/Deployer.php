@@ -127,14 +127,15 @@ class Deployer
 				$this->logger->log("\nLocal-after-jobs:");
 				$this->runJobs($runAfterLocal);
 			}
+			$this->cleanup();
 			return;
 
 		} elseif ($this->testMode) {
-			$this->logger->log("\nUploading:\n" . implode("\n", $toUpload), 'green', 0);
-			$this->logger->log("\nDeleting:\n" . implode("\n", $toDelete), 'maroon', 0);
+			$this->logTestSummary($toUpload, $toDelete);
 			if (isset($deploymentFile)) {
 				unlink($deploymentFile);
 			}
+			$this->cleanup();
 			return;
 		}
 
@@ -633,6 +634,38 @@ class Deployer
 			} else {
 				unset($adjustedPaths[$path]);
 			}
+		}
+	}
+
+
+	/**
+	 * Prints a human-readable summary of pending changes in test mode.
+	 * @param  string[]  $toUpload
+	 * @param  string[]  $toDelete
+	 */
+	private function logTestSummary(array $toUpload, array $toDelete): void
+	{
+		$files = array_filter($toUpload, fn($p) => !str_ends_with($p, '/'));
+		$dirs = array_filter($toUpload, fn($p) => str_ends_with($p, '/'));
+		$totalSize = 0;
+		foreach ($files as $p) {
+			$size = @filesize($this->localDir . $p); // @ - file may be unreadable
+			if ($size !== false) {
+				$totalSize += $size;
+			}
+		}
+
+		$summary = count($files) . ' file(s)'
+			. ($dirs ? ', ' . count($dirs) . ' new dir(s)' : '')
+			. ' (' . Helpers::formatSize($totalSize) . ')';
+		$this->logger->log("\nUploading" . ($toUpload ? " $summary:" : ' nothing'), 'green');
+		if ($toUpload) {
+			$this->logger->log(implode("\n", $toUpload), 'green', 0);
+		}
+
+		$this->logger->log("\nDeleting" . ($toDelete ? ' ' . count($toDelete) . ' item(s):' : ' nothing'), 'maroon');
+		if ($toDelete) {
+			$this->logger->log(implode("\n", $toDelete), 'maroon', 0);
 		}
 	}
 
