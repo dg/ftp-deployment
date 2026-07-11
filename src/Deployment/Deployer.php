@@ -140,6 +140,7 @@ class Deployer
 			$this->runJobs($otherBefore);
 		}
 
+		$failed = false;
 		try {
 			$tempFiles = [];
 			$skippedPaths = [];
@@ -218,17 +219,23 @@ class Deployer
 				$this->runJobs($this->runAfter);
 			}
 
+		} catch (\Throwable $e) {
+			$failed = true;
+			throw $e;
+
 		} finally {
+			// After a failure the connection may be broken, so clean up best-effort:
+			// skip the full retry storm and never let a cleanup error mask the original one.
 			if (isset($runningFile)) {
 				$this->logger->log("\nDeleting remote file $this->deploymentFile.running");
-				$this->server->removeFile($runningFile);
+				$this->removeRemoteFile($runningFile, bestEffort: $failed);
 			}
 			if (isset($deploymentFile)) {
 				unlink($deploymentFile);
 			}
 			if ($tempFiles) {
 				$this->logger->log("\nDeleting temporary files:");
-				$this->deletePaths(array_keys($tempFiles));
+				$this->deletePaths(array_keys($tempFiles), bestEffort: $failed);
 			}
 			$this->cleanup();
 		}
@@ -392,20 +399,19 @@ class Deployer
 	 * @param  string[]  $paths  relative paths, starts with /
 	 * @return string[]  skipped paths
 	 */
-	private function deletePaths(array $paths): array
+	private function deletePaths(array $paths, bool $bestEffort = false): array
 	{
 		$skippedPaths = [];
 		rsort($paths);
 		foreach ($paths as $num => $path) {
 			$remotePath = $this->remoteDir . $path;
 			try {
-				$this->interruptHandler?->check("Delete $path");
-				$this->writeProgress($num + 1, count($paths), "Deleting $path", null, 'maroon');
-				if (str_ends_with($path, '/')) { // is directory?
-					$this->server->removeDir($remotePath);
-				} else {
-					$this->server->removeFile($remotePath);
+				if (!$bestEffort) {
+					$this->interruptHandler?->check("Delete $path");
 				}
+				$this->writeProgress($num + 1, count($paths), "Deleting $path", null, 'maroon');
+				$method = str_ends_with($path, '/') ? 'removeDir' : 'removeFile'; // is directory?
+				$this->serverCall($method, $remotePath, noRetry: $bestEffort);
 			} catch (SkipException) {
 				$skippedPaths[] = $path;
 			} catch (ServerException) {
@@ -413,6 +419,35 @@ class Deployer
 			}
 		}
 		return $skippedPaths;
+	}
+
+
+	/**
+	 * Removes a remote file, optionally best-effort (no retries, errors swallowed).
+	 */
+	private function removeRemoteFile(string $file, bool $bestEffort): void
+	{
+		try {
+			$this->serverCall('removeFile', $file, noRetry: $bestEffort);
+		} catch (ServerException $e) {
+			if (!$bestEffort) {
+				throw $e;
+			}
+			$this->logger->log("Unable to delete $file", 'red');
+		}
+	}
+
+
+	/**
+	 * Invokes a single-argument server method, bypassing RetryServer when requested.
+	 */
+	private function serverCall(string $method, string $arg, bool $noRetry): void
+	{
+		if ($noRetry && $this->server instanceof RetryServer) {
+			$this->server->noRetry($method, $arg);
+		} else {
+			$this->server->$method($arg);
+		}
 	}
 
 
