@@ -78,12 +78,10 @@ class PhpsecServer extends BaseServer
 		$sftp = $this->getConnection();
 		// phpseclib invokes the callback with the number of bytes sent, but the Server
 		// interface contract is a percentage (0-100), so convert it here.
+		$size = max((int) filesize($local), 1);
 		$callback = $progress === null
 			? null
-			: function (int $sent) use ($progress, $local): void {
-				$size = max((int) filesize($local), 1);
-				$progress(min($sent * 100 / $size, 100));
-			};
+			: fn(int $sent) => $progress(min($sent * 100 / $size, 100));
 		if ($sftp->put($remote, $local, SFTP::SOURCE_LOCAL_FILE, -1, -1, $callback) === false) {
 			throw new ServerException('Unable to write file');
 		}
