@@ -34,8 +34,8 @@ class JobRunner
 	{
 		if (preg_match('#^(mkdir|rmdir|unlink|mv|chmod)\s+(\S+)(?:\s+(\S+))?()$#', $command, $m)) {
 			[, $cmd, $a, $b] = $m;
-			$a = '/' . ltrim($a, '/');
-			$b = '/' . ltrim($b, '/');
+			$a = $this->remoteDir . '/' . ltrim($a, '/');
+			$b = $this->remoteDir . '/' . ltrim($b, '/');
 			if ($cmd === 'mkdir') {
 				$this->server->createDir($a);
 			} elseif ($cmd === 'rmdir') {
