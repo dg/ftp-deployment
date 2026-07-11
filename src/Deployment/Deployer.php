@@ -47,6 +47,9 @@ class Deployer
 	private readonly string $localDir;
 	private string $remoteDir;
 
+	/** @var string[] temporary files to delete when the run finishes */
+	private array $garbage = [];
+
 	/** @var array<string, list<array{filter: callable(string, string): ?string, cached: bool, name: string}>> */
 	private array $filters = [];
 
@@ -166,7 +169,7 @@ class Deployer
 			$this->logger->log("Creating remote file $this->deploymentFile.running");
 			$runningFile = "$this->remoteDir/$this->deploymentFile.running";
 			$this->server->createDir(str_replace('\\', '/', dirname($runningFile)));
-			$this->server->writeFile(tempnam($this->tempDir, 'deploy'), $runningFile);
+			$this->server->writeFile($this->createTempFile(), $runningFile);
 
 			if ($toUpload) {
 				$this->logger->log("\nRenaming:");
@@ -227,6 +230,7 @@ class Deployer
 				$this->logger->log("\nDeleting temporary files:");
 				$this->deletePaths(array_keys($tempFiles));
 			}
+			$this->cleanup();
 		}
 	}
 
@@ -249,7 +253,7 @@ class Deployer
 	 */
 	private function loadDeploymentFile(): ?array
 	{
-		$tempFile = tempnam($this->tempDir, 'deploy');
+		$tempFile = $this->createTempFile();
 		try {
 			if ($this->server instanceof RetryServer) {
 				$this->server->noRetry('readFile', $this->remoteDir . '/' . $this->deploymentFile, $tempFile);
@@ -493,10 +497,35 @@ class Deployer
 		}
 
 		if (empty($tempFile)) {
-			$tempFile = tempnam($this->tempDir, 'deploy');
+			$tempFile = $this->createTempFile();
 			file_put_contents($tempFile, $content);
 		}
 		return $tempFile;
+	}
+
+
+	/**
+	 * Creates a temporary file that is deleted when the run finishes.
+	 */
+	private function createTempFile(): string
+	{
+		$file = tempnam($this->tempDir, 'deploy');
+		if ($file === false) {
+			throw new \RuntimeException("Unable to create a temporary file in '$this->tempDir'.");
+		}
+		return $this->garbage[] = $file;
+	}
+
+
+	/**
+	 * Deletes temporary files created during the run.
+	 */
+	public function cleanup(): void
+	{
+		foreach ($this->garbage as $file) {
+			@unlink($file); // @ - file may have been moved or already removed
+		}
+		$this->garbage = [];
 	}
 
 
