@@ -374,7 +374,6 @@ class Deployer
 				$remoteFile = $this->remoteDir . $file;
 				$this->server->renameFile($remoteFile . self::TemporarySuffix, $remoteFile);
 			} catch (SkipException) {
-				$this->interruptHandler->addSkipped("Rename $file");
 				$skippedPaths[] = $file;
 				continue; // skipped temp file stays in $tempFiles, cleaned up by finally block
 			}
@@ -404,7 +403,6 @@ class Deployer
 					$this->server->removeFile($remotePath);
 				}
 			} catch (SkipException) {
-				$this->interruptHandler->addSkipped("Delete $path");
 				$skippedPaths[] = $path;
 			} catch (ServerException) {
 				$this->logger->log("Unable to delete $remotePath", 'red');
@@ -539,7 +537,7 @@ class Deployer
 					throw new \InvalidArgumentException("Invalid job $job, must start with http:, local:, remote: or upload:");
 				}
 			} catch (SkipException) {
-				$this->interruptHandler->addSkipped("Job: $jobName");
+				// already recorded by InterruptHandler::check()
 			}
 		}
 	}
