@@ -247,7 +247,6 @@ class CliRunner
 	private function setupPhp(): void
 	{
 		set_time_limit(0);
-		date_default_timezone_set('Europe/Prague');
 
 		set_error_handler(function ($severity, $message, $file, $line) {
 			if (($severity & error_reporting()) !== $severity) {
