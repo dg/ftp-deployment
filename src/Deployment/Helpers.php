@@ -150,6 +150,18 @@ class Helpers
 
 
 	/**
+	 * Formats a byte count as a human-readable size.
+	 */
+	public static function formatSize(int $bytes): string
+	{
+		$units = ['B', 'kB', 'MB', 'GB', 'TB'];
+		$i = $bytes > 0 ? min((int) floor(log($bytes, 1024)), count($units) - 1) : 0;
+		$value = $bytes / 1024 ** $i;
+		return ($i === 0 ? $value : round($value, 1)) . ' ' . $units[$i];
+	}
+
+
+	/**
 	 * Normalizes a hex SSH fingerprint for comparison: lowercased, without colons,
 	 * whitespace or a leading algorithm prefix (MD5:/SHA1:/SHA256:).
 	 */
