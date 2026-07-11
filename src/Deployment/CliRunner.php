@@ -50,7 +50,8 @@ class CliRunner
 	public function run(): ?int
 	{
 		$this->console = new Console;
-		$this->logger = new Logger('php://memory', $this->console);
+		$bootstrapLogger = new Logger('php://temp', $this->console);
+		$this->logger = $bootstrapLogger;
 		$this->interruptHandler = new InterruptHandler($this->console);
 		$this->setupPhp();
 
@@ -60,6 +61,7 @@ class CliRunner
 		}
 
 		$this->logger = new Logger($config['log'], $this->console);
+		$bootstrapLogger->flushInto($this->logger);
 		if (!$config['colors']) {
 			$this->console->setColorDepth(ColorDepth::None);
 		} elseif (!$this->console->hasColors()) { // `colors = yes` turns them on even for a pipe, as FORCE_COLOR does

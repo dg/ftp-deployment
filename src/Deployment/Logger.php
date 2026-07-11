@@ -26,8 +26,23 @@ class Logger
 		string $file,
 		private readonly Console $console = new Console,
 	) {
-		$this->file = fopen($file, 'a')
+		// 'a+' so a buffering bootstrap logger (php://temp) can be read back via flushInto()
+		$this->file = fopen($file, 'a+')
 			?: throw new \RuntimeException("Cannot open log file '$file'");
+	}
+
+
+	/**
+	 * Persists this logger's buffered content into another logger's file, without echoing again.
+	 * Used to carry messages from the bootstrap logger into the real log once its path is known.
+	 */
+	public function flushInto(self $target): void
+	{
+		@rewind($this->file); // @ - stream may not be seekable
+		$content = stream_get_contents($this->file);
+		if ($content) {
+			fwrite($target->file, $content);
+		}
 	}
 
 
