@@ -40,6 +40,7 @@ class CliRunner
 
 	/** @var 'test'|'generate'|null */
 	private ?string $mode;
+	private bool $force = false;
 
 	/** @var array<string, array<string, mixed>> */
 	private array $batches = [];
@@ -164,6 +165,7 @@ class CliRunner
 			: $config['deploymentfile'];
 		$deployment->allowDelete = (bool) $config['allowdelete'];
 		$deployment->useHashCache = (bool) $config['hashcache'];
+		$deployment->force = $this->force;
 		$deployment->toPurge = self::toArray($config['purge'], true);
 		$deployment->runBefore = self::toArray($config['before'], true);
 		$deployment->runAfterUpload = self::toArray($config['afterupload'], true);
@@ -209,6 +211,7 @@ class CliRunner
 		$command->addOption('--section', 'Only deploys the named section.', valueName: 'name');
 		$command->addFlag('--generate', 'Only generates deployment file.');
 		$command->addFlag('--no-progress', 'Hide the progress indicators.');
+		$command->addFlag('--force', 'Deploy even if a leftover .running lock file is present.');
 		$command->addArgument('config', optional: true, normalizer: Normalizers::realPath(...), hidden: true);
 
 		try {
@@ -226,6 +229,7 @@ class CliRunner
 		$this->mode = $options['--generate']
 			? 'generate'
 			: ($options['--test'] ? 'test' : null);
+		$this->force = (bool) ($options['--force'] ?? false);
 		$this->configFile = $options['config'];
 
 		$config = $this->loadConfigFile($options['config']);
