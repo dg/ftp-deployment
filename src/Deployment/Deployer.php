@@ -50,6 +50,9 @@ class Deployer
 	/** @var string[] temporary files to delete when the run finishes */
 	private array $garbage = [];
 
+	/** @var array<string, string> memoized preprocess() results, keyed by relative path */
+	private array $preprocessed = [];
+
 	/** @var array<string, list<array{filter: callable(string, string): ?string, cached: bool, name: string}>> */
 	private array $filters = [];
 
@@ -491,11 +494,21 @@ class Deployer
 
 
 	/**
-	 * Calls preprocessors on file.
+	 * Calls preprocessors on file, once per run.
 	 * @param  string  $file  relative path, starts with /
 	 * @return string  full path
 	 */
 	private function preprocess(string $file): string
+	{
+		return $this->preprocessed[$file] ??= $this->applyFilters($file);
+	}
+
+
+	/**
+	 * @param  string  $file  relative path, starts with /
+	 * @return string  full path
+	 */
+	private function applyFilters(string $file): string
 	{
 		$ext = pathinfo($file, PATHINFO_EXTENSION);
 		if (!isset($this->filters[$ext]) || !Helpers::matchMask($file, $this->preprocessMasks)) {
@@ -558,6 +571,7 @@ class Deployer
 			@unlink($file); // @ - file may have been moved or already removed
 		}
 		$this->garbage = [];
+		$this->preprocessed = [];
 	}
 
 
