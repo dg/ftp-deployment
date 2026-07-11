@@ -111,6 +111,55 @@ class Helpers
 
 
 	/**
+	 * Checks whether an SSH server public host key matches the expected value.
+	 * The expected value may be the full OpenSSH key ("ssh-rsa AAAA..."), the bare
+	 * base64 blob, an OpenSSH-style "SHA256:..." fingerprint, or an MD5 fingerprint
+	 * (hex, with or without colons and "MD5:" prefix).
+	 * @param  string  $expected  configured host key/fingerprint
+	 * @param  string  $actual    server public host key, "type base64 [comment]"
+	 */
+	public static function matchHostKey(string $expected, string $actual): bool
+	{
+		$expected = trim($expected);
+		$actual = trim($actual);
+		if ($expected !== '' && hash_equals($actual, $expected)) {
+			return true;
+		}
+
+		$parts = explode(' ', $actual);
+		$blob = base64_decode($parts[1] ?? '', true);
+		if ($blob === false || $blob === '') {
+			return false;
+		}
+
+		$md5 = md5($blob);
+		$candidates = [
+			$parts[1], // bare base64 blob
+			'SHA256:' . rtrim(base64_encode(hash('sha256', $blob, true)), '='),
+			'MD5:' . implode(':', str_split($md5, 2)),
+			implode(':', str_split($md5, 2)),
+			$md5,
+		];
+		foreach ($candidates as $candidate) {
+			if ($expected !== '' && hash_equals($candidate, $expected)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+
+	/**
+	 * Normalizes a hex SSH fingerprint for comparison: lowercased, without colons,
+	 * whitespace or a leading algorithm prefix (MD5:/SHA1:/SHA256:).
+	 */
+	public static function normalizeFingerprint(string $s): string
+	{
+		return strtolower((string) preg_replace('#^(md5|sha1|sha256):|[:\s]#i', '', trim($s)));
+	}
+
+
+	/**
 	 * @param array{scheme?: string, host?: string, port?: int, user?: string, pass?: string, path?: string}  $url
 	 */
 	public static function buildUrl(array $url): string

@@ -37,6 +37,7 @@ class SshServer extends BaseServer
 		private readonly ?string $privateKey = null,
 		#[\SensitiveParameter]
 		private readonly ?string $passPhrase = null,
+		private readonly ?string $hostKey = null,
 	) {
 		if (!extension_loaded('ssh2')) {
 			throw new \Exception('PHP extension SSH2 is not loaded.');
@@ -59,6 +60,18 @@ class SshServer extends BaseServer
 			@ssh2_disconnect($this->connection); // @ the connection may already be closed
 		}
 		$this->connection = Safe::ssh2_connect($this->url['host'], $this->url['port'] ?? 22);
+
+		// Verify the server host key before authenticating. ext-ssh2 only exposes
+		// hex fingerprints, so we match against the MD5 or SHA1 fingerprint.
+		if ($this->hostKey !== null) {
+			$want = Helpers::normalizeFingerprint($this->hostKey);
+			$md5 = (string) ssh2_fingerprint($this->connection, SSH2_FINGERPRINT_MD5 | SSH2_FINGERPRINT_HEX);
+			$sha1 = (string) ssh2_fingerprint($this->connection, SSH2_FINGERPRINT_SHA1 | SSH2_FINGERPRINT_HEX);
+			if ($want === '' || (Helpers::normalizeFingerprint($md5) !== $want && Helpers::normalizeFingerprint($sha1) !== $want)) {
+				throw new ServerException("SSH host key verification failed (server MD5 fingerprint: $md5).");
+			}
+		}
+
 		if (isset($this->url['pass'])) {
 			Safe::ssh2_auth_password($this->connection, urldecode($this->url['user']), urldecode($this->url['pass']));
 		} elseif ($this->publicKey && $this->privateKey) {
