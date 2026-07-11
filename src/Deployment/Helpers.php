@@ -134,6 +134,7 @@ class Helpers
 
 		$md5 = md5($blob);
 		$candidates = [
+			$parts[0] . ' ' . $parts[1], // "type base64" without any trailing comment
 			$parts[1], // bare base64 blob
 			'SHA256:' . rtrim(base64_encode(hash('sha256', $blob, true)), '='),
 			'MD5:' . implode(':', str_split($md5, 2)),

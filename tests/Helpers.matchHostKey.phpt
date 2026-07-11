@@ -11,8 +11,9 @@ $key = "ssh-ed25519 $blob comment@host";
 $sha256 = 'SHA256:ycHuPDwMY2vc31WnbIQ+U85SlvMGEQyQH8Qb9ia9wGk';
 $md5 = '31:d5:fb:de:43:30:da:f4:ac:c3:27:9e:0c:3f:98:6f';
 
-// full key, bare blob and fingerprints all match
+// full key, "type base64" without comment, bare blob and fingerprints all match
 Assert::true(Helpers::matchHostKey($key, $key));
+Assert::true(Helpers::matchHostKey("ssh-ed25519 $blob", $key)); // configured without the comment
 Assert::true(Helpers::matchHostKey($blob, $key));
 Assert::true(Helpers::matchHostKey($sha256, $key));
 Assert::true(Helpers::matchHostKey($md5, $key));
