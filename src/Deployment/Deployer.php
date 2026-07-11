@@ -50,6 +50,9 @@ class Deployer
 	/** @var string[] temporary files to delete when the run finishes */
 	private array $garbage = [];
 
+	/** @var array<string, string> memoized preprocess() results, keyed by relative path */
+	private array $preprocessed = [];
+
 	/** @var array<string, list<array{filter: callable(string, string): ?string, cached: bool, name: string}>> */
 	private array $filters = [];
 
@@ -494,11 +497,23 @@ class Deployer
 
 
 	/**
-	 * Calls preprocessors on file.
+	 * Calls preprocessors on file, memoizing the result for the run.
+	 * The same file is preprocessed for both hashing (collectPaths) and uploading,
+	 * so caching avoids running non-cached filters twice and creating duplicate temp files.
 	 * @param  string  $file  relative path, starts with /
 	 * @return string  full path
 	 */
 	private function preprocess(string $file): string
+	{
+		return $this->preprocessed[$file] ??= $this->doPreprocess($file);
+	}
+
+
+	/**
+	 * @param  string  $file  relative path, starts with /
+	 * @return string  full path
+	 */
+	private function doPreprocess(string $file): string
 	{
 		$ext = pathinfo($file, PATHINFO_EXTENSION);
 		if (!isset($this->filters[$ext]) || !Helpers::matchMask($file, $this->preprocessMasks)) {
@@ -561,6 +576,7 @@ class Deployer
 			@unlink($file); // @ - file may have been moved or already removed
 		}
 		$this->garbage = [];
+		$this->preprocessed = [];
 	}
 
 
