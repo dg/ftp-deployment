@@ -14,11 +14,8 @@ namespace Deployment;
  *
  * It has a dependency on the error handler that converts PHP errors to ServerException.
  */
-class SshServer implements Server
+class SshServer extends BaseServer
 {
-	public ?int $filePermissions = null;
-	public ?int $dirPermissions = null;
-
 	/** @var resource|null */
 	private $connection;
 

@@ -7,11 +7,8 @@ use phpseclib3\Crypt\PublicKeyLoader;
 use phpseclib3\Net\SFTP;
 
 
-class PhpsecServer implements Server
+class PhpsecServer extends BaseServer
 {
-	public ?int $filePermissions = null;
-	public ?int $dirPermissions = null;
-
 	/** @var array{scheme: string, host: string, user: string, pass?: string, port?: int, path?: string} */
 	private readonly array $url;
 	private ?SFTP $sftp = null;

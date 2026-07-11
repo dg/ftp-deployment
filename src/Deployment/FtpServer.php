@@ -12,12 +12,9 @@ namespace Deployment;
 /**
  * FTP server.
  */
-class FtpServer implements Server
+class FtpServer extends BaseServer
 {
 	private const BlockSize = 400000;
-
-	public ?int $filePermissions = null;
-	public ?int $dirPermissions = null;
 
 	/** @var resource|null */
 	private $connection;
