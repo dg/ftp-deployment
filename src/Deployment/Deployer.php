@@ -86,77 +86,90 @@ class Deployer
 	 */
 	public function deploy(): void
 	{
-		$this->logger->log('Connecting to server');
-		$this->server->connect();
-		$this->remoteDir = $this->server->getDir();
+		try {
+			$this->logger->log('Connecting to server');
+			$this->server->connect();
+			$this->remoteDir = $this->server->getDir();
 
-		$localBefore = $otherBefore = [];
-		foreach ($this->runBefore as $job) {
-			if (is_string($job) && preg_match('#^local:#', $job)) {
-				$localBefore[] = $job;
+			$localBefore = $otherBefore = [];
+			foreach ($this->runBefore as $job) {
+				if (is_string($job) && preg_match('#^local:#', $job)) {
+					$localBefore[] = $job;
+				} else {
+					$otherBefore[] = $job;
+				}
+			}
+
+			if ($localBefore) {
+				$this->logger->log("\nLocal-jobs:");
+				$this->runJobs($localBefore);
+				$this->logger->log('');
+			}
+
+			$remotePaths = $this->loadDeploymentFile();
+			if (is_array($remotePaths)) {
+				$this->logger->log("Loaded remote $this->deploymentFile file");
 			} else {
-				$otherBefore[] = $job;
+				$this->logger->log("Remote $this->deploymentFile file not found");
+				$remotePaths = [];
 			}
-		}
 
-		if ($localBefore) {
-			$this->logger->log("\nLocal-jobs:");
-			$this->runJobs($localBefore);
-			$this->logger->log('');
-		}
-
-		$remotePaths = $this->loadDeploymentFile();
-		if (is_array($remotePaths)) {
-			$this->logger->log("Loaded remote $this->deploymentFile file");
-		} else {
-			$this->logger->log("Remote $this->deploymentFile file not found");
-			$remotePaths = [];
-		}
-
-		$this->logger->log("Scanning files in $this->localDir");
-		static $cache;
-		$key = serialize([$this->localDir, $this->ignoreMasks, $this->includeMasks, array_keys($this->filters), $this->preprocessMasks]);
-		$localPaths = &$cache[$key];
-		if ($localPaths === null) {
-			$localPaths = $this->collectPaths();
-		}
-
-		unset($localPaths["/$this->deploymentFile"], $remotePaths["/$this->deploymentFile"]);
-		$toDelete = $this->allowDelete ? array_keys(array_diff_key($remotePaths, $localPaths)) : [];
-		$toUpload = array_keys(array_diff_assoc($localPaths, $remotePaths));
-
-		if ($localPaths !== $remotePaths) { // ignores allowDelete
-			$deploymentFile = $this->writeDeploymentFile($localPaths);
-		}
-
-		if (!$toUpload && !$toDelete && !isset($deploymentFile)) {
-			$this->logger->log('Already synchronized.', 'lime');
-
-			$runAfterLocal = array_values(array_filter($this->runAfter, fn($job) => is_string($job) && preg_match('#^local:#', $job)));
-			if ($runAfterLocal) {
-				$this->logger->log("\nLocal-after-jobs:");
-				$this->runJobs($runAfterLocal);
+			$this->logger->log("Scanning files in $this->localDir");
+			static $cache;
+			$key = serialize([
+				$this->localDir,
+				$this->ignoreMasks,
+				$this->includeMasks,
+				array_keys($this->filters),
+				$this->preprocessMasks,
+			]);
+			$localPaths = &$cache[$key];
+			if ($localPaths === null) {
+				$localPaths = $this->collectPaths();
 			}
+
+			unset($localPaths["/$this->deploymentFile"], $remotePaths["/$this->deploymentFile"]);
+			$toDelete = $this->allowDelete ? array_keys(array_diff_key($remotePaths, $localPaths)) : [];
+			$toUpload = array_keys(array_diff_assoc($localPaths, $remotePaths));
+
+			if ($localPaths !== $remotePaths) { // ignores allowDelete
+				$deploymentFile = $this->writeDeploymentFile($localPaths);
+			}
+
+			if (!$toUpload && !$toDelete && !isset($deploymentFile)) {
+				$this->logger->log('Already synchronized.', 'lime');
+
+				$runAfterLocal = array_values(array_filter(
+					$this->runAfter,
+					fn($job) => is_string($job) && preg_match('#^local:#', $job),
+				));
+				if ($runAfterLocal) {
+					$this->logger->log("\nLocal-after-jobs:");
+					$this->runJobs($runAfterLocal);
+				}
+				return;
+
+			} elseif ($this->testMode) {
+				$this->logTestSummary($toUpload, $toDelete);
+				if (isset($deploymentFile)) {
+					unlink($deploymentFile);
+				}
+				return;
+			}
+
+			$this->checkNotRunning();
+
+			if ($otherBefore) {
+				$this->logger->log("\nBefore-jobs:");
+				$this->runJobs($otherBefore);
+			}
+
+			$this->transfer($toUpload, $toDelete, $localPaths, $remotePaths, $deploymentFile ?? null);
+
+		} finally {
+			// Always release local temp files (and persist the hash cache), whatever happens.
 			$this->cleanup();
-			return;
-
-		} elseif ($this->testMode) {
-			$this->logTestSummary($toUpload, $toDelete);
-			if (isset($deploymentFile)) {
-				unlink($deploymentFile);
-			}
-			$this->cleanup();
-			return;
 		}
-
-		$this->checkNotRunning();
-
-		if ($otherBefore) {
-			$this->logger->log("\nBefore-jobs:");
-			$this->runJobs($otherBefore);
-		}
-
-		$this->transfer($toUpload, $toDelete, $localPaths, $remotePaths, $deploymentFile ?? null);
 	}
 
 
@@ -257,7 +270,6 @@ class Deployer
 				$this->logger->log("\nDeleting temporary files:");
 				$this->deletePaths(array_keys($tempFiles), bestEffort: $failed);
 			}
-			$this->cleanup();
 		}
 	}
 
@@ -329,7 +341,6 @@ class Deployer
 		} catch (ServerException) {
 			return; // not present -> free to deploy
 		}
-		$this->cleanup();
 		throw new ServerException(
 			'Another deployment is running or a previous one was interrupted '
 			. "($this->deploymentFile.running exists on the server). Use --force to override.",
