@@ -118,7 +118,7 @@ class FtpServer implements Server
 		$reconnects = 0;
 		do {
 			if ($progress) {
-				$progress(min($blocks * self::BlockSize / $size, 100));
+				$progress(min($blocks * self::BlockSize * 100 / $size, 100));
 			}
 
 			try {
