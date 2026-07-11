@@ -28,6 +28,9 @@ class Deployer
 	public bool $testMode = false;
 	public bool $allowDelete = false;
 
+	/** Deploy even when a leftover .running lock file is present on the server. */
+	public bool $force = false;
+
 	/** @var string[] relative paths */
 	public array $toPurge = [];
 
@@ -139,14 +142,22 @@ class Deployer
 			return;
 		}
 
+		$this->checkNotRunning();
+
 		if ($otherBefore) {
 			$this->logger->log("\nBefore-jobs:");
 			$this->runJobs($otherBefore);
 		}
 
 		$failed = false;
+		$tempFiles = [];
 		try {
-			$tempFiles = [];
+			// Create the lock/marker early so a concurrent deployment detects it.
+			$this->logger->log("Creating remote file $this->deploymentFile.running");
+			$runningFile = "$this->remoteDir/$this->deploymentFile.running";
+			$this->server->createDir(str_replace('\\', '/', dirname($runningFile)));
+			$this->server->writeFile($this->createTempFile(), $runningFile);
+
 			$skippedPaths = [];
 			if ($toUpload) {
 				$this->logger->log("\nUploading:");
@@ -170,11 +181,6 @@ class Deployer
 				$this->logger->log("\nAfter-upload-jobs:");
 				$this->runJobs($this->runAfterUpload);
 			}
-
-			$this->logger->log("Creating remote file $this->deploymentFile.running");
-			$runningFile = "$this->remoteDir/$this->deploymentFile.running";
-			$this->server->createDir(str_replace('\\', '/', dirname($runningFile)));
-			$this->server->writeFile($this->createTempFile(), $runningFile);
 
 			if ($toUpload) {
 				$this->logger->log("\nRenaming:");
@@ -255,6 +261,31 @@ class Deployer
 		$r = new \ReflectionFunction(\Closure::fromCallable($filter));
 		$name = $r->getClosureScopeClass()?->name . '::' . $r->name;
 		$this->filters[$extension][] = ['filter' => $filter, 'cached' => $cached, 'name' => $name];
+	}
+
+
+	/**
+	 * Refuses to deploy if a .running lock file is present on the server, unless forced.
+	 * The file is left behind by a concurrent deployment or one interrupted mid-run.
+	 * @throws ServerException
+	 */
+	private function checkNotRunning(): void
+	{
+		if ($this->force) {
+			return;
+		}
+		$running = $this->remoteDir . '/' . $this->deploymentFile . '.running';
+		$tempFile = $this->createTempFile();
+		try {
+			$this->callServer('readFile', [$running, $tempFile], noRetry: true);
+		} catch (ServerException) {
+			return; // not present -> free to deploy
+		}
+		$this->cleanup();
+		throw new ServerException(
+			'Another deployment is running or a previous one was interrupted '
+			. "($this->deploymentFile.running exists on the server). Use --force to override.",
+		);
 	}
 
 

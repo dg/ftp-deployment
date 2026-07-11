@@ -171,6 +171,10 @@ return [
 Syncing a large number of files attempts to run in (something like) a transaction: all files are
 uploaded with extension `.deploytmp` and then quickly renamed.
 
+While a deployment runs, a `.htdeployment.running` marker exists on the server. If it is still there
+when you start another deployment (because one is already in progress on another machine or a previous
+run was interrupted), the tool refuses to start. Pass `--force` to override and deploy anyway.
+
 You can press **Ctrl+C** at any time during deployment. An interactive prompt will appear with three choices:
 **[s]kip** the current operation and continue with the next one, **[r]esume** to ignore the interruption,
 or **[c]ancel** the entire deployment. Skipped operations are reported at the end. Temporary files are always

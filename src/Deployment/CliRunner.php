@@ -41,6 +41,7 @@ class CliRunner
 
 	/** @var 'test'|'generate'|null */
 	private ?string $mode;
+	private bool $force = false;
 
 	/** @var array<string, array<string, mixed>> */
 	private array $batches = [];
@@ -76,6 +77,8 @@ class CliRunner
 		?bool $generate = null,
 		#[Cli\Flag('Hide the progress indicators.')]
 		?bool $noProgress = null,
+		#[Cli\Flag('Deploy even if a leftover .running lock file is present.')]
+		?bool $force = null,
 		#[Cli\Argument(normalizer: [Normalizers::class, 'realPath'], hidden: true, name: 'config')]
 		?string $configFile = null,
 	): int
@@ -86,6 +89,7 @@ class CliRunner
 		}
 
 		$this->mode = $generate ? 'generate' : ($test ? 'test' : null);
+		$this->force = (bool) $force;
 		$this->configFile = $configFile;
 		$config = $this->loadConfig($section, (bool) $noProgress);
 
@@ -190,6 +194,7 @@ class CliRunner
 			? $deployment->deploymentFile
 			: $config['deploymentfile'];
 		$deployment->allowDelete = (bool) $config['allowdelete'];
+		$deployment->force = $this->force;
 		$deployment->toPurge = self::toArray($config['purge'], lines: true);
 		$deployment->runBefore = self::toArray($config['before'], lines: true);
 		$deployment->runAfterUpload = self::toArray($config['afterupload'], lines: true);
