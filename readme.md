@@ -96,6 +96,9 @@ include = "
 ; is allowed to delete remote files? (defaults to yes)
 allowDelete = yes
 
+; cache local file hashes (by path, size and mtime) to speed up rescans of large trees (defaults to no)
+hashCache = no
+
 ; jobs to run before uploading
 ; local jobs are done even if there is no need for synchronization
 before[] = local: git diff-index --quiet HEAD  ; ensures Git working directory is clean

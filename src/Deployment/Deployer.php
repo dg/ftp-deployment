@@ -28,6 +28,9 @@ class Deployer
 	public bool $testMode = false;
 	public bool $allowDelete = false;
 
+	/** Reuse cached local file hashes keyed by path+size+mtime to speed up rescans. */
+	public bool $useHashCache = false;
+
 	/** @var string[] relative paths */
 	public array $toPurge = [];
 
@@ -52,6 +55,10 @@ class Deployer
 
 	/** @var array<string, string> memoized preprocess() results, keyed by relative path */
 	private array $preprocessed = [];
+
+	/** @var array<string, array{size: int, mtime: int, hash: string}>|null lazily loaded hash cache */
+	private ?array $hashCache = null;
+	private bool $hashCacheModified = false;
 
 	/** @var array<string, list<array{filter: callable(string, string): ?string, cached: bool, name: string}>> */
 	private array $filters = [];
@@ -488,11 +495,73 @@ class Deployer
 				$list += $this->collectPaths($short);
 
 			} elseif (is_file($path)) {
-				$list[$short] = Helpers::hashFile($this->preprocess($short));
+				$list[$short] = $this->hashLocalFile($short, $path);
 			}
 		}
 		$iterator->close();
 		return $list;
+	}
+
+
+	/**
+	 * Hashes a local file, reusing a cached hash when enabled and the file's
+	 * size and mtime are unchanged. Preprocessed files are always hashed directly
+	 * because their output may depend on imported files not captured by mtime.
+	 * @param  string  $relPath   relative path, starts with /
+	 * @param  string  $fullPath  absolute path on disk
+	 */
+	private function hashLocalFile(string $relPath, string $fullPath): string
+	{
+		if (!$this->useHashCache || $this->isPreprocessed($relPath)) {
+			return Helpers::hashFile($this->preprocess($relPath));
+		}
+
+		$stat = @stat($fullPath); // @ - may be unreadable
+		if ($stat !== false) {
+			$this->loadHashCache();
+			$entry = $this->hashCache[$fullPath] ?? null;
+			if ($entry && $entry['size'] === $stat['size'] && $entry['mtime'] === $stat['mtime']) {
+				return $entry['hash'];
+			}
+		}
+
+		$hash = Helpers::hashFile($fullPath);
+		if ($stat !== false) {
+			$this->hashCache[$fullPath] = ['size' => $stat['size'], 'mtime' => $stat['mtime'], 'hash' => $hash];
+			$this->hashCacheModified = true;
+		}
+		return $hash;
+	}
+
+
+	/**
+	 * Whether a file is transformed by a registered preprocessor.
+	 * @param  string  $file  relative path, starts with /
+	 */
+	private function isPreprocessed(string $file): bool
+	{
+		$ext = pathinfo($file, PATHINFO_EXTENSION);
+		return isset($this->filters[$ext]) && Helpers::matchMask($file, $this->preprocessMasks);
+	}
+
+
+	private function loadHashCache(): void
+	{
+		if ($this->hashCache !== null) {
+			return;
+		}
+		$file = $this->tempDir . '/.hashcache';
+		$data = is_file($file) ? @unserialize((string) file_get_contents($file)) : null; // @ a corrupted cache is rebuilt
+		$this->hashCache = is_array($data) ? $data : [];
+	}
+
+
+	private function saveHashCache(): void
+	{
+		if ($this->hashCacheModified && $this->hashCache !== null && $this->tempDir !== '') {
+			file_put_contents($this->tempDir . '/.hashcache', serialize($this->hashCache));
+			$this->hashCacheModified = false;
+		}
 	}
 
 
@@ -577,6 +646,7 @@ class Deployer
 		}
 		$this->garbage = [];
 		$this->preprocessed = [];
+		$this->saveHashCache();
 	}
 
 

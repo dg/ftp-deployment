@@ -28,6 +28,7 @@ class CliRunner
 		'afterupload' => '',
 		'after' => '',
 		'preprocess' => false,
+		'hashcache' => false,
 	];
 
 	/** @var string[] */
@@ -162,6 +163,7 @@ class CliRunner
 			? $deployment->deploymentFile
 			: $config['deploymentfile'];
 		$deployment->allowDelete = (bool) $config['allowdelete'];
+		$deployment->useHashCache = (bool) $config['hashcache'];
 		$deployment->toPurge = self::toArray($config['purge'], true);
 		$deployment->runBefore = self::toArray($config['before'], true);
 		$deployment->runAfterUpload = self::toArray($config['afterupload'], true);
