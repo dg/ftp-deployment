@@ -60,6 +60,9 @@ remote = ftp://user:secretpassword@ftp.example.com/directory
 user = ...
 password = ...
 
+; any value may reference an environment variable, which is handy for secrets in CI/CD
+password = ${FTP_PASSWORD}
+
 ; FTP passive mode
 passiveMode = yes
 
