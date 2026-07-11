@@ -194,6 +194,8 @@ Installing FTP Deployment
 
 FTP Deployment requires PHP 8.2 or later. It also requires openssl extensions for ftps:// and SSH2 extension for sftp:// connections.
 
+**Security note:** the `ftps://` protocol encrypts the connection but, due to a limitation of PHP's FTP extension, does **not** validate the server's TLS certificate, so it is not protected against an active man-in-the-middle attacker. For strong authentication of the server prefer `sftp://` or `phpsec://` together with the `hostKey` option (see the sample config), which verifies the server's host key fingerprint.
+
 The easiest way to obtain FTP Deployment is to download [a single PHAR file](https://github.com/dg/ftp-deployment/releases).
 
 If you want to use minification, install [Node.js](https://nodejs.org/en/), [UglifyJS 3](https://www.npmjs.com/package/uglify-js)
