@@ -58,7 +58,7 @@ class JobRunner
 	/** @return array{?string, ?string} */
 	public function download(string $command): array
 	{
-		[$remotePath, $localFile] = explode(' ', $command);
+		[$remotePath, $localFile] = $this->parseArgs($command, 'download');
 		$localFile = $this->localDir . '/' . $localFile;
 		if (is_file($localFile)) {
 			throw new JobException("File $localFile already exist.");
@@ -72,7 +72,7 @@ class JobRunner
 	/** @return array{?string, ?string} */
 	public function upload(string $command): array
 	{
-		[$localFile, $remotePath] = explode(' ', $command);
+		[$localFile, $remotePath] = $this->parseArgs($command, 'upload');
 		$localFile = $this->localDir . '/' . $localFile;
 		if (!is_file($localFile)) {
 			throw new JobException("File $localFile doesn't exist.");
@@ -89,5 +89,24 @@ class JobRunner
 	{
 		$out = Helpers::fetchUrl($url, $err);
 		return [$out, $err];
+	}
+
+
+	/**
+	 * Splits a job command into exactly two arguments, honouring double quotes
+	 * so that paths may contain spaces, e.g. upload: "my file.txt" remote/path.
+	 * @return array{string, string}
+	 * @throws JobException
+	 */
+	private function parseArgs(string $command, string $job): array
+	{
+		$args = array_values(array_filter(
+			str_getcsv($command, ' ', '"', ''),
+			fn($s) => $s !== null && $s !== '',
+		));
+		if (count($args) !== 2) {
+			throw new JobException("Invalid $job job '$command', expected two paths (quote paths containing spaces).");
+		}
+		return [$args[0], $args[1]];
 	}
 }
