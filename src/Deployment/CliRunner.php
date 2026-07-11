@@ -236,7 +236,6 @@ class CliRunner
 		if (!$config) {
 			throw new \Exception('Missing config.');
 		}
-		$config = $this->expandEnvVars($config);
 
 		$lock = fopen($options['config'], 'r');
 		if (!$lock || !flock($lock, LOCK_EX | LOCK_NB)) {
@@ -258,9 +257,12 @@ class CliRunner
 			$this->batches = [$section => $this->batches[$section]];
 		}
 
+		// Expand %env(NAME)% only in the batches that will actually be deployed, so an unset
+		// variable in an unrelated (e.g. --section-excluded) section never aborts the run.
 		foreach ($this->batches as &$batch) {
-			$batch = array_change_key_case($batch, CASE_LOWER) + $this->defaults;
+			$batch = $this->expandEnvVars(array_change_key_case($batch, CASE_LOWER) + $this->defaults);
 		}
+		unset($batch);
 
 		$config = array_change_key_case($config, CASE_LOWER) + [
 			'log' => preg_replace('#\.\w+$#', '.log', $this->configFile),
@@ -269,6 +271,14 @@ class CliRunner
 			'colors' => $this->console->hasColors(),
 		];
 		$config['progress'] = $options['--no-progress'] ? false : $config['progress'];
+
+		// Top-level scalar settings (e.g. log, tempdir) may also use %env(); section
+		// arrays are left untouched here since each batch is expanded above.
+		foreach ($config as $key => $value) {
+			if (is_string($value)) {
+				$config[$key] = $this->expandEnvVars($value);
+			}
+		}
 		return $config;
 	}
 
