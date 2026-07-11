@@ -534,7 +534,7 @@ class Deployer
 					}
 
 				} else {
-					throw new \InvalidArgumentException("Invalid job $job, must start with http:, local:, remote: or upload:");
+					throw new \InvalidArgumentException("Invalid job $job, must start with http:, local:, remote:, upload: or download:");
 				}
 			} catch (SkipException) {
 				// already recorded by InterruptHandler::check()
