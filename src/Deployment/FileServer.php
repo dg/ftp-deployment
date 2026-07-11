@@ -12,10 +12,8 @@ namespace Deployment;
 /**
  * Filesystem pseudoserver.
  */
-class FileServer implements Server
+class FileServer extends BaseServer
 {
-	public ?int $filePermissions = null;
-	public ?int $dirPermissions = null;
 	private string $root;
 
 
