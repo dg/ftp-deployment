@@ -230,6 +230,7 @@ class CliRunner
 		if (!$config) {
 			throw new \Exception('Missing config.');
 		}
+		$config = $this->expandEnvVars($config);
 
 		$lock = fopen($options['config'], 'r');
 		if (!$lock || !flock($lock, LOCK_EX | LOCK_NB)) {
@@ -263,6 +264,27 @@ class CliRunner
 		];
 		$config['progress'] = $options['--no-progress'] ? false : $config['progress'];
 		return $config;
+	}
+
+
+	/**
+	 * Replaces %env(NAME)% placeholders in config values with environment variables.
+	 * Useful for keeping secrets (e.g. FTP passwords) out of the config file in CI/CD.
+	 */
+	private function expandEnvVars(mixed $value): mixed
+	{
+		if (is_array($value)) {
+			return array_map($this->expandEnvVars(...), $value);
+		} elseif (is_string($value)) {
+			return preg_replace_callback('#%env\(\s*(\w+)\s*\)%#', function (array $m): string {
+				$env = getenv($m[1]);
+				if ($env === false) {
+					throw new \Exception("Environment variable '$m[1]' referenced in config is not set.");
+				}
+				return $env;
+			}, $value);
+		}
+		return $value;
 	}
 
 
