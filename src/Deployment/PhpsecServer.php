@@ -68,7 +68,13 @@ class PhpsecServer implements Server
 	public function writeFile(string $local, string $remote, ?callable $progress = null): void
 	{
 		$sftp = $this->getConnection();
-		if ($sftp->put($remote, $local, SFTP::SOURCE_LOCAL_FILE, -1, -1, $progress) === false) {
+		// phpseclib invokes the callback with the number of bytes sent, but the Server
+		// interface contract is a percentage (0-100), so convert it here.
+		$size = max((int) filesize($local), 1);
+		$callback = $progress === null
+			? null
+			: fn(int $sent) => $progress(min($sent * 100 / $size, 100));
+		if ($sftp->put($remote, $local, SFTP::SOURCE_LOCAL_FILE, -1, -1, $callback) === false) {
 			throw new ServerException('Unable to write file');
 		}
 		if ($this->filePermissions) {
