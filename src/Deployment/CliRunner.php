@@ -118,6 +118,7 @@ class CliRunner
 				$this->logger->log('Scanning files');
 				$localPaths = $deployment->collectPaths();
 				$this->logger->log('Saved ' . $deployment->writeDeploymentFile($localPaths));
+				$deployment->cleanup();
 				continue;
 			}
 
