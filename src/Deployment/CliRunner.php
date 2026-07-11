@@ -136,51 +136,7 @@ class CliRunner
 	/** @param array<string, mixed> $config */
 	private function createDeployer(array $config): Deployer
 	{
-		if (
-			empty($config['remote'])
-			|| !($urlParts = parse_url($config['remote']))
-			|| !isset($urlParts['scheme'])
-		) {
-			throw new \Exception("Missing or invalid 'remote' URL in config.");
-		}
-		if (isset($config['user'])) {
-			$urlParts['user'] = urlencode($config['user']);
-		}
-		if (isset($config['password'])) {
-			$urlParts['pass'] = urlencode($config['password']);
-		}
-
-		if ($urlParts['scheme'] === 'ftp') {
-			$this->logger->log('Note: connection is not encrypted', 'white/red');
-		}
-
-		if ($urlParts['scheme'] === 'phpsec') {
-			$server = new PhpsecServer(
-				Helpers::buildUrl($urlParts),
-				$config['publickey'] ?? null,
-				$config['privatekey'] ?? null,
-				$config['passphrase'] ?? null,
-			);
-		} elseif ($urlParts['scheme'] === 'sftp') {
-			$server = new SshServer(
-				Helpers::buildUrl($urlParts),
-				$config['publickey'] ?? null,
-				$config['privatekey'] ?? null,
-				$config['passphrase'] ?? null,
-			);
-		} elseif ($urlParts['scheme'] === 'file') {
-			$server = new FileServer($config['remote']);
-		} else {
-			$server = new FtpServer(Helpers::buildUrl($urlParts), (bool) $config['passivemode']);
-		}
-		$server->filePermissions = empty($config['filepermissions'])
-			? null
-			: (int) octdec($config['filepermissions']);
-		$server->dirPermissions = empty($config['dirpermissions'])
-			? null
-			: (int) octdec($config['dirpermissions']);
-
-		$server = new RetryServer($server, $this->logger, $this->interruptHandler);
+		$server = (new ServerFactory($this->logger, $this->interruptHandler))->create($config);
 
 		if (!preg_match('#/|\\\|[a-z]:#iA', $config['local'])) {
 			$config['local'] = dirname($this->configFile) . '/' . $config['local'];
