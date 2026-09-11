@@ -3,5 +3,6 @@
 .github export-ignore
 .travis.yml export-ignore
 tests/ export-ignore
+*    text=auto
 *.sh eol=lf
 deployment eol=lf
