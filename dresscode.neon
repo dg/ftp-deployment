@@ -1,0 +1,31 @@
+use:
+	- nette
+	- modernizations
+
+typeAnalysis: phpstan
+
+paths:
+	- src
+	- tests
+	- deployment
+
+excludePaths:
+	- fixtures
+	- tests/**/output
+
+fileExtensions:
+	- php
+	- phpt
+
+imports: {grouping: {class: grouped}}
+
+overrides:
+	-
+		paths: [src]
+		nameResolution: certain
+		use:
+			- deprecations
+
+	- # the parameters mirror the signatures of the native functions the methods wrap
+		paths: [src/Deployment/Safe.php]
+		naming: {variable: keep}
