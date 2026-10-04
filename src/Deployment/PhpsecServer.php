@@ -39,7 +39,7 @@ class PhpsecServer implements Server
 	public function connect(): void
 	{
 		if ($this->sftp) { // reconnect?
-			@$this->sftp->disconnect(); // @ may fail
+			@$this->sftp->disconnect(); // @ the connection may already be closed
 		}
 		$sftp = new SFTP($this->url['host'], $this->url['port'] ?? 22);
 		if ($this->privateKey) {

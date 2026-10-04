@@ -65,7 +65,7 @@ class SshServer implements Server
 	public function connect(): void
 	{
 		if ($this->connection) { // reconnect?
-			@ssh2_disconnect($this->connection); // @ may fail
+			@ssh2_disconnect($this->connection); // @ the connection may already be closed
 		}
 		$this->connection = Safe::ssh2_connect($this->url['host'], $this->url['port'] ?? 22);
 		if (isset($this->url['pass'])) {

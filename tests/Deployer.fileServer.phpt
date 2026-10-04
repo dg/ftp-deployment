@@ -31,7 +31,7 @@ test('fresh deploy with FileServer copies files to remote', function () {
 	Assert::same('<?php function foo() {}', file_get_contents("$remoteDir/lib/utils.php"));
 
 	// .htdeployment should be valid gzipped data referencing all files
-	$content = @gzinflate(file_get_contents("$remoteDir/.htdeployment"))
+	$content = @gzinflate(file_get_contents("$remoteDir/.htdeployment")) // @ the data may be gzip, not raw deflate
 		?: gzdecode(file_get_contents("$remoteDir/.htdeployment"));
 	Assert::type('string', $content);
 	Assert::contains('/index.php', $content);

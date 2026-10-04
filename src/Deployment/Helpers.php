@@ -95,7 +95,7 @@ class Helpers
 			}
 
 		} else {
-			$output = @file_get_contents($url, false, stream_context_create([
+			$output = @file_get_contents($url, false, stream_context_create([ // @ the error is read below
 				'http' => $postData === null ? [] : [
 					'method' => 'POST',
 					'header' => 'Content-type: application/x-www-form-urlencoded',
