@@ -165,9 +165,9 @@ class CliRunner
 		$deployment = new Deployer($server, $config['local'], $this->logger, $this->interruptHandler);
 
 		if ($config['preprocess']) {
-			$deployment->preprocessMasks = $config['preprocess'] == 1
+			$deployment->preprocessMasks = $config['preprocess'] == 1 // intentionally ==, the option may be true or a string
 				? ['*.js', '*.css']
-				: self::toArray($config['preprocess']); // intentionally ==
+				: self::toArray($config['preprocess']);
 			$preprocessor = new Preprocessor($this->logger);
 			$deployment->addFilter('js', $preprocessor->expandApacheImports(...));
 			$deployment->addFilter('js', $preprocessor->compressJs(...), true);
@@ -295,7 +295,7 @@ class CliRunner
 	/** @return array<string, mixed> */
 	protected function loadConfigFile(string $file): array
 	{
-		if (pathinfo($file, PATHINFO_EXTENSION) == 'php') {
+		if (pathinfo($file, PATHINFO_EXTENSION) === 'php') {
 			return include $file;
 		} else {
 			return parse_ini_file($file, true)
@@ -323,6 +323,6 @@ class CliRunner
 			&& (getenv('FORCE_COLOR')
 				|| (function_exists('sapi_windows_vt100_support')
 					? sapi_windows_vt100_support(STDOUT)
-					: @stream_isatty(STDOUT)));
+					: @stream_isatty(STDOUT))); // @ a filtered stream cannot be cast on some systems
 	}
 }

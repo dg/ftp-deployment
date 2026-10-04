@@ -268,7 +268,7 @@ class Deployer
 		if ($s === false) {
 			return null;
 		}
-		$content = @gzinflate($s) ?: gzdecode($s);
+		$content = @gzinflate($s) ?: gzdecode($s); // @ the data may be gzip, not raw deflate
 		if ($content === false) {
 			return null;
 		}

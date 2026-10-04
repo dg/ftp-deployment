@@ -27,7 +27,7 @@ class JobRunner
 	/** @return array{?string, ?string} */
 	public function local(string $command): array
 	{
-		@exec($command, $out, $code);
+		@exec($command, $out, $code); // @ the process may fail to start
 		$out = trim(implode("\n", $out));
 		$err = $code !== 0 ? "exit code $code" : null;
 		return [$out, $err];
