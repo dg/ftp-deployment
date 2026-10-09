@@ -112,7 +112,7 @@ purge[] = temp/cache
 ; jobs to run after everything (upload, rename, delete, purge) is done
 ; local jobs are done even if the synchronization did not take place
 after[] = remote: unzip api.zip
-after[] = remote: chmod 0777 temp/cache  ; change permissions
+after[] = remote: chmod 0777 temp/cache  ; change permissions, relative paths are relative to 'remote', absolute ones to the server root
 after[] = upload: config.server.neon app/config.local.neon
 after[] = http://example.com/deployment.php?after
 after[] = local: git reset HEAD --hard   ; reverts all changes in working directory
