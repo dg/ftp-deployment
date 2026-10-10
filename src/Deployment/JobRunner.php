@@ -39,8 +39,8 @@ class JobRunner
 	{
 		if (preg_match('#^(mkdir|rmdir|unlink|mv|chmod)\s+(\S+)(?:\s+(\S+))?()$#', $command, $m)) {
 			[, $cmd, $a, $b] = $m;
-			$a = '/' . ltrim($a, '/');
-			$b = '/' . ltrim($b, '/');
+			$a = $this->resolveRemotePath($a);
+			$b = $this->resolveRemotePath($b);
 			if ($cmd === 'mkdir') {
 				$this->server->createDir($a);
 			} elseif ($cmd === 'rmdir') {
@@ -94,5 +94,13 @@ class JobRunner
 	{
 		$out = Helpers::fetchUrl($url, $err);
 		return [$out, $err];
+	}
+
+
+	private function resolveRemotePath(string $path): string
+	{
+		return str_starts_with($path, '/')
+			? $path
+			: $this->remoteDir . '/' . $path;
 	}
 }
