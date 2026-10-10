@@ -11,6 +11,9 @@ namespace Deployment;
 
 class JobRunner
 {
+	public bool $followRedirects = true;
+
+
 	public function __construct(
 		private readonly Server $server,
 		private readonly string $localDir,
@@ -87,7 +90,7 @@ class JobRunner
 	/** @return array{?string, ?string} */
 	public function http(string $url): array
 	{
-		$out = Helpers::fetchUrl($url, $err);
+		$out = Helpers::fetchUrl($url, $err, followRedirects: $this->followRedirects);
 		return [$out, $err];
 	}
 

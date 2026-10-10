@@ -79,12 +79,18 @@ class Helpers
 	 * @param ?array<string, scalar>  $postData
 	 * @param-out ?string  $error
 	 */
-	public static function fetchUrl(string $url, ?string &$error, ?array $postData = null): string
+	public static function fetchUrl(
+		string $url,
+		?string &$error,
+		?array $postData = null,
+		bool $followRedirects = true,
+	): string
 	{
+		$error = null;
 		if (extension_loaded('curl')) {
 			$ch = curl_init($url);
 			curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-			curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+			curl_setopt($ch, CURLOPT_FOLLOWLOCATION, $followRedirects);
 			curl_setopt($ch, CURLOPT_USERAGENT, self::UserAgent);
 			if ($postData !== null) {
 				curl_setopt($ch, CURLOPT_POST, true);
@@ -95,15 +101,20 @@ class Helpers
 				$error = curl_error($ch);
 			} elseif (($code = curl_getinfo($ch, CURLINFO_HTTP_CODE)) >= 400) {
 				$error = "responds with HTTP code $code";
+			} elseif (!$followRedirects && $code >= 300) {
+				$error = "responds with HTTP code $code, redirects to " . curl_getinfo($ch, CURLINFO_REDIRECT_URL);
 			}
 
 		} else {
 			$output = @file_get_contents($url, false, stream_context_create([ // @ the error is read below
-				'http' => ['user_agent' => self::UserAgent] + ($postData === null ? [] : [
-					'method' => 'POST',
-					'header' => 'Content-type: application/x-www-form-urlencoded',
-					'content' => http_build_query($postData, '', '&'),
-				]),
+				// max_redirects = 1 makes a redirect fail with 'Redirection limit reached'
+				'http' => ['user_agent' => self::UserAgent]
+					+ ($followRedirects ? [] : ['max_redirects' => 1])
+					+ ($postData === null ? [] : [
+						'method' => 'POST',
+						'header' => 'Content-type: application/x-www-form-urlencoded',
+						'content' => http_build_query($postData, '', '&'),
+					]),
 			]));
 			$error = $output === false
 				? preg_replace('#^file_get_contents\(.*?\): #', '', (string) (error_get_last()['message'] ?? ''))
