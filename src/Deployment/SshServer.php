@@ -122,7 +122,7 @@ class SshServer extends BaseServer
 			}
 		}
 		if ($this->filePermissions) {
-			Safe::ssh2_sftp_chmod($this->getConnection(), $remote, $this->filePermissions);
+			$this->chmod($remote, $this->filePermissions);
 		}
 	}
 
@@ -163,7 +163,14 @@ class SshServer extends BaseServer
 	public function createDir(string $dir): void
 	{
 		if (trim($dir, '/') !== '' && !file_exists('ssh2.sftp://' . (int) $this->getConnection() . $dir)) {
-			Safe::ssh2_sftp_mkdir($this->getConnection(), $dir, $this->dirPermissions ?: 0o777, true);
+			try {
+				Safe::ssh2_sftp_mkdir($this->getConnection(), $dir, $this->dirPermissions ?: 0o777, true);
+			} catch (ServerException $e) {
+				$this->executeFallback('mkdir -p ' . escapeshellarg($dir), $e);
+				if ($this->dirPermissions) {
+					$this->chmod($dir, $this->dirPermissions);
+				}
+			}
 		}
 	}
 
@@ -224,7 +231,11 @@ class SshServer extends BaseServer
 	 */
 	public function chmod(string $path, int $permissions): void
 	{
-		Safe::ssh2_sftp_chmod($this->getConnection(), $path, $permissions);
+		try {
+			Safe::ssh2_sftp_chmod($this->getConnection(), $path, $permissions);
+		} catch (ServerException $e) {
+			$this->executeFallback(sprintf('chmod %o %s', $permissions, escapeshellarg($path)), $e);
+		}
 	}
 
 
@@ -248,6 +259,23 @@ class SshServer extends BaseServer
 		$out = Safe::stream_get_contents($stream);
 		fclose($stream);
 		return $out;
+	}
+
+
+	/**
+	 * Runs a shell command when the SFTP subsystem refuses an operation the shell allows.
+	 * @throws ServerException  the original one if the command fails too
+	 */
+	private function executeFallback(string $command, ServerException $e): void
+	{
+		try {
+			$ok = trim($this->execute($command . ' && echo OK')) === 'OK';
+		} catch (ServerException) {
+			$ok = false;
+		}
+		if (!$ok) {
+			throw $e;
+		}
 	}
 
 
