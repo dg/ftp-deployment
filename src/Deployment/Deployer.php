@@ -478,7 +478,8 @@ class Deployer
 		}
 
 		foreach ($this->filters[$ext] as $info) {
-			$callable_name = is_array($info['filter']) ? implode('::', $info['filter']) : '';
+			$filter = new \ReflectionFunction(\Closure::fromCallable($info['filter']));
+			$callable_name = $filter->getClosureScopeClass()?->name . '::' . $filter->name;
 			$cacheFile = $info['cached']
 				? $this->tempDir . '/' . md5($content . $callable_name)
 				: null;
