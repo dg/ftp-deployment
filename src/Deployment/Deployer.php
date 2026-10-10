@@ -42,6 +42,9 @@ class Deployer
 
 	/** @var list<string|(callable(Server, Logger, Deployer): (false|void))> */
 	public array $runAfter = [];
+
+	/** @var list<string|(callable(Server, Logger, Deployer): (false|void))> */
+	public array $runFinally = [];
 	public string $tempDir = '';
 
 	/** @var string[] */
@@ -49,6 +52,7 @@ class Deployer
 
 	private string $localDir;
 	private string $remoteDir;
+	private bool $lockedByOther = false;
 
 	/** @var string[] temporary files to delete when the run finishes */
 	private array $garbage = [];
@@ -78,6 +82,19 @@ class Deployer
 	 * Synchronize remote and local.
 	 */
 	public function deploy(): void
+	{
+		$this->lockedByOther = false;
+		try {
+			$this->synchronize();
+		} catch (\Throwable $e) {
+			$this->runFinallyJobs($e);
+			throw $e;
+		}
+		$this->runFinallyJobs(null);
+	}
+
+
+	private function synchronize(): void
 	{
 		try {
 			$this->logger->log('Connecting to server');
@@ -301,6 +318,39 @@ class Deployer
 
 
 	/**
+	 * Runs all finally-jobs even if some of them fail; their error never masks the one of the deployment.
+	 * @throws \Throwable  the first job error, if the deployment itself succeeded
+	 */
+	private function runFinallyJobs(?\Throwable $deployError): void
+	{
+		if (!$this->runFinally || $this->testMode) {
+			return;
+		} elseif ($this->lockedByOther) {
+			// the jobs would interfere with the deployment that holds the lock
+			$this->logger->log("\nFinally-jobs skipped, another deployment is running.", 'maroon');
+			return;
+		}
+
+		$this->logger->log("\nFinally-jobs:");
+		$firstError = null;
+		foreach ($this->runFinally as $job) {
+			try {
+				$this->runJobs([$job]);
+			} catch (TerminatedException $e) {
+				throw $e;
+			} catch (\Throwable $e) {
+				$this->logger->log("Error: {$e->getMessage()}", 'red');
+				$firstError ??= $e;
+			}
+		}
+
+		if ($firstError && !$deployError) {
+			throw $firstError;
+		}
+	}
+
+
+	/**
 	 * Appends preprocessor for files.
 	 * @param callable(string, string): ?string  $filter
 	 */
@@ -329,6 +379,7 @@ class Deployer
 		} catch (ServerException) {
 			return; // not present -> free to deploy
 		}
+		$this->lockedByOther = true;
 		throw new ServerException(
 			'Another deployment is running or a previous one was interrupted '
 			. "($this->deploymentFile.running exists on the server). Use --force to override.",

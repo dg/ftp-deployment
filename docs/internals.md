@@ -30,7 +30,12 @@ files. The subtlety: after a failure the connection may be broken, so the finall
 cleanup is **best-effort when the phase failed** (`bestEffort: $failed`) — it skips
 the full retry storm and **never lets a cleanup error mask the original error**. A
 leftover `.running` after a crash blocks the next deploy until `--force` (a
-deliberate safety brake, not a bug).
+deliberate safety brake, not a bug). The user's `finally` jobs run after this cleanup
+(`runFinallyJobs()`), also when nothing was synchronized or the deployment failed; a
+failing one is logged, the rest still run, and it only fails a deployment that
+otherwise succeeded. The only exception is a deploy refused by `checkNotRunning()`:
+the `finally` jobs are skipped (and the skip is logged), since they would interfere
+with the deployment that holds the marker.
 
 ## Skipped operations rewrite the recorded state
 
