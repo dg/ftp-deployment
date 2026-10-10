@@ -14,6 +14,9 @@ namespace Deployment;
  */
 class Helpers
 {
+	private const UserAgent = 'Mozilla/5.0 FTP-deployment';
+
+
 	/**
 	 * Computes hash.
 	 */
@@ -82,7 +85,7 @@ class Helpers
 			$ch = curl_init($url);
 			curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 			curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-			curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 FTP-deployment');
+			curl_setopt($ch, CURLOPT_USERAGENT, self::UserAgent);
 			if ($postData !== null) {
 				curl_setopt($ch, CURLOPT_POST, true);
 				curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($postData, '', '&'));
@@ -96,11 +99,11 @@ class Helpers
 
 		} else {
 			$output = @file_get_contents($url, false, stream_context_create([ // @ the error is read below
-				'http' => $postData === null ? [] : [
+				'http' => ['user_agent' => self::UserAgent] + ($postData === null ? [] : [
 					'method' => 'POST',
 					'header' => 'Content-type: application/x-www-form-urlencoded',
 					'content' => http_build_query($postData, '', '&'),
-				],
+				]),
 			]));
 			$error = $output === false
 				? preg_replace('#^file_get_contents\(.*?\): #', '', (string) (error_get_last()['message'] ?? ''))
