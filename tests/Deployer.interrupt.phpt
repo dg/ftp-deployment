@@ -200,10 +200,10 @@ test('skipped operations are tracked and reported', function () {
 	$deployer->tempDir = TEMP_DIR;
 	$deployer->deploy();
 
+	// upload order follows the filesystem's directory order
 	$skipped = $handler->getSkipped();
-	Assert::count(2, $skipped);
-	Assert::same('Upload /a.txt', $skipped[0]);
-	Assert::same('Upload /c.txt', $skipped[1]);
+	sort($skipped);
+	Assert::same(['Upload /a.txt', 'Upload /c.txt'], $skipped);
 });
 
 
