@@ -46,7 +46,7 @@ class Deployer
 	private string $remoteDir;
 	private Logger $logger;
 
-	/** @var array<string, list<array{filter: callable(string, string): ?string, cached: bool}>> */
+	/** @var array<string, list<array{filter: callable(string, string): ?string, cached: bool, name: string}>> */
 	private array $filters = [];
 	private Server $server;
 	private ?InterruptHandler $interruptHandler;
@@ -242,7 +242,9 @@ class Deployer
 	 */
 	public function addFilter(string $extension, callable $filter, bool $cached = false): void
 	{
-		$this->filters[$extension][] = ['filter' => $filter, 'cached' => $cached];
+		$r = new \ReflectionFunction(\Closure::fromCallable($filter));
+		$name = $r->getClosureScopeClass()?->name . '::' . $r->name;
+		$this->filters[$extension][] = ['filter' => $filter, 'cached' => $cached, 'name' => $name];
 	}
 
 
@@ -478,9 +480,8 @@ class Deployer
 		}
 
 		foreach ($this->filters[$ext] as $info) {
-			$callable_name = is_array($info['filter']) ? implode('::', $info['filter']) : '';
 			$cacheFile = $info['cached']
-				? $this->tempDir . '/' . md5($content . $callable_name)
+				? $this->tempDir . '/' . md5($content . $info['name'])
 				: null;
 
 			if ($cacheFile && is_file($cacheFile)) {
