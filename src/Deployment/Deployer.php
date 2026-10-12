@@ -8,6 +8,8 @@
 
 namespace Deployment;
 
+use Nette\CommandLine\Ansi;
+
 
 /**
  * Synchronizes local and remote.
@@ -202,12 +204,10 @@ class Deployer
 				$this->server->purge($this->remoteDir . '/' . $path, function ($path) {
 					static $counter;
 					$path = (string) substr($path, strlen($this->remoteDir));
-					$path = preg_match('#/(.{1,60})$#', $path, $m)
-						? $m[1]
-						: substr(basename($path), 0, 60);
-					$this->logger->progress(str_pad($path . ' ' . str_repeat('.', $counter++ % 30 + 60 - strlen($path)), 90));
+					$path = Ansi::truncate($path, 60, keepEnd: true); // the name of the file is at the end
+					$this->logger->progress($path . ' ' . str_repeat('.', $counter++ % 30));
 				});
-				$this->logger->progress(str_repeat(' ', 91));
+				$this->logger->progress('');
 			}
 
 			if ($this->runAfter) {
@@ -428,7 +428,7 @@ class Deployer
 		}
 		$counter = 0;
 		while (($entry = $iterator->read()) !== false) {
-			$this->logger->progress(str_pad(str_repeat('.', $counter++ % 40), 40));
+			$this->logger->progress(str_repeat('.', $counter++ % 40));
 
 			$path = "$this->localDir$subdir/$entry";
 			$short = "$subdir/$entry";
@@ -436,11 +436,11 @@ class Deployer
 				continue;
 
 			} elseif (Helpers::matchMask($short, $this->ignoreMasks, is_dir($path))) {
-				$this->logger->log(str_pad("Ignoring .$short", 40), 'gray');
+				$this->logger->log("Ignoring .$short", 'gray');
 				continue;
 
 			} elseif ($this->includeMasks && !Helpers::matchMask($short, $this->includeMasks, is_dir($path))) {
-				$this->logger->log(str_pad("Not included .$short", 40), 'gray');
+				$this->logger->log("Not included .$short", 'gray');
 				continue;
 
 			} elseif (is_dir($path)) {

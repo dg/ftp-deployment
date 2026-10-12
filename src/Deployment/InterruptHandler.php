@@ -8,6 +8,8 @@
 
 namespace Deployment;
 
+use Nette\CommandLine\{Console, Prompt};
+
 
 /**
  * Handles Ctrl+C interruption with interactive prompt.
@@ -24,6 +26,15 @@ class InterruptHandler
 
 	/** @var string[] */
 	private array $skipped = [];
+	private readonly Prompt $prompt;
+
+
+	/** the console must be the one the logger draws the progress on, so that the prompt erases it */
+	public function __construct(
+		private readonly Console $console = new Console,
+	) {
+		$this->prompt = new Prompt($console);
+	}
 
 
 	/**
@@ -34,7 +45,7 @@ class InterruptHandler
 		if (extension_loaded('pcntl')) {
 			pcntl_signal(SIGINT, function (): void {
 				if ($this->promptActive) {
-					echo "\n";
+					$this->console->writeLine();
 					exit(1);
 				}
 				$this->interrupted = true;
@@ -44,7 +55,7 @@ class InterruptHandler
 		} elseif (function_exists('sapi_windows_set_ctrl_handler')) {
 			sapi_windows_set_ctrl_handler(function (): void {
 				if ($this->promptActive) {
-					echo "\n";
+					$this->console->writeLine();
 					exit(1);
 				}
 				$this->interrupted = true;
@@ -65,7 +76,7 @@ class InterruptHandler
 		}
 
 		// Non-interactive mode (CI/CD) — terminate immediately
-		if (!stream_isatty(STDIN)) {
+		if (!$this->prompt->isInteractive()) {
 			throw new TerminatedException('Terminated');
 		}
 
@@ -94,15 +105,13 @@ class InterruptHandler
 
 	private function ask(string $operation): string
 	{
-		echo "\n";
-		echo "Interrupted during: $operation\n";
-		echo "  [s] Skip this operation\n";
-		echo "  [r] Resume (continue)\n";
-		echo "  [c] Cancel deployment\n";
-		echo 'Choice [s/r/c]: ';
-
-		$line = strtolower(trim((string) fgets(STDIN)));
-		return $line !== '' ? $line[0] : 'r';
+		$this->console->writeLine(); // the first write erases the progress drawn before it
+		$this->console->writeLine("Interrupted during: $operation");
+		return $this->prompt->choose('Choice', [
+			's' => 'Skip this operation',
+			'r' => 'Resume (continue)',
+			'c' => 'Cancel deployment',
+		], default: 'r') ?? 'c';
 	}
 
 
