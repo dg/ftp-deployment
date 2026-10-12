@@ -97,7 +97,8 @@ class Deployer
 
 		$this->logger->log("Scanning files in $this->localDir");
 		static $cache;
-		$localPaths = &$cache[serialize([$this->localDir, $this->ignoreMasks, $this->includeMasks, array_keys($this->filters), $this->preprocessMasks])];
+		$key = serialize([$this->localDir, $this->ignoreMasks, $this->includeMasks, array_keys($this->filters), $this->preprocessMasks]);
+		$localPaths = &$cache[$key];
 		if ($localPaths === null) {
 			$localPaths = $this->collectPaths();
 		}
@@ -255,7 +256,7 @@ class Deployer
 			} else {
 				$this->server->readFile($this->remoteDir . '/' . $this->deploymentFile, $tempFile);
 			}
-		} catch (ServerException $e) {
+		} catch (ServerException) {
 			return null;
 		}
 		$s = file_get_contents($tempFile);
@@ -312,7 +313,7 @@ class Deployer
 			}
 
 			$remotePath = $this->remoteDir . $path;
-			$isDir = substr($remotePath, -1) === '/';
+			$isDir = str_ends_with($remotePath, '/');
 			$remoteDir = $isDir
 				? substr($remotePath, 0, -1)
 				: str_replace('\\', '/', dirname($remotePath));
@@ -361,7 +362,7 @@ class Deployer
 	private function renamePaths(array $paths, array &$tempFiles): array
 	{
 		$skippedPaths = [];
-		$files = array_values(array_filter($paths, fn($path) => substr($path, -1) !== '/'));
+		$files = array_values(array_filter($paths, fn($path) => !str_ends_with($path, '/')));
 		foreach ($files as $num => $file) {
 			try {
 				// Deployment file rename is never skippable to keep server state consistent
@@ -397,7 +398,7 @@ class Deployer
 			try {
 				$this->interruptHandler?->check("Delete $path");
 				$this->writeProgress($num + 1, count($paths), "Deleting $path", null, 'maroon');
-				if (substr($path, -1) === '/') { // is directory?
+				if (str_ends_with($path, '/')) { // is directory?
 					$this->server->removeDir($remotePath);
 				} else {
 					$this->server->removeFile($remotePath);

@@ -201,7 +201,7 @@ class FtpServer implements Server
 						$this->chmod($path, $this->dirPermissions);
 					}
 				}
-			} catch (ServerException $e) {
+			} catch (ServerException) {
 				if (!$this->isDir($path)) {
 					throw new ServerException("Cannot create directory '$path'.");
 				}
@@ -250,23 +250,23 @@ class FtpServer implements Server
 	 * Recursive deletes content of directory or file.
 	 * @throws ServerException
 	 */
-	public function purge(string $dir, ?callable $progress = null): void
+	public function purge(string $path, ?callable $progress = null): void
 	{
-		if (!$this->isDir($dir)) {
+		if (!$this->isDir($path)) {
 			return;
 		}
 
 		$conn = $this->getConnection();
 		$dirs = [];
-		foreach ((array) Safe::ftp_nlist($conn, $dir) as $entry) {
-			if ($entry == null || $entry === $dir || preg_match('#(^|/)\.+$#', $entry)) { // intentionally ==
+		foreach ((array) Safe::ftp_nlist($conn, $path) as $entry) {
+			if ($entry == null || $entry === $path || preg_match('#(^|/)\.+$#', $entry)) { // intentionally ==
 				continue;
 			} elseif (!str_contains($entry, '/')) {
-				$entry = "$dir/$entry";
+				$entry = "$path/$entry";
 			}
 
 			if ($this->isDir($entry)) {
-				$dirs[] = $tmp = "$dir/.delete" . uniqid() . count($dirs);
+				$dirs[] = $tmp = "$path/.delete" . uniqid() . count($dirs);
 				Safe::ftp_rename($conn, $entry, $tmp);
 			} else {
 				Safe::ftp_delete($conn, $entry);
@@ -308,13 +308,13 @@ class FtpServer implements Server
 	/**
 	 * @throws ServerException
 	 */
-	public function chmod(string $file, int $perms): void
+	public function chmod(string $path, int $permissions): void
 	{
 		try {
-			Safe::ftp_chmod($this->getConnection(), $perms, $file);
-		} catch (ServerException $e) {
-			$perms = str_pad(decoct($perms), 4, '0', STR_PAD_LEFT);
-			Safe::ftp_site($this->getConnection(), "CHMOD $perms $file");
+			Safe::ftp_chmod($this->getConnection(), $permissions, $path);
+		} catch (ServerException) {
+			$mode = str_pad(decoct($permissions), 4, '0', STR_PAD_LEFT);
+			Safe::ftp_site($this->getConnection(), "CHMOD $mode $path");
 		}
 	}
 

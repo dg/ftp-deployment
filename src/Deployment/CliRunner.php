@@ -94,7 +94,7 @@ class CliRunner
 
 			try {
 				$deployment->deploy();
-			} catch (JobException | ServerException $e) {
+			} catch (JobException|ServerException $e) {
 				$this->logger->log("Error: {$e->getMessage()} in {$e->getFile()}:{$e->getLine()}\n\n$e", 'red');
 				$res = 1;
 			} catch (TerminatedException $e) {
@@ -114,7 +114,10 @@ class CliRunner
 		}
 
 		$time = time() - $time;
-		$this->logger->log('Finished at ' . date('[Y/m/d H:i]') . " (in $time seconds)\n----------------------------------------------\n\n", 'lime');
+		$this->logger->log(
+			'Finished at ' . date('[Y/m/d H:i]') . " (in $time seconds)\n----------------------------------------------\n\n",
+			'lime',
+		);
 		return $res;
 	}
 
@@ -141,9 +144,19 @@ class CliRunner
 		}
 
 		if ($urlParts['scheme'] === 'phpsec') {
-			$server = new PhpsecServer(Helpers::buildUrl($urlParts), $config['publickey'] ?? null, $config['privatekey'] ?? null, $config['passphrase'] ?? null);
+			$server = new PhpsecServer(
+				Helpers::buildUrl($urlParts),
+				$config['publickey'] ?? null,
+				$config['privatekey'] ?? null,
+				$config['passphrase'] ?? null,
+			);
 		} elseif ($urlParts['scheme'] === 'sftp') {
-			$server = new SshServer(Helpers::buildUrl($urlParts), $config['publickey'] ?? null, $config['privatekey'] ?? null, $config['passphrase'] ?? null);
+			$server = new SshServer(
+				Helpers::buildUrl($urlParts),
+				$config['publickey'] ?? null,
+				$config['privatekey'] ?? null,
+				$config['passphrase'] ?? null,
+			);
 		} elseif ($urlParts['scheme'] === 'file') {
 			$server = new FileServer($config['remote']);
 		} else {
@@ -177,7 +190,7 @@ class CliRunner
 		}
 
 		$deployment->includeMasks = self::toArray($config['include'], true);
-		$deployment->ignoreMasks = array_merge(self::toArray($config['ignore']), $this->ignoreMasks);
+		$deployment->ignoreMasks = [...self::toArray($config['ignore']), ...$this->ignoreMasks];
 		$deployment->deploymentFile = empty($config['deploymentfile'])
 			? $deployment->deploymentFile
 			: $config['deploymentfile'];
@@ -295,12 +308,8 @@ class CliRunner
 	/** @return array<string, mixed> */
 	protected function loadConfigFile(string $file): array
 	{
-		if (pathinfo($file, PATHINFO_EXTENSION) === 'php') {
-			return include $file;
-		} else {
-			return parse_ini_file($file, true)
-				?: throw new \Exception("Unable to parse config file '$file'.");
-		}
+		return pathinfo($file, PATHINFO_EXTENSION) === 'php' ? (include $file) : (parse_ini_file($file, true)
+			?: throw new \Exception("Unable to parse config file '$file'."));
 	}
 
 

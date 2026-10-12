@@ -106,11 +106,11 @@ class RetryServer implements Server
 	{
 		$interruptible = in_array($method, ['writeFile', 'readFile', 'removeFile', 'renameFile', 'removeDir'], true);
 		$lastError = '';
-		for ($counter = 0; ; $counter++) {
+		for ($counter = 0;; $counter++) {
 			try {
 				return $this->server->$method(...$args);
 
-			} catch (SkipException | TerminatedException $e) {
+			} catch (SkipException|TerminatedException $e) {
 				// These exceptions are thrown from user callbacks (e.g. progress callback in writeFile)
 				// and may interrupt a transfer mid-stream, leaving the connection in a broken state.
 				// Reconnect before re-throwing so that subsequent operations (e.g. cleanup) work.
