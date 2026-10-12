@@ -1,8 +1,6 @@
 <?php declare(strict_types=1);
 
-use Deployment\Deployer;
-use Deployment\Helpers;
-use Deployment\MockServer;
+use Deployment\{Deployer, Helpers, MockServer};
 use Tester\Assert;
 
 require __DIR__ . '/bootstrap.php';

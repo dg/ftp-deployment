@@ -1,11 +1,6 @@
 <?php declare(strict_types=1);
 
-use Deployment\Deployer;
-use Deployment\Helpers;
-use Deployment\InterruptHandler;
-use Deployment\MockServer;
-use Deployment\SkipException;
-use Deployment\TerminatedException;
+use Deployment\{Deployer, Helpers, InterruptHandler, MockServer, SkipException, TerminatedException};
 use Tester\Assert;
 
 require __DIR__ . '/bootstrap.php';

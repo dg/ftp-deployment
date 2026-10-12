@@ -1,7 +1,6 @@
 <?php declare(strict_types=1);
 
-use Deployment\Deployer;
-use Deployment\FileServer;
+use Deployment\{Deployer, FileServer};
 use Tester\Assert;
 
 require __DIR__ . '/bootstrap.php';
