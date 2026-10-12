@@ -27,9 +27,6 @@ class SshServer implements Server
 
 	/** @var array{scheme: string, host: string, user: string, pass?: string, port?: int, path?: string} */
 	private array $url;
-	private ?string $publicKey;
-	private ?string $privateKey;
-	private ?string $passPhrase;
 
 
 	/**
@@ -38,11 +35,11 @@ class SshServer implements Server
 	 */
 	public function __construct(
 		string $url,
-		?string $publicKey = null,
+		private ?string $publicKey = null,
 		#[\SensitiveParameter]
-		?string $privateKey = null,
+		private ?string $privateKey = null,
 		#[\SensitiveParameter]
-		?string $passPhrase = null,
+		private ?string $passPhrase = null,
 	) {
 		if (!extension_loaded('ssh2')) {
 			throw new \Exception('PHP extension SSH2 is not loaded.');
@@ -52,9 +49,6 @@ class SshServer implements Server
 			throw new \InvalidArgumentException('Invalid URL or missing username');
 		}
 		$this->url = $url;
-		$this->publicKey = $publicKey;
-		$this->privateKey = $privateKey;
-		$this->passPhrase = $passPhrase;
 	}
 
 
@@ -71,7 +65,13 @@ class SshServer implements Server
 		if (isset($this->url['pass'])) {
 			Safe::ssh2_auth_password($this->connection, urldecode($this->url['user']), urldecode($this->url['pass']));
 		} elseif ($this->publicKey && $this->privateKey) {
-			Safe::ssh2_auth_pubkey_file($this->connection, urldecode($this->url['user']), $this->publicKey, $this->privateKey, (string) $this->passPhrase);
+			Safe::ssh2_auth_pubkey_file(
+				$this->connection,
+				urldecode($this->url['user']),
+				$this->publicKey,
+				$this->privateKey,
+				(string) $this->passPhrase,
+			);
 		} else {
 			Safe::ssh2_auth_agent($this->connection, urldecode($this->url['user']));
 		}
@@ -172,14 +172,14 @@ class SshServer implements Server
 	 * Recursive deletes content of directory or file.
 	 * @throws ServerException
 	 */
-	public function purge(string $dir, ?callable $progress = null): void
+	public function purge(string $path, ?callable $progress = null): void
 	{
-		if (!file_exists($path = 'ssh2.sftp://' . (int) $this->getConnection() . $dir)) {
+		if (!file_exists($sftpPath = 'ssh2.sftp://' . (int) $this->getConnection() . $path)) {
 			return;
 		}
 
 		$dirs = $entries = [];
-		$iterator = Safe::dir($path);
+		$iterator = Safe::dir($sftpPath);
 		while (($entry = $iterator->read()) !== false) {
 			if ($entry !== '.' && $entry !== '..') {
 				$entries[] = $entry;
@@ -187,11 +187,11 @@ class SshServer implements Server
 		}
 
 		foreach ($entries as $entry) {
-			if (is_dir("$path/$entry")) {
+			if (is_dir("$sftpPath/$entry")) {
 				$dirs[] = $tmp = '.delete' . uniqid() . count($dirs);
-				Safe::rename("$path/$entry", "$path/$tmp");
+				Safe::rename("$sftpPath/$entry", "$sftpPath/$tmp");
 			} else {
-				Safe::unlink("$path/$entry");
+				Safe::unlink("$sftpPath/$entry");
 			}
 
 			if ($progress) {
@@ -200,8 +200,8 @@ class SshServer implements Server
 		}
 
 		foreach ($dirs as $subdir) {
-			$this->purge("$dir/$subdir", $progress);
-			Safe::rmdir("$path/$subdir");
+			$this->purge("$path/$subdir", $progress);
+			Safe::rmdir("$sftpPath/$subdir");
 		}
 	}
 

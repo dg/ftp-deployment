@@ -24,7 +24,7 @@ class FileServer implements Server
 	 */
 	public function __construct(string $url)
 	{
-		if (substr($url, 0, 7) !== 'file://') {
+		if (!str_starts_with($url, 'file://')) {
 			throw new \InvalidArgumentException('Invalid URL');
 		}
 		$this->root = $url;
@@ -115,15 +115,15 @@ class FileServer implements Server
 	 * Recursive deletes content of directory or file.
 	 * @throws ServerException
 	 */
-	public function purge(string $dir, ?callable $progress = null): void
+	public function purge(string $path, ?callable $progress = null): void
 	{
-		$dir = $this->root . $dir;
-		if (!file_exists($dir)) {
+		$path = $this->root . $path;
+		if (!file_exists($path)) {
 			return;
 		}
 
 		$iterator = new \RecursiveIteratorIterator(
-			new \RecursiveDirectoryIterator($dir, \FilesystemIterator::SKIP_DOTS),
+			new \RecursiveDirectoryIterator($path, \FilesystemIterator::SKIP_DOTS),
 			\RecursiveIteratorIterator::CHILD_FIRST,
 		);
 		foreach ($iterator as $name => $file) {

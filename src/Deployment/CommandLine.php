@@ -29,13 +29,13 @@ class CommandLine
 
 	/** @var string[] */
 	private array $positional = [];
-	private string $help;
 
 
 	/** @param array<string, array{argument?: bool, optional?: bool, repeatable?: bool, realpath?: bool, default?: ?string}> $defaults */
-	public function __construct(string $help, array $defaults = [])
-	{
-		$this->help = $help;
+	public function __construct(
+		private readonly string $help,
+		array $defaults = [],
+	) {
 		$this->options = $defaults;
 
 		preg_match_all('#^[ \t]+(--?\w.*?)(?:  .*\(default: (.*)\)|  |\r|$)#m', $help, $lines, PREG_SET_ORDER);
@@ -49,7 +49,7 @@ class CommandLine
 			$opts = $this->options[$name] ?? [];
 			$this->options[$name] = $opts + [
 				self::Argument => (bool) end($m[2]),
-				self::Optional => isset($line[2]) || (substr((string) end($m[2]), 0, 1) === '[') || isset($opts[self::Value]),
+				self::Optional => isset($line[2]) || (str_starts_with((string) end($m[2]), '[')) || isset($opts[self::Value]),
 				self::Repeatable => (bool) end($m[3]),
 				self::Value => $line[2] ?? null,
 			];

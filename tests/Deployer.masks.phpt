@@ -9,7 +9,7 @@ require __DIR__ . '/MockServer.php';
 
 test('ignoreMasks filters out matching files', function () {
 	$localDir = TEMP_DIR . '/masks1/local';
-	mkdir($localDir . '/.git', 0o777, true);
+	mkdir($localDir . '/.git', recursive: true);
 	file_put_contents("$localDir/a.txt", 'text');
 	file_put_contents("$localDir/b.log", 'log');
 	file_put_contents("$localDir/.git/config", 'git config');
@@ -30,7 +30,7 @@ test('ignoreMasks filters out matching files', function () {
 
 test('includeMasks limits to matching files only', function () {
 	$localDir = TEMP_DIR . '/masks2/local';
-	mkdir($localDir, 0o777, true);
+	mkdir($localDir, recursive: true);
 	file_put_contents("$localDir/a.txt", 'text');
 	file_put_contents("$localDir/b.css", 'css');
 	file_put_contents("$localDir/c.php", 'php');

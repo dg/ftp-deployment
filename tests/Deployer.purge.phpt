@@ -8,7 +8,7 @@ require __DIR__ . '/MockServer.php';
 
 
 $localDir = TEMP_DIR . '/purge/local';
-mkdir($localDir, 0o777, true);
+mkdir($localDir, recursive: true);
 file_put_contents("$localDir/index.php", '<?php');
 
 $server = new MockServer([
@@ -37,5 +37,5 @@ Assert::false(isset($server->getFiles()['/cache/sub/item3.tmp']));
 // Purge should happen after renames (new code deployed before cache cleared)
 $ops = $server->getOperationNames();
 $lastRename = max(array_keys(array_filter($ops, fn($op) => $op === 'renameFile')) ?: [0]);
-$purgeIndex = array_search('purge', $ops, true);
+$purgeIndex = array_search('purge', $ops, strict: true);
 Assert::true($purgeIndex > $lastRename, 'Purge should happen after renames');

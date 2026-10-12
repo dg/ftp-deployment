@@ -25,12 +25,10 @@ class Preprocessor
 	/** compress only file when contains /**! */
 	public bool $requireCompressMark = true;
 
-	private Logger $logger;
 
-
-	public function __construct(Logger $logger)
-	{
-		$this->logger = $logger;
+	public function __construct(
+		private readonly Logger $logger,
+	) {
 	}
 
 
@@ -47,7 +45,7 @@ class Preprocessor
 		$this->logger->log("Compressing $origFile");
 
 		$cmd = escapeshellarg($this->uglifyJsBinary) . ' --compress --mangle';
-		[$ok, $output] = $this->execute($cmd, $content, false);
+		[$ok, $output] = $this->execute($cmd, $content, bypassShell: false);
 		if (!$ok) {
 			$this->logger->log("Error while executing $this->uglifyJsBinary, install Node.js and uglify-js.", 'red');
 			$this->logger->log($output);
@@ -76,7 +74,7 @@ class Preprocessor
 		}
 
 		$cmd = escapeshellarg($this->cleanCssBinary) . ' --compatibility ie9 -O2';
-		[$ok, $output] = $this->execute($cmd, $content, false);
+		[$ok, $output] = $this->execute($cmd, $content, bypassShell: false);
 		if (!$ok) {
 			$this->logger->log("Error while executing $cmd", 'red');
 			$this->logger->log($output);
@@ -91,7 +89,7 @@ class Preprocessor
 		if (!$this->cleanCssBinary) {
 			return 'clean-css binary not configured';
 		}
-		[$ok, $output] = $this->execute(escapeshellarg($this->cleanCssBinary) . ' --version', '', false);
+		[$ok, $output] = $this->execute(escapeshellarg($this->cleanCssBinary) . ' --version', '', bypassShell: false);
 		if (!$ok) {
 			return "Error while executing $this->cleanCssBinary, install Node.js and clean-css-cli.";
 		} elseif (version_compare($output, '4.2', '<')) {
@@ -123,7 +121,7 @@ class Preprocessor
 			$s = $this->expandCssImports($s, $file);
 			if ($newDir !== $dir) {
 				$tmp = $dir . '/';
-				if (substr($newDir, 0, strlen($tmp)) === $tmp) {
+				if (str_starts_with($newDir, $tmp)) {
 					$s = preg_replace('#\burl\(["\']?(?=[.\w])(?!\w+:)#', '$0' . substr($newDir, strlen($tmp)) . '/', $s);
 				} elseif (str_contains($s, 'url(')) {
 					return $m[0];

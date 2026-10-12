@@ -9,7 +9,7 @@ require __DIR__ . '/MockServer.php';
 
 // Setup local directory
 $localDir = TEMP_DIR . '/nochg/local';
-mkdir($localDir, 0o777, true);
+mkdir($localDir, recursive: true);
 file_put_contents("$localDir/a.txt", 'content A');
 file_put_contents("$localDir/b.txt", 'content B');
 

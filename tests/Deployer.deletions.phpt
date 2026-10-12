@@ -9,7 +9,7 @@ require __DIR__ . '/MockServer.php';
 
 test('allowDelete=true removes files missing from local', function () {
 	$localDir = TEMP_DIR . '/del1/local';
-	mkdir($localDir, 0o777, true);
+	mkdir($localDir, recursive: true);
 	file_put_contents("$localDir/a.txt", 'content A');
 
 	$remotePaths = [
@@ -47,7 +47,7 @@ test('allowDelete=true removes files missing from local', function () {
 
 test('allowDelete=false keeps remote-only files but updates .htdeployment', function () {
 	$localDir = TEMP_DIR . '/del2/local';
-	mkdir($localDir, 0o777, true);
+	mkdir($localDir, recursive: true);
 	file_put_contents("$localDir/a.txt", 'content A');
 
 	$remotePaths = [

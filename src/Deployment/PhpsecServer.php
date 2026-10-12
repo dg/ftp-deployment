@@ -6,6 +6,7 @@ use phpseclib3\Crypt\Common\PrivateKey;
 use phpseclib3\Crypt\PublicKeyLoader;
 use phpseclib3\Net\SFTP;
 
+
 class PhpsecServer implements Server
 {
 	public ?int $filePermissions = null;
@@ -13,8 +14,6 @@ class PhpsecServer implements Server
 
 	/** @var array{scheme: string, host: string, user: string, pass?: string, port?: int, path?: string} */
 	private array $url;
-	private ?string $privateKey;
-	private ?string $passPhrase;
 	private ?SFTP $sftp = null;
 
 
@@ -22,17 +21,15 @@ class PhpsecServer implements Server
 		string $url,
 		?string $publicKey = null,
 		#[\SensitiveParameter]
-		?string $privateKey = null,
+		private ?string $privateKey = null,
 		#[\SensitiveParameter]
-		?string $passPhrase = null,
+		private ?string $passPhrase = null,
 	) {
 		$url = parse_url($url);
 		if (!$url || !isset($url['scheme'], $url['user'], $url['host']) || $url['scheme'] !== 'phpsec') {
 			throw new \InvalidArgumentException('Invalid URL or missing username');
 		}
 		$this->url = $url;
-		$this->privateKey = $privateKey;
-		$this->passPhrase = $passPhrase;
 	}
 
 
@@ -142,7 +139,7 @@ class PhpsecServer implements Server
 	{
 		$sftp = $this->getConnection();
 		if ($sftp->file_exists($path)) {
-			if ($sftp->delete($path, true) === false) {
+			if ($sftp->delete($path) === false) {
 				throw new ServerException('Unable to purge directory/file');
 			}
 		}

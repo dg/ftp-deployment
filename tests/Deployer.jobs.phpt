@@ -9,7 +9,7 @@ require __DIR__ . '/MockServer.php';
 
 test('callable jobs run in correct order: before -> afterUpload -> after', function () {
 	$localDir = TEMP_DIR . '/jobs1/local';
-	mkdir($localDir, 0o777, true);
+	mkdir($localDir, recursive: true);
 	file_put_contents("$localDir/index.php", '<?php');
 
 	$server = new MockServer;
@@ -37,7 +37,7 @@ test('callable jobs run in correct order: before -> afterUpload -> after', funct
 
 test('callable job receives correct arguments', function () {
 	$localDir = TEMP_DIR . '/jobs2/local';
-	mkdir($localDir, 0o777, true);
+	mkdir($localDir, recursive: true);
 	file_put_contents("$localDir/index.php", '<?php');
 
 	$server = new MockServer;
@@ -61,7 +61,7 @@ test('callable job receives correct arguments', function () {
 
 test('callable job returning false throws JobException', function () {
 	$localDir = TEMP_DIR . '/jobs3/local';
-	mkdir($localDir, 0o777, true);
+	mkdir($localDir, recursive: true);
 	file_put_contents("$localDir/index.php", '<?php');
 
 	$server = new MockServer;

@@ -8,7 +8,7 @@ require __DIR__ . '/MockServer.php';
 
 
 $localDir = TEMP_DIR . '/incr/local';
-mkdir($localDir, 0o777, true);
+mkdir($localDir, recursive: true);
 file_put_contents("$localDir/a.txt", 'changed content A');
 file_put_contents("$localDir/b.txt", 'changed content B');
 file_put_contents("$localDir/c.txt", 'unchanged content');

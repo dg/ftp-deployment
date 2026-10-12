@@ -44,28 +44,22 @@ class Deployer
 
 	private string $localDir;
 	private string $remoteDir;
-	private Logger $logger;
 
 	/** @var array<string, list<array{filter: callable(string, string): ?string, cached: bool, name: string}>> */
 	private array $filters = [];
-	private Server $server;
-	private ?InterruptHandler $interruptHandler;
 
 
 	public function __construct(
-		Server $server,
+		private readonly Server $server,
 		string $localDir,
-		Logger $logger,
-		?InterruptHandler $interruptHandler = null,
+		private readonly Logger $logger,
+		private readonly ?InterruptHandler $interruptHandler = null,
 	) {
 		$path = realpath($localDir);
 		if (!$path) {
 			throw new \InvalidArgumentException("Directory $localDir not found.");
 		}
 		$this->localDir = $path;
-		$this->server = $server;
-		$this->logger = $logger;
-		$this->interruptHandler = $interruptHandler;
 	}
 
 
@@ -103,7 +97,8 @@ class Deployer
 
 		$this->logger->log("Scanning files in $this->localDir");
 		static $cache;
-		$localPaths = &$cache[serialize([$this->localDir, $this->ignoreMasks, $this->includeMasks, array_keys($this->filters), $this->preprocessMasks])];
+		$key = serialize([$this->localDir, $this->ignoreMasks, $this->includeMasks, array_keys($this->filters), $this->preprocessMasks]);
+		$localPaths = &$cache[$key];
 		if ($localPaths === null) {
 			$localPaths = $this->collectPaths();
 		}
@@ -261,7 +256,7 @@ class Deployer
 			} else {
 				$this->server->readFile($this->remoteDir . '/' . $this->deploymentFile, $tempFile);
 			}
-		} catch (ServerException $e) {
+		} catch (ServerException) {
 			return null;
 		}
 		$s = file_get_contents($tempFile);
@@ -293,7 +288,7 @@ class Deployer
 			$s .= "$v=$k\n";
 		}
 		$file = $this->localDir . '/' . $this->deploymentFile;
-		@mkdir(dirname($file), 0o777, true); // @ dir may exists
+		@mkdir(dirname($file), recursive: true); // @ dir may exists
 		file_put_contents($file, gzencode($s, 9));
 		return $file;
 	}
@@ -318,7 +313,7 @@ class Deployer
 			}
 
 			$remotePath = $this->remoteDir . $path;
-			$isDir = substr($remotePath, -1) === '/';
+			$isDir = str_ends_with($remotePath, '/');
 			$remoteDir = $isDir
 				? substr($remotePath, 0, -1)
 				: str_replace('\\', '/', dirname($remotePath));
@@ -367,7 +362,7 @@ class Deployer
 	private function renamePaths(array $paths, array &$tempFiles): array
 	{
 		$skippedPaths = [];
-		$files = array_values(array_filter($paths, fn($path) => substr($path, -1) !== '/'));
+		$files = array_values(array_filter($paths, fn($path) => !str_ends_with($path, '/')));
 		foreach ($files as $num => $file) {
 			try {
 				// Deployment file rename is never skippable to keep server state consistent
@@ -403,7 +398,7 @@ class Deployer
 			try {
 				$this->interruptHandler?->check("Delete $path");
 				$this->writeProgress($num + 1, count($paths), "Deleting $path", null, 'maroon');
-				if (substr($path, -1) === '/') { // is directory?
+				if (str_ends_with($path, '/')) { // is directory?
 					$this->server->removeDir($remotePath);
 				} else {
 					$this->server->removeFile($remotePath);
@@ -437,7 +432,7 @@ class Deployer
 
 			$path = "$this->localDir$subdir/$entry";
 			$short = "$subdir/$entry";
-			if ($entry == '.' || $entry == '..') {
+			if ($entry === '.' || $entry === '..') {
 				continue;
 
 			} elseif (Helpers::matchMask($short, $this->ignoreMasks, is_dir($path))) {
@@ -528,7 +523,7 @@ class Deployer
 						[$out, $err] = $runner->$method($m[2]);
 					}
 
-					if ($out != null) { // intentionally ==
+					if ($out != null) { // intentionally !=, skips null and empty string
 						$this->logger->log("-> $out", 'gray', -3);
 					}
 					if ($err) {

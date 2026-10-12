@@ -9,8 +9,8 @@ require __DIR__ . '/bootstrap.php';
 test('fresh deploy with FileServer copies files to remote', function () {
 	$localDir = TEMP_DIR . '/fs1/local';
 	$remoteDir = TEMP_DIR . '/fs1/remote';
-	mkdir($localDir . '/lib', 0o777, true);
-	mkdir($remoteDir, 0o777, true);
+	mkdir($localDir . '/lib', recursive: true);
+	mkdir($remoteDir, recursive: true);
 
 	file_put_contents("$localDir/index.php", '<?php echo "hello";');
 	file_put_contents("$localDir/style.css", 'body { color: red; }');
@@ -55,9 +55,9 @@ test('incremental deploy uploads only changed files', function () {
 	$localDir1 = TEMP_DIR . '/fs2/local1';
 	$localDir2 = TEMP_DIR . '/fs2/local2';
 	$remoteDir = TEMP_DIR . '/fs2/remote';
-	mkdir($localDir1, 0o777, true);
-	mkdir($localDir2, 0o777, true);
-	mkdir($remoteDir, 0o777, true);
+	mkdir($localDir1, recursive: true);
+	mkdir($localDir2, recursive: true);
+	mkdir($remoteDir, recursive: true);
 
 	// First deploy: both files original
 	file_put_contents("$localDir1/a.txt", 'original A');

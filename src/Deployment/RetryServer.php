@@ -17,16 +17,12 @@ class RetryServer implements Server
 	private const Retries = 20;
 	private const Delay = 2;
 
-	private Server $server;
-	private Logger $logger;
-	private ?InterruptHandler $interruptHandler;
 
-
-	public function __construct(Server $server, Logger $logger, ?InterruptHandler $interruptHandler = null)
-	{
-		$this->server = $server;
-		$this->logger = $logger;
-		$this->interruptHandler = $interruptHandler;
+	public function __construct(
+		private readonly Server $server,
+		private readonly Logger $logger,
+		private readonly ?InterruptHandler $interruptHandler = null,
+	) {
 	}
 
 
@@ -110,11 +106,11 @@ class RetryServer implements Server
 	{
 		$interruptible = in_array($method, ['writeFile', 'readFile', 'removeFile', 'renameFile', 'removeDir'], true);
 		$lastError = '';
-		for ($counter = 0; ; $counter++) {
+		for ($counter = 0;; $counter++) {
 			try {
 				return $this->server->$method(...$args);
 
-			} catch (SkipException | TerminatedException $e) {
+			} catch (SkipException|TerminatedException $e) {
 				// These exceptions are thrown from user callbacks (e.g. progress callback in writeFile)
 				// and may interrupt a transfer mid-stream, leaving the connection in a broken state.
 				// Reconnect before re-throwing so that subsequent operations (e.g. cleanup) work.

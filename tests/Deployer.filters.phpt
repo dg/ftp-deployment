@@ -25,7 +25,7 @@ class Filters
 function createDeployer(string $name, MockServer $server): Deployer
 {
 	$localDir = TEMP_DIR . "/$name/local";
-	mkdir($localDir, 0o777, true);
+	mkdir($localDir, recursive: true);
 	file_put_contents("$localDir/a.js", 'same');
 	file_put_contents("$localDir/a.css", 'same');
 

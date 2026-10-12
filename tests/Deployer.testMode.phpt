@@ -8,7 +8,7 @@ require __DIR__ . '/MockServer.php';
 
 
 $localDir = TEMP_DIR . '/testmode/local';
-mkdir($localDir, 0o777, true);
+mkdir($localDir, recursive: true);
 file_put_contents("$localDir/index.php", '<?php echo "hello";');
 file_put_contents("$localDir/style.css", 'body {}');
 

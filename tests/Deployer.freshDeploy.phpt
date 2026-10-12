@@ -8,7 +8,7 @@ require __DIR__ . '/MockServer.php';
 
 
 $localDir = TEMP_DIR . '/fresh/local';
-mkdir($localDir . '/lib', 0o777, true);
+mkdir($localDir . '/lib', recursive: true);
 file_put_contents("$localDir/index.php", '<?php echo "hello";');
 file_put_contents("$localDir/style.css", 'body { color: red; }');
 file_put_contents("$localDir/lib/utils.php", '<?php function foo() {}');

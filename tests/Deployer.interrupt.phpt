@@ -50,7 +50,7 @@ class TestInterruptHandler extends InterruptHandler
 
 test('skipped upload keeps old hash in deployment file', function () {
 	$localDir = TEMP_DIR . '/int1/local';
-	mkdir($localDir, 0o777, true);
+	mkdir($localDir, recursive: true);
 	file_put_contents("$localDir/a.txt", 'new content A');
 	file_put_contents("$localDir/b.txt", 'new content B');
 	file_put_contents("$localDir/c.txt", 'unchanged');
@@ -99,7 +99,7 @@ test('skipped upload keeps old hash in deployment file', function () {
 
 test('skipped rename regenerates deployment file with old hash', function () {
 	$localDir = TEMP_DIR . '/int2/local';
-	mkdir($localDir, 0o777, true);
+	mkdir($localDir, recursive: true);
 	file_put_contents("$localDir/a.txt", 'new content A');
 	file_put_contents("$localDir/b.txt", 'new content B');
 
@@ -141,7 +141,7 @@ test('skipped rename regenerates deployment file with old hash', function () {
 
 test('cancel during upload propagates TerminatedException and cleans up', function () {
 	$localDir = TEMP_DIR . '/int3/local';
-	mkdir($localDir, 0o777, true);
+	mkdir($localDir, recursive: true);
 	file_put_contents("$localDir/a.txt", 'aaa');
 	file_put_contents("$localDir/b.txt", 'bbb');
 	file_put_contents("$localDir/c.txt", 'ccc');
@@ -171,7 +171,7 @@ test('cancel during upload propagates TerminatedException and cleans up', functi
 
 test('skipped operations are tracked and reported', function () {
 	$localDir = TEMP_DIR . '/int4/local';
-	mkdir($localDir, 0o777, true);
+	mkdir($localDir, recursive: true);
 	file_put_contents("$localDir/a.txt", 'new A');
 	file_put_contents("$localDir/b.txt", 'new B');
 	file_put_contents("$localDir/c.txt", 'new C');
@@ -204,7 +204,7 @@ test('skipped operations are tracked and reported', function () {
 
 test('skip during job execution continues deployment', function () {
 	$localDir = TEMP_DIR . '/int5/local';
-	mkdir($localDir, 0o777, true);
+	mkdir($localDir, recursive: true);
 	file_put_contents("$localDir/a.txt", 'aaa');
 
 	$server = new MockServer;
@@ -233,7 +233,7 @@ test('skip during job execution continues deployment', function () {
 
 test('skipped upload of new file removes it from deployment file', function () {
 	$localDir = TEMP_DIR . '/int6/local';
-	mkdir($localDir, 0o777, true);
+	mkdir($localDir, recursive: true);
 	file_put_contents("$localDir/a.txt", 'existing');
 	file_put_contents("$localDir/b.txt", 'brand new');
 
@@ -266,7 +266,7 @@ test('skipped upload of new file removes it from deployment file', function () {
 
 test('cancel during rename propagates TerminatedException and cleans up temp files', function () {
 	$localDir = TEMP_DIR . '/int7/local';
-	mkdir($localDir, 0o777, true);
+	mkdir($localDir, recursive: true);
 	file_put_contents("$localDir/a.txt", 'aaa');
 	file_put_contents("$localDir/b.txt", 'bbb');
 	file_put_contents("$localDir/c.txt", 'ccc');
@@ -298,7 +298,7 @@ test('cancel during rename propagates TerminatedException and cleans up temp fil
 
 test('skip during delete keeps skipped file on server', function () {
 	$localDir = TEMP_DIR . '/int8/local';
-	mkdir($localDir, 0o777, true);
+	mkdir($localDir, recursive: true);
 	file_put_contents("$localDir/keep.txt", 'keep');
 
 	$hashKeep = Helpers::hashFile("$localDir/keep.txt");
