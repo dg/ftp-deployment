@@ -11,16 +11,11 @@ namespace Deployment;
 
 class JobRunner
 {
-	private Server $server;
-	private string $localDir;
-	private string $remoteDir;
-
-
-	public function __construct(Server $server, string $localDir, string $remoteDir)
-	{
-		$this->server = $server;
-		$this->localDir = $localDir;
-		$this->remoteDir = $remoteDir;
+	public function __construct(
+		private readonly Server $server,
+		private readonly string $localDir,
+		private readonly string $remoteDir,
+	) {
 	}
 
 

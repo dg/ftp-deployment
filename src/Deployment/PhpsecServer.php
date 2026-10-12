@@ -12,9 +12,7 @@ class PhpsecServer implements Server
 	public ?int $dirPermissions = null;
 
 	/** @var array{scheme: string, host: string, user: string, pass?: string, port?: int, path?: string} */
-	private array $url;
-	private ?string $privateKey;
-	private ?string $passPhrase;
+	private readonly array $url;
 	private ?SFTP $sftp = null;
 
 
@@ -22,17 +20,15 @@ class PhpsecServer implements Server
 		string $url,
 		?string $publicKey = null,
 		#[\SensitiveParameter]
-		?string $privateKey = null,
+		private readonly ?string $privateKey = null,
 		#[\SensitiveParameter]
-		?string $passPhrase = null,
+		private readonly ?string $passPhrase = null,
 	) {
 		$url = parse_url($url);
 		if (!$url || !isset($url['scheme'], $url['user'], $url['host']) || $url['scheme'] !== 'phpsec') {
 			throw new \InvalidArgumentException('Invalid URL or missing username');
 		}
 		$this->url = $url;
-		$this->privateKey = $privateKey;
-		$this->passPhrase = $passPhrase;
 	}
 
 

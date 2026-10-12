@@ -23,7 +23,7 @@ class FtpServer implements Server
 	private $connection;
 
 	/** @var array{scheme: string, host: string, user: string, pass: string, port?: int, path?: string} */
-	private array $url;
+	private readonly array $url;
 	private bool $passiveMode = true;
 
 

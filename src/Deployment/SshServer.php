@@ -26,10 +26,7 @@ class SshServer implements Server
 	private $sftp;
 
 	/** @var array{scheme: string, host: string, user: string, pass?: string, port?: int, path?: string} */
-	private array $url;
-	private ?string $publicKey;
-	private ?string $privateKey;
-	private ?string $passPhrase;
+	private readonly array $url;
 
 
 	/**
@@ -38,11 +35,11 @@ class SshServer implements Server
 	 */
 	public function __construct(
 		string $url,
-		?string $publicKey = null,
+		private readonly ?string $publicKey = null,
 		#[\SensitiveParameter]
-		?string $privateKey = null,
+		private readonly ?string $privateKey = null,
 		#[\SensitiveParameter]
-		?string $passPhrase = null,
+		private readonly ?string $passPhrase = null,
 	) {
 		if (!extension_loaded('ssh2')) {
 			throw new \Exception('PHP extension SSH2 is not loaded.');
@@ -52,9 +49,6 @@ class SshServer implements Server
 			throw new \InvalidArgumentException('Invalid URL or missing username');
 		}
 		$this->url = $url;
-		$this->publicKey = $publicKey;
-		$this->privateKey = $privateKey;
-		$this->passPhrase = $passPhrase;
 	}
 
 

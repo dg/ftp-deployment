@@ -29,13 +29,13 @@ class CommandLine
 
 	/** @var string[] */
 	private array $positional = [];
-	private string $help;
 
 
 	/** @param array<string, array{argument?: bool, optional?: bool, repeatable?: bool, realpath?: bool, default?: ?string}> $defaults */
-	public function __construct(string $help, array $defaults = [])
-	{
-		$this->help = $help;
+	public function __construct(
+		private readonly string $help,
+		array $defaults = [],
+	) {
 		$this->options = $defaults;
 
 		preg_match_all('#^[ \t]+(--?\w.*?)(?:  .*\(default: (.*)\)|  |\r|$)#m', $help, $lines, PREG_SET_ORDER);

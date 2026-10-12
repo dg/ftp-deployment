@@ -42,30 +42,24 @@ class Deployer
 	/** @var string[] */
 	public array $preprocessMasks = [];
 
-	private string $localDir;
+	private readonly string $localDir;
 	private string $remoteDir;
-	private Logger $logger;
 
 	/** @var array<string, list<array{filter: callable(string, string): ?string, cached: bool, name: string}>> */
 	private array $filters = [];
-	private Server $server;
-	private ?InterruptHandler $interruptHandler;
 
 
 	public function __construct(
-		Server $server,
+		private readonly Server $server,
 		string $localDir,
-		Logger $logger,
-		?InterruptHandler $interruptHandler = null,
+		private readonly Logger $logger,
+		private readonly ?InterruptHandler $interruptHandler = null,
 	) {
 		$path = realpath($localDir);
 		if (!$path) {
 			throw new \InvalidArgumentException("Directory $localDir not found.");
 		}
 		$this->localDir = $path;
-		$this->server = $server;
-		$this->logger = $logger;
-		$this->interruptHandler = $interruptHandler;
 	}
 
 

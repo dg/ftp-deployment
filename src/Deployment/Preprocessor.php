@@ -25,12 +25,10 @@ class Preprocessor
 	/** compress only file when contains /**! */
 	public bool $requireCompressMark = true;
 
-	private Logger $logger;
 
-
-	public function __construct(Logger $logger)
-	{
-		$this->logger = $logger;
+	public function __construct(
+		private readonly Logger $logger,
+	) {
 	}
 
 

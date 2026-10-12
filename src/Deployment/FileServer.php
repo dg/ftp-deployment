@@ -16,7 +16,7 @@ class FileServer implements Server
 {
 	public ?int $filePermissions = null;
 	public ?int $dirPermissions = null;
-	private string $root;
+	private readonly string $root;
 
 
 	/**

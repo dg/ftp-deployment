@@ -17,16 +17,12 @@ class RetryServer implements Server
 	private const Retries = 20;
 	private const Delay = 2;
 
-	private Server $server;
-	private Logger $logger;
-	private ?InterruptHandler $interruptHandler;
 
-
-	public function __construct(Server $server, Logger $logger, ?InterruptHandler $interruptHandler = null)
-	{
-		$this->server = $server;
-		$this->logger = $logger;
-		$this->interruptHandler = $interruptHandler;
+	public function __construct(
+		private readonly Server $server,
+		private readonly Logger $logger,
+		private readonly ?InterruptHandler $interruptHandler = null,
+	) {
 	}
 
 

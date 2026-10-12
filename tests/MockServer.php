@@ -15,16 +15,15 @@ class MockServer implements Server
 	/** @var list<array{method: string, args: list<mixed>}> */
 	private array $operations = [];
 
-	private string $dir;
-
 
 	/**
 	 * @param  array<string, string|true>  $files  initial virtual filesystem
 	 */
-	public function __construct(array $files = [], string $dir = '')
-	{
+	public function __construct(
+		array $files = [],
+		private readonly string $dir = '',
+	) {
 		$this->files = $files;
-		$this->dir = $dir;
 	}
 
 
