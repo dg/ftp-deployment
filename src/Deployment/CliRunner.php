@@ -8,6 +8,8 @@
 
 namespace Deployment;
 
+use Nette\CommandLine\{ColorDepth, Command, Console, HelpRenderer, Normalizers, Parser, UsageException};
+
 
 /**
  * Run Forrest run!
@@ -30,6 +32,7 @@ class CliRunner
 
 	/** @var string[] */
 	public array $ignoreMasks = ['*.bak', '.svn', '.git*', 'Thumbs.db', '.DS_Store', '.idea', '.claude'];
+	private Console $console;
 	private Logger $logger;
 	private string $configFile;
 	private InterruptHandler $interruptHandler;
@@ -46,8 +49,9 @@ class CliRunner
 
 	public function run(): ?int
 	{
-		$this->logger = new Logger('php://memory');
-		$this->interruptHandler = new InterruptHandler;
+		$this->console = new Console;
+		$this->logger = new Logger('php://memory', $this->console);
+		$this->interruptHandler = new InterruptHandler($this->console);
 		$this->setupPhp();
 
 		$config = $this->loadConfig();
@@ -55,8 +59,12 @@ class CliRunner
 			return 1;
 		}
 
-		$this->logger = new Logger($config['log']);
-		$this->logger->useColors = (bool) $config['colors'];
+		$this->logger = new Logger($config['log'], $this->console);
+		if (!$config['colors']) {
+			$this->console->setColorDepth(ColorDepth::None);
+		} elseif (!$this->console->hasColors()) { // `colors = yes` turns them on even for a pipe, as FORCE_COLOR does
+			$this->console->setColorDepth(ColorDepth::Ansi16);
+		}
 		$this->logger->showProgress = (bool) $config['progress'];
 		$this->interruptHandler->logger = $this->logger;
 
@@ -234,32 +242,26 @@ class CliRunner
 	/** @return ?array<string, mixed> */
 	private function loadConfig(): ?array
 	{
-		$cmd = new CommandLine(
-			<<<'XX'
+		$command = new Command(usage: 'deployment <config_file> [-t | --test]');
+		$command->addText("FTP deployment v3.7\n-------------------");
+		$command->addFlag('--test', 'Run in test-mode.', alias: '-t');
+		$command->addOption('--section', 'Only deploys the named section.', valueName: 'name');
+		$command->addFlag('--generate', 'Only generates deployment file.');
+		$command->addFlag('--no-progress', 'Hide the progress indicators.');
+		$command->addArgument('config', optional: true, normalizer: Normalizers::realPath(...), hidden: true);
 
-				FTP deployment v3.7
-				-------------------
-				Usage:
-					deployment <config_file> [-t | --test]
-
-				Options:
-					-t | --test       Run in test-mode.
-					--section <name>  Only deploys the named section.
-					--generate        Only generates deployment file.
-					--no-progress     Hide the progress indicators.
-
-				XX,
-			[
-				'config' => [CommandLine::RealPath => true],
-			],
-		);
-
-		if ($cmd->isEmpty()) {
-			$cmd->help();
+		try {
+			$options = (new Parser)->parse($command);
+		} catch (UsageException $e) {
+			(new HelpRenderer)->renderError($e);
 			return null;
 		}
 
-		$options = $cmd->parse();
+		if ($options['config'] === null) {
+			(new HelpRenderer($this->console))->render($command);
+			return null;
+		}
+
 		$this->mode = $options['--generate']
 			? 'generate'
 			: ($options['--test'] ? 'test' : null);
@@ -297,8 +299,8 @@ class CliRunner
 		$config = array_change_key_case($config, CASE_LOWER) + [
 			'log' => preg_replace('#\.\w+$#', '.log', $this->configFile),
 			'tempdir' => sys_get_temp_dir() . '/deployment',
-			'progress' => true,
-			'colors' => self::detectColors(),
+			'progress' => $this->console->isTerminal(),
+			'colors' => $this->console->hasColors(),
 		];
 		$config['progress'] = $options['--no-progress'] ? false : $config['progress'];
 		return $config;
@@ -322,16 +324,5 @@ class CliRunner
 		return is_array($val)
 			? array_values(array_filter($val))
 			: preg_split($lines ? '#\s*\n\s*#' : '#\s+#', $val, -1, PREG_SPLIT_NO_EMPTY);
-	}
-
-
-	public static function detectColors(): bool
-	{
-		return (PHP_SAPI === 'cli' || PHP_SAPI === 'phpdbg')
-			&& getenv('NO_COLOR') === false
-			&& (getenv('FORCE_COLOR')
-				|| (function_exists('sapi_windows_vt100_support')
-					? sapi_windows_vt100_support(STDOUT)
-					: @stream_isatty(STDOUT))); // @ a filtered stream cannot be cast on some systems
 	}
 }
