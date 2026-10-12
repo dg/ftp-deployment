@@ -135,7 +135,7 @@ class RetryServer implements Server
 					$this->retry('connect', []); // first try to reconnect
 				}
 
-				$this->logger->progress('retrying ' . str_pad(str_repeat('.', ($counter + 1) % 40), 40));
+				$this->logger->progress('retrying ' . str_repeat('.', ($counter + 1) % 40));
 
 				// Fragmented sleep (200ms intervals) to stay responsive to Ctrl+C
 				for ($i = 0; $i < self::Delay * 5; $i++) {
