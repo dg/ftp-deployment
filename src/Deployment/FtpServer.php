@@ -259,7 +259,7 @@ class FtpServer implements Server
 		$conn = $this->getConnection();
 		$dirs = [];
 		foreach ((array) Safe::ftp_nlist($conn, $path) as $entry) {
-			if ($entry == null || $entry === $path || preg_match('#(^|/)\.+$#', $entry)) { // intentionally ==
+			if ($entry === '' || $entry === $path || preg_match('#(^|/)\.+$#', $entry)) {
 				continue;
 			} elseif (!str_contains($entry, '/')) {
 				$entry = "$path/$entry";

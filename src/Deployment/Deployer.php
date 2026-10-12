@@ -432,7 +432,7 @@ class Deployer
 
 			$path = "$this->localDir$subdir/$entry";
 			$short = "$subdir/$entry";
-			if ($entry == '.' || $entry == '..') {
+			if ($entry === '.' || $entry === '..') {
 				continue;
 
 			} elseif (Helpers::matchMask($short, $this->ignoreMasks, is_dir($path))) {
@@ -523,7 +523,7 @@ class Deployer
 						[$out, $err] = $runner->$method($m[2]);
 					}
 
-					if ($out != null) { // intentionally ==
+					if ($out != null) { // intentionally !=, skips null and empty string
 						$this->logger->log("-> $out", 'gray', -3);
 					}
 					if ($err) {
