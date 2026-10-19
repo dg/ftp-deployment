@@ -8,7 +8,7 @@
 
 namespace Deployment;
 
-use Nette\CommandLine\{Attributes as Cli, ColorDepth, Command, Console, HelpRenderer, Normalizers, Parser, UsageException};
+use Nette\CommandLine\{Attributes as Cli, ColorDepth, Command, Console, Normalizers, Runner};
 
 
 /**
@@ -56,18 +56,15 @@ class CliRunner
 		$this->interruptHandler = new InterruptHandler($this->console);
 		$this->setupPhp();
 
-		try {
-			return (new Parser)->parse(Command::from($this->deploy(...)))->run();
-		} catch (UsageException $e) {
-			(new HelpRenderer)->renderError($e);
-			return 1;
-		}
+		$runner = new Runner(Command::from($this->deploy(...)), version: 'FTP deployment v3.7', helpWhenEmpty: true, out: $this->console);
+		return $runner->run();
 	}
 
 
-	#[Cli\Command('FTP deployment v3.7', usage: 'deployment <config_file> [-t | --test]')]
+	#[Cli\Command(usage: 'deployment <config_file> [-t | --test]')]
 	private function deploy(
-		Command $program,
+		#[Cli\Argument(normalizer: [Normalizers::class, 'realPath'], hidden: true, name: 'config')]
+		string $configFile,
 		#[Cli\Flag('Run in test-mode.', alias: '-t')]
 		?bool $test = null,
 		#[Cli\Option('Only deploys the named section.', valueName: 'name')]
@@ -78,15 +75,8 @@ class CliRunner
 		?bool $noProgress = null,
 		#[Cli\Flag('Deploy even if a leftover .running lock file is present.')]
 		?bool $force = null,
-		#[Cli\Argument(normalizer: [Normalizers::class, 'realPath'], hidden: true, name: 'config')]
-		?string $configFile = null,
 	): int
 	{
-		if ($configFile === null) {
-			(new HelpRenderer($this->console))->render($program);
-			return 1;
-		}
-
 		$this->mode = $generate ? 'generate' : ($test ? 'test' : null);
 		$this->force = (bool) $force;
 		$this->configFile = $configFile;
