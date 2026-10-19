@@ -8,7 +8,7 @@
 
 namespace Deployment;
 
-use Nette\CommandLine\{ColorDepth, Command, Console, HelpRenderer, Normalizers, Parser, UsageException};
+use Nette\CommandLine\{Attributes as Cli, ColorDepth, Command, Console, HelpRenderer, Normalizers, Parser, UsageException};
 
 
 /**
@@ -16,6 +16,8 @@ use Nette\CommandLine\{ColorDepth, Command, Console, HelpRenderer, Normalizers, 
  */
 class CliRunner
 {
+	public const Version = '3.7.0';
+
 	/** @var array<string, string|bool> */
 	public array $defaults = [
 		'local' => '',
@@ -54,10 +56,38 @@ class CliRunner
 		$this->interruptHandler = new InterruptHandler($this->console);
 		$this->setupPhp();
 
-		$config = $this->loadConfig();
-		if (!$config) {
+		try {
+			return (new Parser)->parse(Command::from($this->deploy(...)))->run();
+		} catch (UsageException $e) {
+			(new HelpRenderer)->renderError($e);
 			return 1;
 		}
+	}
+
+
+	#[Cli\Command('FTP deployment v' . self::Version, usage: 'deployment <config_file> [-t | --test]')]
+	private function deploy(
+		Command $program,
+		#[Cli\Flag('Run in test-mode.', alias: '-t')]
+		?bool $test = null,
+		#[Cli\Option('Only deploys the named section.', valueName: 'name')]
+		?string $section = null,
+		#[Cli\Flag('Only generates deployment file.')]
+		?bool $generate = null,
+		#[Cli\Flag('Hide the progress indicators.')]
+		?bool $noProgress = null,
+		#[Cli\Argument(normalizer: [Normalizers::class, 'realPath'], hidden: true, name: 'config')]
+		?string $configFile = null,
+	): int
+	{
+		if ($configFile === null) {
+			(new HelpRenderer($this->console))->render($program);
+			return 1;
+		}
+
+		$this->mode = $generate ? 'generate' : ($test ? 'test' : null);
+		$this->configFile = $configFile;
+		$config = $this->loadConfig($section, (bool) $noProgress);
 
 		$this->logger = new Logger($config['log'], $this->console);
 		if (!$config['colors']) {
@@ -239,40 +269,15 @@ class CliRunner
 	}
 
 
-	/** @return ?array<string, mixed> */
-	private function loadConfig(): ?array
+	/** @return array<string, mixed> */
+	private function loadConfig(?string $section, bool $noProgress): array
 	{
-		$command = new Command(usage: 'deployment <config_file> [-t | --test]');
-		$command->addText("FTP deployment v3.7\n-------------------");
-		$command->addFlag('--test', 'Run in test-mode.', alias: '-t');
-		$command->addOption('--section', 'Only deploys the named section.', valueName: 'name');
-		$command->addFlag('--generate', 'Only generates deployment file.');
-		$command->addFlag('--no-progress', 'Hide the progress indicators.');
-		$command->addArgument('config', optional: true, normalizer: Normalizers::realPath(...), hidden: true);
-
-		try {
-			$options = (new Parser)->parse($command);
-		} catch (UsageException $e) {
-			(new HelpRenderer)->renderError($e);
-			return null;
-		}
-
-		if ($options['config'] === null) {
-			(new HelpRenderer($this->console))->render($command);
-			return null;
-		}
-
-		$this->mode = $options['--generate']
-			? 'generate'
-			: ($options['--test'] ? 'test' : null);
-		$this->configFile = $options['config'];
-
-		$config = $this->loadConfigFile($options['config']);
+		$config = $this->loadConfigFile($this->configFile);
 		if (!$config) {
 			throw new \Exception('Missing config.');
 		}
 
-		$lock = fopen($options['config'], 'r');
+		$lock = fopen($this->configFile, 'r');
 		if (!$lock || !flock($lock, LOCK_EX | LOCK_NB)) {
 			throw new \Exception('It seems that you are in the middle of another deployment.');
 		}
@@ -282,8 +287,7 @@ class CliRunner
 			? ['' => $config]
 			: array_filter($config, 'is_array');
 
-		if (isset($options['--section'])) {
-			$section = $options['--section'];
+		if ($section !== null) {
 			if ($section === '') {
 				throw new \Exception('Missing section name.');
 			} elseif (!isset($this->batches[$section])) {
@@ -302,7 +306,7 @@ class CliRunner
 			'progress' => $this->console->isTerminal(),
 			'colors' => $this->console->hasColors(),
 		];
-		$config['progress'] = $options['--no-progress'] ? false : $config['progress'];
+		$config['progress'] = $noProgress ? false : $config['progress'];
 		return $config;
 	}
 
