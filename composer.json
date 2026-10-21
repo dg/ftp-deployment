@@ -1,8 +1,8 @@
 {
 	"name": "dg/ftp-deployment",
 	"type": "project",
-	"description": "A tool for automated deployment of web applications to an FTP server.",
-	"keywords": ["deployment", "ftp", "ssh"],
+	"description": "🚚 FTP Deployment: deploys web applications to FTP or SFTP, uploading only the files that changed and switching them in at the end, so the site is never half-updated.",
+	"keywords": ["deployment", "deploy", "ftp", "sftp", "ftps"],
 	"homepage": "https://github.com/dg/ftp-deployment",
 	"license": ["BSD-3-Clause", "GPL-2.0-only", "GPL-3.0-only"],
 	"authors": [
