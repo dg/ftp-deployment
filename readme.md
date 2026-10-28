@@ -149,6 +149,9 @@ data/* - ignore everything inside the 'data' folder, but the folder will be crea
 project.pp[jx] - ignore files or folders 'project.ppj' and 'project.ppx'
 ```
 
+Files `*.bak`, `.svn`, `.git*`, `Thumbs.db`, `.DS_Store`, `.idea` and `.claude` are always ignored, unless an exception
+such as `!.gitlab-ci.yml` says otherwise.
+
 Before the upload starts, after it finishes and after all jobs, you can execute commands or call your scripts on
 the server (see `before`, `afterUpload`, `after`), which can, for example, switch the server to a maintenance mode.
 If you use PHP config, you can run lambda function with deployment environment:

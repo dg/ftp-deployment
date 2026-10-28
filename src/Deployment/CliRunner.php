@@ -189,7 +189,7 @@ class CliRunner
 		}
 
 		$deployment->includeMasks = self::toArray($config['include'], lines: true);
-		$deployment->ignoreMasks = [...self::toArray($config['ignore']), ...$this->ignoreMasks];
+		$deployment->ignoreMasks = [...$this->ignoreMasks, ...self::toArray($config['ignore'])];
 		$deployment->deploymentFile = empty($config['deploymentfile'])
 			? $deployment->deploymentFile
 			: $config['deploymentfile'];
