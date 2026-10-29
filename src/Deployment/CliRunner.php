@@ -16,7 +16,7 @@ use Nette\CommandLine\{Attributes as Cli, ColorDepth, Command, Console, HelpRend
  */
 class CliRunner
 {
-	public const Version = '3.7.0';
+	public const Version = '3.8.0';
 
 	/** @var array<string, string|bool> */
 	public array $defaults = [
