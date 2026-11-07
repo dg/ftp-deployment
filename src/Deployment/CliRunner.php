@@ -33,7 +33,10 @@ class CliRunner
 	];
 
 	/** @var string[] */
-	public array $ignoreMasks = ['*.bak', '.svn', '.git*', 'Thumbs.db', '.DS_Store', '.idea', '.claude'];
+	public array $defaultIgnoreMasks = ['*.bak', '.git*'];
+
+	/** @var string[] */
+	public array $forcedIgnoreMasks = ['.svn', '.git', 'Thumbs.db', '.DS_Store', '.idea', '.claude'];
 	private Console $console;
 	private Logger $logger;
 	private string $configFile;
@@ -189,7 +192,11 @@ class CliRunner
 		}
 
 		$deployment->includeMasks = self::toArray($config['include'], lines: true);
-		$deployment->ignoreMasks = [...$this->ignoreMasks, ...self::toArray($config['ignore'])];
+		$deployment->ignoreMasks = [
+			...$this->defaultIgnoreMasks,
+			...self::toArray($config['ignore']),
+			...$this->forcedIgnoreMasks,
+		];
 		$deployment->deploymentFile = empty($config['deploymentfile'])
 			? $deployment->deploymentFile
 			: $config['deploymentfile'];
