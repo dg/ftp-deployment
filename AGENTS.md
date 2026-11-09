@@ -34,9 +34,6 @@ composer phpstan
 
 # Run a deployment (--test = dry run)
 php deployment deployment.ini [--test]
-
-# Build the standalone PHAR
-php create-phar/create-phar.php     # -> create-phar/deployment.phar
 ```
 
 ## Conventions
