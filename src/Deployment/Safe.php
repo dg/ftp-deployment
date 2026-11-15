@@ -34,6 +34,7 @@ namespace Deployment;
  * @method static void ftp_rmdir(resource $ftp_stream, string $directory)
  * @method static void ftp_set_option(resource $ftp_stream, int $option, mixed $value)
  * @method static void ftp_site(resource $ftp_stream, string $command)
+ * @method static int ftp_size(resource $ftp_stream, string $filename)
  * @method static resource ftp_ssl_connect(string $host, int $port = 21, int $timeout = 90)
  * @method static int fwrite(resource $handle, string $string, int $length)
  * @method static void mkdir(string $pathname, int $mode = 0777, bool $recursive = false)
