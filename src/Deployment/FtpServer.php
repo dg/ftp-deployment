@@ -51,17 +51,9 @@ class FtpServer extends BaseServer
 	}
 
 
-	/**
-	 * Suppresses error on closing.
-	 */
 	public function __destruct()
 	{
-		if ($this->connection) {
-			try {
-				Safe::ftp_close($this->connection);
-			} catch (\Throwable) {
-			}
-		}
+		$this->disconnect();
 	}
 
 
@@ -71,10 +63,7 @@ class FtpServer extends BaseServer
 	 */
 	public function connect(): void
 	{
-		// Don't use ftp_close() for reconnects — it sends QUIT which can block
-		// indefinitely if a transfer was interrupted mid-stream (server still
-		// waits for data on the data channel). Just abandon the resource.
-		$this->connection = null;
+		$this->disconnect();
 		$this->connection = $this->url['scheme'] === 'ftp'
 			? Safe::ftp_connect($this->url['host'], $this->url['port'] ?? 21)
 			: Safe::ftp_ssl_connect($this->url['host'], $this->url['port'] ?? 21);
@@ -332,6 +321,31 @@ class FtpServer extends BaseServer
 			$this->connect();
 			$operation();
 		}
+	}
+
+
+	/**
+	 * Closes the connection, ignoring errors of one the server has already dropped.
+	 * Closing explicitly matters: a connection passed to an ftp_*() call whose warning Safe turned into
+	 * an exception is never freed, and freeing a dropped FTPS connection later warns 'SSL_shutdown failed',
+	 * which the CLI error handler turns into a fatal error.
+	 */
+	private function disconnect(): void
+	{
+		if (!$this->connection) {
+			return;
+		}
+		try {
+			// QUIT waits for a reply that never comes when a transfer was interrupted mid-stream
+			Safe::ftp_set_option($this->connection, FTP_TIMEOUT_SEC, 1);
+		} catch (\Throwable) {
+		}
+		try {
+			// a warning becomes an exception only after ftp_close() returns, so the connection is closed anyway
+			Safe::ftp_close($this->connection);
+		} catch (\Throwable) {
+		}
+		$this->connection = null;
 	}
 
 
