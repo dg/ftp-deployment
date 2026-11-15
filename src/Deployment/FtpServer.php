@@ -23,6 +23,9 @@ class FtpServer extends BaseServer
 	private array $url;
 	private bool $passiveMode = true;
 
+	/** @var ?array{string, string} rename that failed, so its outcome is unknown */
+	private ?array $pendingRename = null;
+
 
 	/**
 	 * @param  string  $url  ftp://... or ftps://...
@@ -161,8 +164,26 @@ class FtpServer extends BaseServer
 	 */
 	public function renameFile(string $old, string $new): void
 	{
+		// a retry after a lost reply to RNTO would delete the renamed file and then fail on the missing $old
+		if ($this->pendingRename === [$old, $new] && $this->isRenamed($old, $new)) {
+			$this->pendingRename = null;
+			return;
+		}
 		$this->removeFile($new);
+		$this->pendingRename = [$old, $new];
 		Safe::ftp_rename($this->getConnection(), $old, $new); // TODO: zachovat permissions
+		$this->pendingRename = null;
+	}
+
+
+	/**
+	 * Checks whether a rename whose reply was lost took place: $old is gone and $new is a file.
+	 * @throws ServerException
+	 */
+	private function isRenamed(string $old, string $new): bool
+	{
+		$conn = $this->getConnection();
+		return Safe::ftp_size($conn, $old) === -1 && Safe::ftp_size($conn, $new) !== -1;
 	}
 
 
