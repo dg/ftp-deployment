@@ -127,7 +127,7 @@ class PhpsecServer extends BaseServer
 		$sftp = $this->getConnection();
 		if ($dir !== '' && !$sftp->file_exists($dir)) {
 			if ($sftp->mkdir($dir) === false) {
-				$this->executeFallback('mkdir -p ' . escapeshellarg($dir), new ServerException('Unable to create directory'));
+				$this->executeFallback('mkdir -p ' . Helpers::escapeShellArg($dir), new ServerException('Unable to create directory'));
 			}
 			$this->chmod($dir, $this->dirPermissions ?: 0o777);
 		}
@@ -160,7 +160,7 @@ class PhpsecServer extends BaseServer
 	{
 		if ($this->getConnection()->chmod($permissions, $path) === false) {
 			$this->executeFallback(
-				sprintf('chmod %o %s', $permissions, escapeshellarg($path)),
+				sprintf('chmod %o %s', $permissions, Helpers::escapeShellArg($path)),
 				new ServerException('Unable to chmod file'),
 			);
 		}
@@ -186,22 +186,5 @@ class PhpsecServer extends BaseServer
 	private function getConnection(): SFTP
 	{
 		return $this->sftp ?? throw new ServerException('Not connected. Call connect() first.');
-	}
-
-
-	/**
-	 * Runs a shell command when the SFTP subsystem refuses an operation the shell allows.
-	 * @throws ServerException  the original one if the command fails too
-	 */
-	private function executeFallback(string $command, ServerException $e): void
-	{
-		try {
-			$ok = trim($this->execute($command . ' && echo OK')) === 'OK';
-		} catch (ServerException) {
-			$ok = false;
-		}
-		if (!$ok) {
-			throw $e;
-		}
 	}
 }
