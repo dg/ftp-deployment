@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-use Deployment\{Deployer, JobException, MockServer, ServerException};
+use Deployment\{Deployer, JobException, LockedException, MockServer, ServerException};
 use Tester\Assert;
 
 require __DIR__ . '/bootstrap.php';
@@ -100,7 +100,33 @@ test('finally-jobs do not run while another deployment holds the lock', function
 	$deployer = createDeployer('fin7', new MockServer(['/.htdeployment.running' => 'in progress']));
 	$deployer->runFinally = [function () use (&$log) { $log[] = 'finally'; }];
 
-	Assert::exception(fn() => $deployer->deploy(), ServerException::class, '%A%.running exists on the server%A%');
+	Assert::exception(fn() => $deployer->deploy(), LockedException::class, '%A%.running exists on the server%A%');
 	Assert::same([], $log);
 	Assert::contains('Finally-jobs skipped', file_get_contents(TEMP_DIR . '/fin7.log'));
+});
+
+
+test('without a connection the jobs that need the server are skipped, the others run', function () {
+	$log = [];
+	$server = new class extends MockServer {
+		public function connect(): void
+		{
+			throw new ServerException('Login failed');
+		}
+	};
+	$deployer = createDeployer('fin8', $server);
+	$deployer->runFinally = [
+		'remote: unlink maintenance.php',
+		'upload: index.php copy.php',
+		'local: echo local-job-output',
+		function () use (&$log) { $log[] = 'callable'; },
+	];
+
+	Assert::exception(fn() => $deployer->deploy(), ServerException::class, 'Login failed');
+	Assert::same(['callable'], $log);
+	Assert::same([], $server->getOperations());
+	$output = file_get_contents(TEMP_DIR . '/fin8.log');
+	Assert::contains('remote: unlink maintenance.php: skipped, not connected to the server', $output);
+	Assert::contains('upload: index.php copy.php: skipped, not connected to the server', $output);
+	Assert::contains('-> local-job-output', $output);
 });

@@ -33,9 +33,11 @@ leftover `.running` after a crash blocks the next deploy until `--force` (a
 deliberate safety brake, not a bug). The user's `finally` jobs run after this cleanup
 (`runFinallyJobs()`), also when nothing was synchronized or the deployment failed; a
 failing one is logged, the rest still run, and it only fails a deployment that
-otherwise succeeded. The only exception is a deploy refused by `checkNotRunning()`:
-the `finally` jobs are skipped (and the skip is logged), since they would interfere
-with the deployment that holds the marker.
+otherwise succeeded. The only exception is a deploy refused by `checkNotRunning()`
+(`LockedException`): the `finally` jobs are skipped (and the skip is logged), since they
+would interfere with the deployment that holds the marker. When the connection failed,
+`$remoteDir` stays uninitialized (`deploy()` unsets it) and the jobs that need the
+server (`remote:`, `upload:`, `download:`) are logged as skipped; the others run.
 
 ## Skipped operations rewrite the recorded state
 

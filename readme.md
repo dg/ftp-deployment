@@ -160,6 +160,7 @@ Before the upload starts, after it finishes and after all jobs, you can execute 
 the server (see `before`, `afterUpload`, `after`), which can, for example, switch the server to a maintenance mode.
 Jobs in `finally` run at the end of every deployment, even a failed one, so they can switch the maintenance mode off
 or remove temporary files. They are skipped only when the deployment is refused because another one is running.
+When the connection to the server fails, the `remote:`, `upload:` and `download:` jobs are skipped, the others run.
 If you use PHP config, you can run lambda function with deployment environment:
 
 ```php
