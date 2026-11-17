@@ -164,6 +164,16 @@ class Helpers
 
 
 	/**
+	 * Quotes an argument for a POSIX shell on the remote server, unlike escapeshellarg()
+	 * which quotes for the local OS (on Windows it drops % and !).
+	 */
+	public static function escapeShellArg(string $s): string
+	{
+		return "'" . str_replace("'", "'\\''", $s) . "'";
+	}
+
+
+	/**
 	 * @param array{scheme?: string, host?: string, port?: int, user?: string, pass?: string, path?: string}  $url
 	 */
 	public static function buildUrl(array $url): string
