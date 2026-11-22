@@ -21,6 +21,7 @@ class CurlServer extends BaseServer
 	/** @var array{scheme: string, host: string, user: string, pass: string, port?: int, path?: string} */
 	private array $url;
 	private bool $passiveMode = true;
+	private bool $verifyCertificate = false;
 	private string $dir = '';
 
 	/** @var list<string> */
@@ -38,6 +39,7 @@ class CurlServer extends BaseServer
 		#[\SensitiveParameter]
 		string $url,
 		bool $passiveMode = true,
+		bool $verifyCertificate = false,
 	) {
 		if (!extension_loaded('curl')) {
 			throw new \Exception('PHP extension cURL is not loaded.');
@@ -52,6 +54,7 @@ class CurlServer extends BaseServer
 		}
 		$this->url = $url;
 		$this->passiveMode = $passiveMode;
+		$this->verifyCertificate = $verifyCertificate;
 	}
 
 
@@ -380,8 +383,10 @@ class CurlServer extends BaseServer
 			CURLOPT_PASSWORD => urldecode($this->url['pass']),
 			CURLOPT_PORT => $this->url['port'] ?? 21,
 			CURLOPT_USE_SSL => $this->url['scheme'] === 'ftps' ? CURLUSESSL_ALL : CURLUSESSL_NONE,
-			CURLOPT_SSL_VERIFYPEER => false,
-			CURLOPT_SSL_VERIFYHOST => 0,
+			CURLOPT_SSL_VERIFYPEER => $this->verifyCertificate,
+			CURLOPT_SSL_VERIFYHOST => $this->verifyCertificate ? 2 : 0,
+			// the certificate store of Windows completes a chain the server sends without its intermediate certificate
+			CURLOPT_SSL_OPTIONS => PHP_OS_FAMILY === 'Windows' ? CURLSSLOPT_NATIVE_CA : 0,
 			CURLOPT_FTP_FILEMETHOD => CURLFTPMETHOD_NOCWD,
 			CURLOPT_FTP_SKIP_PASV_IP => true,
 			CURLOPT_CONNECTTIMEOUT => self::Timeout,
@@ -396,6 +401,10 @@ class CurlServer extends BaseServer
 
 		$result = curl_exec($connection);
 		if ($result === false) {
+			if (curl_errno($connection) === CURLE_SSL_PEER_CERTIFICATE) { // not a ServerException, a retry would not help
+				throw new \Exception('Certificate of the server was not verified: ' . curl_error($connection)
+					. '. Use the host name the certificate is issued for.');
+			}
 			$reply = $this->findReply('[45]\d\d');
 			throw new ServerException($reply === null || curl_errno($connection) === CURLE_OPERATION_TIMEDOUT
 				? curl_error($connection)

@@ -74,6 +74,14 @@ replies collected by the header callback instead. Whether a file exists is asked
 `SIZE`, so on a server without it `removeFile()` cannot tell a failed `DELE` from a
 missing file and stays silent.
 
+With `verifyCertificate = yes`, `CurlServer` verifies the certificate of the server, which
+ext-ftp cannot do. It is off by default, because hostings commonly serve a certificate of
+their own domain under the customer's host name and an update of the tool must not stop
+those deployments. A failed verification is thrown as a plain `\Exception`,
+not a `ServerException`, so that `RetryServer` does not retry what cannot succeed. On
+Windows the certificate store of the system is used besides the configured CA file,
+because it completes a chain that the server sends without its intermediate certificate.
+
 ## One console draws everything the user sees
 
 `Logger` writes to the log file and, through a `Nette\CommandLine\Console`, to the

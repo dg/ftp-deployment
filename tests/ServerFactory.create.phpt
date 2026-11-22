@@ -25,6 +25,26 @@ test('ftps:// goes through cURL when the extension is loaded', function () {
 });
 
 
+test('cURL verifies the certificate when asked to', function () {
+	if (!extension_loaded('curl')) {
+		Tester\Environment::skip('Requires the cURL extension.');
+	}
+
+	$verifies = fn(array $config): bool => (new ReflectionProperty(CurlServer::class, 'verifyCertificate'))
+		->getValue(createServer(['remote' => 'ftps://user:secret@example.com/dir'] + $config));
+
+	Assert::false($verifies([]));
+	Assert::true($verifies(['verifycertificate' => '1']));
+	Assert::false($verifies(['verifycertificate' => '']));
+
+	Assert::exception(
+		fn() => createServer(['remote' => 'ftps://user:secret@example.com/dir', 'curl' => false, 'verifycertificate' => '1']),
+		Exception::class,
+		"Option 'verifyCertificate' requires the cURL extension.",
+	);
+});
+
+
 test('ftp:// stays with the FTP extension', function () {
 	if (!extension_loaded('ftp')) {
 		Tester\Environment::skip('Requires the FTP extension.');

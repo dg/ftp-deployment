@@ -69,6 +69,10 @@ passiveMode = yes
 ; ftps:// goes through the cURL extension when it is loaded; "no" forces PHP's FTP extension
 curl = yes
 
+; verify the certificate of the ftps:// server against man-in-the-middle attacks (needs the cURL extension);
+; the certificate has to be issued for the host name in 'remote'
+verifyCertificate = yes
+
 ; verify the SSH server host key (sftp:// and phpsec://) against man-in-the-middle attacks;
 ; phpsec:// accepts the full public key, an "SHA256:..." or an MD5 fingerprint, sftp:// only an MD5 or SHA1 hex fingerprint
 hostKey = "SHA256:xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
@@ -211,7 +215,7 @@ Installing FTP Deployment
 
 FTP Deployment requires PHP 8.2 or later. It also requires openssl extensions for ftps:// and SSH2 extension for sftp:// connections. With the cURL extension loaded, ftps:// goes through it, which is much faster against servers that insist on reusing the TLS session for data connections (ProFTPD, for one).
 
-**Security note:** the `ftps://` protocol encrypts the connection but does **not** validate the server's TLS certificate, so it is not protected against an active man-in-the-middle attacker. For strong authentication of the server prefer `sftp://` or `phpsec://` together with the `hostKey` option (see the sample config), which verifies the server's host key fingerprint.
+**Security note:** the `ftps://` protocol encrypts the connection but by default does **not** validate the server's TLS certificate, so it is not protected against an active man-in-the-middle attacker. Turn the validation on with `verifyCertificate = yes`; it needs the cURL extension, and the certificate has to be issued for the host name in `remote` (hostings often serve one issued for their own domain, in which case use that name instead of your own). With `sftp://` or `phpsec://` the server is authenticated by the `hostKey` option (see the sample config), which verifies its host key fingerprint.
 
 The easiest way to obtain FTP Deployment is to download [a single PHAR file](https://github.com/dg/ftp-deployment/releases).
 

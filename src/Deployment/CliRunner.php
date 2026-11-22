@@ -23,6 +23,7 @@ class CliRunner
 		'local' => '',
 		'passivemode' => true,
 		'curl' => true,
+		'verifycertificate' => false,
 		'include' => '',
 		'ignore' => '',
 		'allowdelete' => true,
