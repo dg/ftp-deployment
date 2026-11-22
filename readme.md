@@ -66,6 +66,9 @@ password = ${FTP_PASSWORD}
 ; FTP passive mode
 passiveMode = yes
 
+; ftps:// goes through the cURL extension when it is loaded; "no" forces PHP's FTP extension
+curl = yes
+
 ; verify the SSH server host key (sftp:// and phpsec://) against man-in-the-middle attacks;
 ; phpsec:// accepts the full public key, an "SHA256:..." or an MD5 fingerprint, sftp:// only an MD5 or SHA1 hex fingerprint
 hostKey = "SHA256:xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
@@ -206,9 +209,9 @@ This tool will combine scripts together and minify them with the Closure Compile
 Installing FTP Deployment
 -------------------------
 
-FTP Deployment requires PHP 8.2 or later. It also requires openssl extensions for ftps:// and SSH2 extension for sftp:// connections.
+FTP Deployment requires PHP 8.2 or later. It also requires openssl extensions for ftps:// and SSH2 extension for sftp:// connections. With the cURL extension loaded, ftps:// goes through it, which is much faster against servers that insist on reusing the TLS session for data connections (ProFTPD, for one).
 
-**Security note:** the `ftps://` protocol encrypts the connection but, due to a limitation of PHP's FTP extension, does **not** validate the server's TLS certificate, so it is not protected against an active man-in-the-middle attacker. For strong authentication of the server prefer `sftp://` or `phpsec://` together with the `hostKey` option (see the sample config), which verifies the server's host key fingerprint.
+**Security note:** the `ftps://` protocol encrypts the connection but does **not** validate the server's TLS certificate, so it is not protected against an active man-in-the-middle attacker. For strong authentication of the server prefer `sftp://` or `phpsec://` together with the `hostKey` option (see the sample config), which verifies the server's host key fingerprint.
 
 The easiest way to obtain FTP Deployment is to download [a single PHAR file](https://github.com/dg/ftp-deployment/releases).
 

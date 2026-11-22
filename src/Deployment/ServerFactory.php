@@ -61,6 +61,9 @@ class ServerFactory
 				$config['hostkey'] ?? null,
 			),
 			'file' => new FileServer($config['remote']),
+			'ftps' => extension_loaded('curl') && ($config['curl'] ?? true)
+				? new CurlServer(Helpers::buildUrl($urlParts), (bool) $config['passivemode'])
+				: new FtpServer(Helpers::buildUrl($urlParts), (bool) $config['passivemode']),
 			default => new FtpServer(Helpers::buildUrl($urlParts), (bool) $config['passivemode']),
 		};
 		$server->filePermissions = empty($config['filepermissions'])

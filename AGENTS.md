@@ -45,7 +45,8 @@ php deployment deployment.ini [--test]
   tests use a `TestInterruptHandler` subclass that overrides `check()` to throw at a
   chosen operation instead of depending on signals/STDIN. Fixtures in `tests/fixtures/`.
 - Extensions are protocol-dependent: `ext-zlib` (required); `ext-ftp`/`ext-openssl`
-  (ftp/ftps); `ext-ssh2` (sftp) - or the `phpsec://` protocol (pure-PHP phpseclib).
+  (ftp/ftps), `ext-curl` takes ftps over when loaded; `ext-ssh2` (sftp) - or the
+  `phpsec://` protocol (pure-PHP phpseclib).
 
 ## Working in this repo
 

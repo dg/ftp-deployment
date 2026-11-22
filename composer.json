@@ -26,6 +26,7 @@
 	"suggest": {
 		"ext-ftp": "to connect to ftp:// server",
 		"ext-openssl": "to connect to ftps:// server and preprocess CSS files",
+		"ext-curl": "to upload to ftps:// server faster",
 		"ext-ssh2": "to connect to sftp:// server",
 		"ext-json": "to preprocess CSS files via online service"
 	},

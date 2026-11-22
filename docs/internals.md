@@ -52,7 +52,7 @@ directory.
 
 ## Servers, retries, and interruption
 
-`Server` implementations (`FtpServer`, `SshServer`, `PhpsecServer`, `FileServer`) are
+`Server` implementations (`FtpServer`, `CurlServer`, `SshServer`, `PhpsecServer`, `FileServer`) are
 wrapped by **`RetryServer`**, which retries on a `ServerException` with a reconnect —
 so callers that must bypass retries (e.g. probing whether `.running` exists) invoke
 the method with a no-retry flag that unwraps `RetryServer`. `FtpServer::writeFile`
@@ -60,6 +60,19 @@ carries its own **FTPS mid-upload reconnect** for dropped secure connections.
 **`InterruptHandler`** is a cooperative, flag-based cancel checked at defined points;
 **skip and cancel have different cleanup semantics** for the `.deploytmp` files, which
 is why skipped paths flow back into the deployment-file regeneration above.
+
+**`ftps://` is served by `CurlServer` whenever ext-curl is loaded** (`curl = no` forces
+`FtpServer`). With TLS 1.3, ext-ftp fails to resume the TLS session on every second upload
+against servers that require it (ProFTPD answers 425, php/php-src#25656), and the
+reconnect that hides the failure costs about a second per file. `CurlServer` talks over
+one cURL handle, which keeps the control connection open between requests: transfers are
+requests with an absolute path (`CURLFTPMETHOD_NOCWD`, so no working directory to track),
+everything else is a body-less request carrying the commands in `CURLOPT_QUOTE`. The
+commands go out prefixed with `*`, because cURL closes the connection after a refused
+command and a refusal is how "does not exist" is learnt; the verdict is read from the
+replies collected by the header callback instead. Whether a file exists is asked with
+`SIZE`, so on a server without it `removeFile()` cannot tell a failed `DELE` from a
+missing file and stays silent.
 
 ## One console draws everything the user sees
 

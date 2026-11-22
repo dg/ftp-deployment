@@ -22,6 +22,7 @@ class CliRunner
 	public array $defaults = [
 		'local' => '',
 		'passivemode' => true,
+		'curl' => true,
 		'include' => '',
 		'ignore' => '',
 		'allowdelete' => true,
