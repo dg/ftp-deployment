@@ -42,6 +42,9 @@ class Deployer
 
 	/** @var list<string|(callable(Server, Logger, Deployer): (false|void))> */
 	public array $runAfter = [];
+
+	/** @var list<string|(callable(Server, Logger, Deployer): (false|void))> */
+	public array $runFinally = [];
 	public string $tempDir = '';
 
 	/** @var string[] */
@@ -78,6 +81,19 @@ class Deployer
 	 * Synchronize remote and local.
 	 */
 	public function deploy(): void
+	{
+		unset($this->remoteDir); // initialized only once connected, see runFinallyJobs()
+		try {
+			$this->synchronize();
+		} catch (\Throwable $e) {
+			$this->runFinallyJobs($e);
+			throw $e;
+		}
+		$this->runFinallyJobs(null);
+	}
+
+
+	private function synchronize(): void
 	{
 		try {
 			$this->logger->log('Connecting to server');
@@ -301,6 +317,44 @@ class Deployer
 
 
 	/**
+	 * Runs all finally-jobs even if some of them fail; their error never masks the one of the deployment.
+	 * @throws \Throwable  the first job error, if the deployment itself succeeded
+	 */
+	private function runFinallyJobs(?\Throwable $deployError): void
+	{
+		if (!$this->runFinally || $this->testMode) {
+			return;
+		} elseif ($deployError instanceof LockedException) {
+			// the jobs would interfere with the deployment that holds the lock
+			$this->logger->log("\nFinally-jobs skipped, another deployment is running.", 'maroon');
+			return;
+		}
+
+		$this->logger->log("\nFinally-jobs:");
+		$connected = isset($this->remoteDir);
+		$firstError = null;
+		foreach ($this->runFinally as $job) {
+			if (!$connected && is_string($job) && preg_match('#^(remote|upload|download):#', $job)) {
+				$this->logger->log("$job: skipped, not connected to the server", 'maroon');
+				continue;
+			}
+			try {
+				$this->runJobs([$job]);
+			} catch (TerminatedException $e) {
+				throw $e;
+			} catch (\Throwable $e) {
+				$this->logger->log("Error: {$e->getMessage()}", 'red');
+				$firstError ??= $e;
+			}
+		}
+
+		if ($firstError && !$deployError) {
+			throw $firstError;
+		}
+	}
+
+
+	/**
 	 * Appends preprocessor for files.
 	 * @param callable(string, string): ?string  $filter
 	 */
@@ -329,7 +383,7 @@ class Deployer
 		} catch (ServerException) {
 			return; // not present -> free to deploy
 		}
-		throw new ServerException(
+		throw new LockedException(
 			'Another deployment is running or a previous one was interrupted '
 			. "($this->deploymentFile.running exists on the server). Use --force to override.",
 		);
@@ -659,7 +713,7 @@ class Deployer
 	 */
 	private function runJobs(array $jobs): void
 	{
-		$runner = new JobRunner($this->server, $this->localDir, $this->remoteDir);
+		$runner = new JobRunner($this->server, $this->localDir, $this->remoteDir ?? '');
 
 		foreach ($jobs as $job) {
 			$jobName = is_string($job) ? $job : 'callable';

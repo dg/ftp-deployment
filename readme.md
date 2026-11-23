@@ -124,6 +124,10 @@ after[] = upload: config.server.neon app/config.local.neon
 after[] = http://example.com/deployment.php?after
 after[] = local: git reset HEAD --hard   ; reverts all changes in working directory
 
+; jobs to run at the very end every time: after a successful or failed deployment
+; and even if the synchronization did not take place; a failing job does not stop the others
+finally[] = remote: unlink setup.php   ; cleans up even if a previous job failed
+
 ; files to preprocess (defaults to none)
 preprocess = *.js *.css
 
@@ -161,6 +165,9 @@ ignored too, unless an exception such as `!.gitlab-ci.yml` says otherwise.
 
 Before the upload starts, after it finishes and after all jobs, you can execute commands or call your scripts on
 the server (see `before`, `afterUpload`, `after`), which can, for example, switch the server to a maintenance mode.
+Jobs in `finally` run at the end of every deployment, even a failed one, so they can switch the maintenance mode off
+or remove temporary files. They are skipped only when the deployment is refused because another one is running.
+When the connection to the server fails, the `remote:`, `upload:` and `download:` jobs are skipped, the others run.
 If you use PHP config, you can run lambda function with deployment environment:
 
 ```php
