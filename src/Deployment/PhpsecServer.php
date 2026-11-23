@@ -86,9 +86,7 @@ class PhpsecServer extends BaseServer
 			throw new ServerException('Unable to write file');
 		}
 		if ($this->filePermissions) {
-			if ($sftp->chmod($this->filePermissions, $remote) === false) {
-				throw new ServerException('Unable to chmod after file creation');
-			}
+			$this->chmod($remote, $this->filePermissions);
 		}
 	}
 
@@ -129,11 +127,9 @@ class PhpsecServer extends BaseServer
 		$sftp = $this->getConnection();
 		if ($dir !== '' && !$sftp->file_exists($dir)) {
 			if ($sftp->mkdir($dir) === false) {
-				throw new ServerException('Unable to create directory');
+				$this->executeFallback('mkdir -p ' . Helpers::escapeShellArg($dir), new ServerException('Unable to create directory'));
 			}
-			if ($sftp->chmod($this->dirPermissions ?: 0o777, $dir) === false) {
-				throw new ServerException('Unable to chmod after creating a directory');
-			}
+			$this->chmod($dir, $this->dirPermissions ?: 0o777);
 		}
 	}
 
@@ -163,7 +159,10 @@ class PhpsecServer extends BaseServer
 	public function chmod(string $path, int $permissions): void
 	{
 		if ($this->getConnection()->chmod($permissions, $path) === false) {
-			throw new ServerException('Unable to chmod file');
+			$this->executeFallback(
+				sprintf('chmod %o %s', $permissions, Helpers::escapeShellArg($path)),
+				new ServerException('Unable to chmod file'),
+			);
 		}
 	}
 
