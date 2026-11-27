@@ -186,6 +186,7 @@ class CliRunner
 				? ['*.js', '*.css']
 				: self::toArray($config['preprocess']);
 			$preprocessor = new Preprocessor($this->logger);
+			$preprocessor->requireCompressMark = (bool) $config['requireCompressMark'];
 			$deployment->addFilter('js', $preprocessor->expandApacheImports(...));
 			$deployment->addFilter('js', $preprocessor->compressJs(...), cached: true);
 			$deployment->addFilter('css', $preprocessor->expandApacheImports(...));
