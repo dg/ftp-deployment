@@ -65,11 +65,9 @@ class CurlServer extends BaseServer
 	public function connect(): void
 	{
 		$this->connection = curl_init();
-		if (isset($this->url['path'])) {
-			$this->command('CWD ' . $this->url['path']);
-		}
-
-		$this->command('PWD');
+		// in one request, the next one may get a new connection in the login directory (libcurl 8.5 never reuses FTPS ones)
+		$commands = isset($this->url['path']) ? ['CWD ' . $this->url['path'], 'PWD'] : ['PWD'];
+		$this->command(...$commands);
 		if (!preg_match('#^257 "((?:[^"]|"")*)"#', $this->findReply('257') ?? '', $m)) {
 			throw new ServerException('Unable to detect the current directory.');
 		}
