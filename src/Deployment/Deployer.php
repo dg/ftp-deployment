@@ -125,7 +125,8 @@ class Deployer
 			$toDelete = $this->allowDelete ? array_keys(array_diff_key($remotePaths, $localPaths)) : [];
 			$toUpload = array_keys(array_diff_assoc($localPaths, $remotePaths));
 
-			if ($localPaths !== $remotePaths) { // ignores allowDelete
+			// order-independent, the order of scanned files depends on the filesystem; ignores allowDelete
+			if ($toUpload || array_diff_key($remotePaths, $localPaths)) {
 				$deploymentFile = $this->writeDeploymentFile($localPaths);
 			}
 
